@@ -1,0 +1,63 @@
+# docker compose -f docker-compose.dev.yaml up --build
+
+services:
+  db:
+    image: postgres:16
+    container_name: hr_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: HrSaaS
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "6000:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d HrSaaS"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hr-network
+
+  api:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    container_name: hr_api
+    working_dir: /src/backend
+    command: dotnet watch run --urls=http://+:8080 --non-interactive
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=HrSaaS;Username=postgres;Password=postgres
+    volumes:
+      - .:/src
+      - /src/bin
+      - /src/obj
+      - nuget_cache:/root/.nuget/packages
+    networks:
+      - hr-network
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hr_client
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - hr-network
+
+volumes:
+  postgres-data:
+  nuget_cache:
+
+networks:
+  hr-network:

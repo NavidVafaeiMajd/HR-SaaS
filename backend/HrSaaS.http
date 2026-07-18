@@ -1,0 +1,6 @@
+@HrSaaS_HostAddress = http://localhost:5087
+
+GET {{HrSaaS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
