@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+
 builder.Services.AddDbContextPool<HRSaaSContext>(
     options =>
     {
@@ -25,9 +26,17 @@ builder.Services.AddDbContextPool<HRSaaSContext>(
     poolSize: 256
 );
 
+//add auth
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<Users>()
+    .AddEntityFrameworkStores<HRSaaSContext>();
 
 
 var app = builder.Build();
+
+///to map the Identity endpoints:
+app.MapIdentityApi<Users>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,6 +46,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();   // اضافه شود
 app.UseAuthorization();
 
 app.MapControllers();

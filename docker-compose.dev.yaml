@@ -35,7 +35,7 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=HrSaaS;Username=postgres;Password=postgres
+      ConnectionStrings__DefaultConnection: Server=db,1433;Database=HrSaaS;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;
     volumes:
       - .:/src
       - /src/backend/bin
