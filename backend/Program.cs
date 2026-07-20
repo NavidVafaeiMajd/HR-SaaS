@@ -1,5 +1,7 @@
 using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
+using HrSaaS.Infrastructure.Bootstrap;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,14 +31,14 @@ builder.Services.AddDbContextPool<HRSaaSContext>(
 //add auth
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityApiEndpoints<Users>()
-    .AddEntityFrameworkStores<HRSaaSContext>();
-
+builder.Services
+    .AddIdentity<Users, IdentityRole>()
+    .AddEntityFrameworkStores<HRSaaSContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
 ///to map the Identity endpoints:
-app.MapIdentityApi<Users>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -44,9 +46,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+///bootstrap for create initial admin and roll
+await app.BootstrapAsync();
+
 app.UseHttpsRedirection();
 
-app.UseAuthentication();   // اضافه شود
+app.UseAuthentication();  
 app.UseAuthorization();
 
 app.MapControllers();
