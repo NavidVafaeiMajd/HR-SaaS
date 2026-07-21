@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4 text-center">ورود به حساب</h2>
         <Form formProp={form} onSubmit={onSubmit}>
           <Form.Input label="نام کاربری" name="username" />
-          <Form.Input label="رمز عبور" name="password" />
+          <Form.Password label="رمز عبور" name="password" />
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded mt-4 disabled:opacity-50"

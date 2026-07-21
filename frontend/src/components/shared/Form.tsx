@@ -147,6 +147,71 @@ function FormInput<T extends FieldValues>({
     />
   );
 }
+
+///---------------password--------
+
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+
+interface FormPasswordProps<T extends FieldValues> {
+  name: Path<T>;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+  inputClassName?: string;
+  disabled?: boolean;
+}
+
+function FormPassword<T extends FieldValues>({
+  name,
+  label,
+  placeholder,
+  required,
+  className,
+  inputClassName,
+  disabled,
+}: FormPasswordProps<T>) {
+  const { control } = useFormContextSafe<T>();
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={`w-full space-y-2 ${className ?? ""}`}>
+          <FormLabel className="text-base">
+            {label}
+            {required && <span className="text-red-500">*</span>}
+          </FormLabel>
+
+          <FormControl>
+            <div className="relative">
+              <Input
+                {...field}
+                type={showPassword ? "text" : "password"}
+                placeholder={placeholder}
+                disabled={disabled}
+                className={`min-h-12 ps-12 ${inputClassName ?? ""}`}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </FormControl>
+
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 // ---------- Date ----------
 interface FormDateProps<T extends FieldValues> {
   name: Path<T>;
@@ -633,4 +698,5 @@ export const Form = Object.assign(FormRoot, {
   TimePicker: FormTimePicker,
   Hidden: FormHidden,
   PriceInput: FormPriceInput,
+  Password: FormPassword,
 });
