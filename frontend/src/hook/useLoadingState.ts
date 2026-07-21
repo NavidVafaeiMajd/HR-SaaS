@@ -2,19 +2,19 @@ import { useLoading } from '@/Context/LoadingContext';
 import { useEffect } from 'react';
 
 export const useLoadingState = (isLoading: boolean, message?: string) => {
-  const { setIsLoading, setLoadingMessage } = useLoading();
+  const { setIsLoadingNavbar, setLoadingMessage } = useLoading();
 
   useEffect(() => {
-    setIsLoading(isLoading);
+    setIsLoadingNavbar(isLoading);
     if (message) {
       setLoadingMessage(message);
     }
-  }, [isLoading, message, setIsLoading, setLoadingMessage]);
+  }, [isLoading, message, setIsLoadingNavbar, setLoadingMessage]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      setIsLoading(false);
+      setIsLoadingNavbar(false);
     };
-  }, [setIsLoading]);
+  }, [setIsLoadingNavbar]);
 };

@@ -157,7 +157,7 @@ const DisciplinaryList = lazy(
 const ViolationType = lazy(
   () => import("./components/pages/DisciplinaryCases/ViolationType")
 );
-import AuthProvider, { useAuth } from "./Context/AuthContext";
+import AuthProvider, { useAuth, useAuthContext } from "./Context/AuthContext";
 const MarketingStaffDetails = lazy(() => import("./components/pages/CRM/MarketingStaff/UserPage/UserPage"));
 const Companies = lazy(() => import("./components/pages/CRM/Companies/Companies"));
 const CompanyDetails = lazy(() => import("./components/pages/CRM/Companies/UserPage/UserPage"));
@@ -229,11 +229,16 @@ const LayoutContent = () => {
   useBootstrapData();
   const { toggleNavbar, isNavbarOpen } = useNavbar();
   const location = useLocation();
-  const { isLoggedIn } = useAuth();
-  const { isLoading } = useLoading();
+  const { isLoggedIn , authLoading } = useAuthContext();
+  const { isLoadingNavbar } = useLoading();
+
+  if (authLoading) {
+    return <div>Loading...</div>;
+  }
 
   const isLoginPage = location.pathname === "/login";
 
+  console.log("login" , isLoggedIn);
   // Prevent dashboard flash for unauthenticated users
   if (!isLoginPage && !isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -264,7 +269,7 @@ const LayoutContent = () => {
           <div
             className={`w-[25%] overflow-auto ${
               isNavbarOpen ? "show" : "max-lg:hidden"
-            } ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
+            } ${isLoadingNavbar ? "pointer-events-none opacity-50" : ""}`}
           >
             <Navbar />
             <div
@@ -429,7 +434,6 @@ const LayoutContent = () => {
                   </ProtectedRoute>
                 }
               />
-
             </Route>
 
             <Route
@@ -503,7 +507,6 @@ const LayoutContent = () => {
                 }
               />
             </Route>
-
 
             <Route
               path="accounts-list"
@@ -633,7 +636,10 @@ const LayoutContent = () => {
               <Route path="companies" element={<Companies />} />
               <Route path="statistics" element={<CRMStatistics />} />
             </Route>
-            <Route path="marketing-staff/:id" element={<MarketingStaffDetails />} />
+            <Route
+              path="marketing-staff/:id"
+              element={<MarketingStaffDetails />}
+            />
             <Route path="crm/companies/:id" element={<CompanyDetails />} />
 
             {/* Not Found */}

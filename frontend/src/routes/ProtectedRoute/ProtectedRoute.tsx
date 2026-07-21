@@ -1,6 +1,6 @@
 import React, { type ReactNode, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/Context/AuthContext";
+import { useAuth, useAuthContext } from "@/Context/AuthContext";
 import SkeletonLoading from "@/components/ui/skeleton";
 import 'react-loading-skeleton/dist/skeleton.css'
 
@@ -9,9 +9,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { isLoggedIn } = useAuthContext();
 
-  if (!user) {
+  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
 

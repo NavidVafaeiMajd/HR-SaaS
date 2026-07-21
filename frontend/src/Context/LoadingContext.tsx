@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface LoadingContextType {
-  isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
+  isLoadingNavbar: boolean;
+  setIsLoadingNavbar: (loading: boolean) => void;
   loadingMessage: string;
   setLoadingMessage: (message: string) => void;
 }
@@ -10,16 +10,18 @@ interface LoadingContextType {
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingNavbar, setIsLoadingNavbar] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('در حال بارگذاری...');
 
   return (
-    <LoadingContext.Provider value={{ 
-      isLoading, 
-      setIsLoading, 
-      loadingMessage, 
-      setLoadingMessage 
-    }}>
+    <LoadingContext.Provider
+      value={{
+        isLoadingNavbar,
+        setIsLoadingNavbar,
+        loadingMessage,
+        setLoadingMessage,
+      }}
+    >
       {children}
     </LoadingContext.Provider>
   );

@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
       if (!res.ok) throw new Error("نام کاربری یا رمز عبور اشتباه است.");
       return res.json();
     },
-    onSuccess: (data) => { login(data.user, data.token); navigate("/"); },
+    onSuccess: (data) => { login(data); navigate("/"); },
     onError: (error: any) => toast.error(error?.message || "خطا در ورود"),
   });
   

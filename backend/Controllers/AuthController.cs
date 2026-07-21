@@ -45,6 +45,12 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
+        var user = await _userManager.FindByNameAsync(request.UserName);
+
+if (user is null)
+    return Unauthorized();
+
+
         var result = await _signInManager.PasswordSignInAsync(
             request.UserName,
             request.Password,
@@ -55,7 +61,7 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return Unauthorized("Invalid username or password.");
 
-        return Ok(new { Message = "Login successful." });
+        return Ok(user);
     }
 
     [Authorize]
