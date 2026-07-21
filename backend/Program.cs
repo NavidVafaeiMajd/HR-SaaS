@@ -28,6 +28,19 @@ builder.Services.AddDbContextPool<HRSaaSContext>(
     poolSize: 256
 );
 
+//add corse
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 //add auth
 builder.Services.AddAuthorization();
 
@@ -35,10 +48,31 @@ builder.Services
     .AddIdentity<Users, IdentityRole>()
     .AddEntityFrameworkStores<HRSaaSContext>()
     .AddDefaultTokenProviders();
+//add cookies config
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "HrSaaS.Auth";
+
+    options.Cookie.HttpOnly = true;
+
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+
+    options.SlidingExpiration = true;
+
+    options.LoginPath = "/api/auth/login";
+
+    options.LogoutPath = "/api/auth/logout";
+
+    options.AccessDeniedPath = "/api/auth/forbidden";
+});
+
+///
 var app = builder.Build();
-
-///to map the Identity endpoints:
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -47,9 +81,12 @@ if (app.Environment.IsDevelopment())
 }
 
 ///bootstrap for create initial admin and roll
-await app.BootstrapAsync();
+/// //just for times that you just run the app for the first time and you want to create an admin user and role
+// await app.BootstrapAsync();
 
 app.UseHttpsRedirection();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();  
 app.UseAuthorization();
