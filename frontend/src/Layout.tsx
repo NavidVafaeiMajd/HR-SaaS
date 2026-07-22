@@ -157,7 +157,7 @@ const DisciplinaryList = lazy(
 const ViolationType = lazy(
   () => import("./components/pages/DisciplinaryCases/ViolationType")
 );
-import AuthProvider, { useAuth, useAuthContext } from "./Context/AuthContext";
+import AuthProvider, { useAuthContext } from "./Context/AuthContext";
 import { Loader2 } from "lucide-react";
 import { RouteProgress } from "./components/ui/RouteProgress";
 const MarketingStaffDetails = lazy(() => import("./components/pages/CRM/MarketingStaff/UserPage/UserPage"));
@@ -226,7 +226,6 @@ const EmployeeRatingDetailes = lazy(
       "./components/pages/Performance/PerformanceDetails/EmployeeRatingDetailes"
     )
 );
-import { setupInterceptors } from "./api/interceptors";
 
 const LayoutContent = () => {
   useBootstrapData();

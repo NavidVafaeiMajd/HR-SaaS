@@ -76,10 +76,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export default AuthProvider;
 
-export const useAuth = () => {
-  const user = Cookies.get("user");
-  return { user };
-};
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (!context)

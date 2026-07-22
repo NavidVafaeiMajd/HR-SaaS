@@ -1,6 +1,6 @@
 import React, { type ReactNode, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth, useAuthContext } from "@/Context/AuthContext";
+import { useAuthContext } from "@/Context/AuthContext";
 import SkeletonLoading from "@/components/ui/skeleton";
 import 'react-loading-skeleton/dist/skeleton.css'
 
