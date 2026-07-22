@@ -1,25 +1,50 @@
+import LayoutStaffList from "@/components/pages/Staff/LayoutStaffList";
 import { lazy } from "react";
+import { Route } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
 
-const StaffList = lazy(() => import("../components/pages/Staff/StaffList/StaffList"));
-const SetRoles = lazy(() => import("../components/pages/Staff/SetRoles/SetRoles"));
-const OfficeShifts = lazy(() => import("../components/pages/Staff/OfficeShifts/OfficeShifts"));
-const EmployExit = lazy(() => import("../components/pages/Staff/EmployExit/EmployExit"));
+const StaffList = lazy(
+  () => import("../components/pages/Staff/StaffList/StaffList"),
+);
+const SetRoles = lazy(
+  () => import("../components/pages/Staff/SetRoles/SetRoles"),
+);
+const OfficeShifts = lazy(
+  () => import("../components/pages/Staff/OfficeShifts/OfficeShifts"),
+);
 
-export const staffRoutes = [
-    {
-        path: "/staff",
-        element: <StaffList />,
-    },
-    {
-        path: "/staff/set-roles",
-        element: <SetRoles />,
-    },
-    {
-        path: "/staff/office-shifts",
-        element: <OfficeShifts />,
-    },
-    {
-        path: "/staff/employ-exit",
-        element: <EmployExit />,
-    },
-];
+const EmployExit = lazy(
+  () => import("@/components/pages/Staff/EmployExit/EmployExit"),
+);
+const ExitType = lazy(
+  () => import("@/components/pages/Staff/EmployExit/ExitType/ExitType"),
+);
+
+export const staffRoutes = (
+  <>
+    {" "}
+    <Route
+      path="staff"
+      element={
+        <ProtectedRoute>
+          <LayoutStaffList />
+        </ProtectedRoute>
+      }
+    >
+      <Route index element={<StaffList />} />
+      <Route path="set-roles" element={<SetRoles />} />
+      <Route path="office-shifts" element={<OfficeShifts />} />
+      <Route path="employ-exit" element={<EmployExit />} />
+    </Route>
+    <Route
+      path="exit-type"
+      element={
+        <ProtectedRoute>
+          <ProtectedRoute>
+            <ExitType />
+          </ProtectedRoute>
+        </ProtectedRoute>
+      }
+    />
+  </>
+);

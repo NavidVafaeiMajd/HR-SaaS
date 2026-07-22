@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Form } from "@/components/shared/Form";
 import NProgress from "@/lib/nprogress";
+import api from "@/api/axios";
 
 // -----------------
 // Zod Validation
@@ -46,20 +47,9 @@ const LoginPage: React.FC = () => {
   const mutation = useMutation({
     mutationFn: async (values: LoginFormData) => {
       NProgress.start();
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-          credentials: "include",
-          body: JSON.stringify(values),
-        },
-      );
-      if (!res.ok) throw new Error("نام کاربری یا رمز عبور اشتباه است.");
-      return res.json();
+      const { data } = await api.post("/auth/login", values);
+
+      return data;
     },
     onSuccess: (data) => {
       login(data);
