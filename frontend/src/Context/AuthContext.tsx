@@ -3,9 +3,13 @@ import {
   useContext,
   useEffect,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import Cookies from "js-cookie";
+import api from "@/api/axios";
+import { setupInterceptors } from "@/api/interceptors";
 
 interface User {
   id: string;
@@ -18,7 +22,8 @@ interface AuthContextType {
   login: (userData: User, token?: string) => void;
   logout: () => void;
   isLoggedIn: boolean;
-  authLoading:boolean;
+  authLoading: boolean;
+  setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,35 +32,24 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
-useEffect(() => {
-  const verifyAuth = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/me", {
-        method: "GET",
-        credentials: "include",
-      });
+  useEffect(() => {
+      setupInterceptors(setIsLoggedIn);
+    const verifyAuth = async () => {
+      try {
+        const res = await api.get("/auth/me");
 
-      if (!res.ok) {
-        throw new Error("Not authenticated");
+        setUser(res.data);
+        setIsLoggedIn(true);
+      } catch (error) {
+        setUser(null);
+        setIsLoggedIn(false);
+      } finally {
+        setAuthLoading(false);
       }
+    };
 
-      const data = await res.json();
-
-      setUser(data);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.log("Auth failed:", error);
-
-      setUser(null);
-      setIsLoggedIn(false);
-    }finally {
-      setAuthLoading(false);
-    }
-
-  };
-
-  verifyAuth();
-}, []);
+    verifyAuth();
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -71,7 +65,9 @@ useEffect(() => {
   };
   return (
     <>
-      <AuthContext.Provider value={{ user, login, logout, isLoggedIn , authLoading}}>
+      <AuthContext.Provider
+        value={{ user, login, logout, isLoggedIn, authLoading,setIsLoggedIn }}
+      >
         {children}
       </AuthContext.Provider>
     </>

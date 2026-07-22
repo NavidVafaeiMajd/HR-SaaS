@@ -1,6 +1,6 @@
 import Header from "./components/shared/Header";
 import Navbar from "./components/Navbar/Navbar";
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import { useBootstrapData } from "./hook/useBootstrapData";
 import { LoadingProvider, useLoading } from "./Context/LoadingContext";
 const Desk = lazy(() => import("./components/pages/Desk"));
@@ -158,6 +158,8 @@ const ViolationType = lazy(
   () => import("./components/pages/DisciplinaryCases/ViolationType")
 );
 import AuthProvider, { useAuth, useAuthContext } from "./Context/AuthContext";
+import { Loader2 } from "lucide-react";
+import { RouteProgress } from "./components/ui/RouteProgress";
 const MarketingStaffDetails = lazy(() => import("./components/pages/CRM/MarketingStaff/UserPage/UserPage"));
 const Companies = lazy(() => import("./components/pages/CRM/Companies/Companies"));
 const CompanyDetails = lazy(() => import("./components/pages/CRM/Companies/UserPage/UserPage"));
@@ -224,6 +226,7 @@ const EmployeeRatingDetailes = lazy(
       "./components/pages/Performance/PerformanceDetails/EmployeeRatingDetailes"
     )
 );
+import { setupInterceptors } from "./api/interceptors";
 
 const LayoutContent = () => {
   useBootstrapData();
@@ -232,8 +235,18 @@ const LayoutContent = () => {
   const { isLoggedIn , authLoading } = useAuthContext();
   const { isLoadingNavbar } = useLoading();
 
+
   if (authLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            در حال بررسی حساب کاربری...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const isLoginPage = location.pathname === "/login";
@@ -656,35 +669,36 @@ const Layout = () => {
     <AuthProvider>
       <LoadingProvider>
         <Router>
+          <RouteProgress />
           <Routes>
-          <Route
-            path="bank/accounts-list-details/:id"
-            element={<AccountsListDetails />}
-          />
-          <Route
-            path="bank/deposit-list-details/:id"
-            element={<DepositListDetails />}
-          />
-          <Route
-            path="payroll/payroll-list-details/:id"
-            element={<PayrollListDetails />}
-          />
-          <Route
-            path="payslip-history/:id"
-            element={
-              <ProtectedRoute>
-                <PayslipDetailsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="leave/details/:id" element={<LeaveDetailsPage />} />
-          <Route
-            path="learning/details/:id"
-            element={<LearningDetailsPage />}
-          />
+            <Route
+              path="bank/accounts-list-details/:id"
+              element={<AccountsListDetails />}
+            />
+            <Route
+              path="bank/deposit-list-details/:id"
+              element={<DepositListDetails />}
+            />
+            <Route
+              path="payroll/payroll-list-details/:id"
+              element={<PayrollListDetails />}
+            />
+            <Route
+              path="payslip-history/:id"
+              element={
+                <ProtectedRoute>
+                  <PayslipDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="leave/details/:id" element={<LeaveDetailsPage />} />
+            <Route
+              path="learning/details/:id"
+              element={<LearningDetailsPage />}
+            />
 
-          <Route path="/*" element={<LayoutContent />} />
-        </Routes>
+            <Route path="/*" element={<LayoutContent />} />
+          </Routes>
         </Router>
       </LoadingProvider>
     </AuthProvider>

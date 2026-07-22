@@ -8,6 +8,7 @@ import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Form } from "@/components/shared/Form";
+import NProgress from "@/lib/nprogress";
 
 // -----------------
 // Zod Validation
@@ -44,25 +45,38 @@ const LoginPage: React.FC = () => {
   // -----------------
   const mutation = useMutation({
     mutationFn: async (values: LoginFormData) => {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" ,"Access-Control-Allow-Origin" : "*"},
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
-  
+      NProgress.start();
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          credentials: "include",
+          body: JSON.stringify(values),
+        },
+      );
       if (!res.ok) throw new Error("نام کاربری یا رمز عبور اشتباه است.");
       return res.json();
     },
-    onSuccess: (data) => { login(data); navigate("/"); },
-    onError: (error: any) => toast.error(error?.message || "خطا در ورود"),
+    onSuccess: (data) => {
+      login(data);
+      navigate("/");
+      NProgress.done();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "خطا در ورود");
+      NProgress.done();
+    },
   });
-  
+
   // Access loading state via mutation.status
   const isLoading = mutation.status === "pending";
-  
+
   const onSubmit = (values: LoginFormData) => {
-    console.log(values)
+    console.log(values);
     mutation.mutate(values);
   };
 
