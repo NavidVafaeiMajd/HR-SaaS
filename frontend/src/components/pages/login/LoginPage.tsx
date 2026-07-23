@@ -71,7 +71,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen w-full!">
       <div className="w-full max-w-md p-6 border rounded shadow">
         <h2 className="text-2xl font-bold mb-4 text-center">ورود به حساب</h2>
         <Form formProp={form} onSubmit={onSubmit}>
