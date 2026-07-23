@@ -5,29 +5,63 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hook/useProfile";
 import { HiUserCircle } from "react-icons/hi2";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
-import { cn } from "@/lib/utils";
 
 interface ChildProps {
-  headerMenu?: () => void;
+  headerMenu: () => void;
 }
 const Header: React.FC<ChildProps> = ({ headerMenu }) => {
   const [fisrtMenu, setFisrtMenu] = useState(false);
   const [secoundMenu, setSecoundMenu] = useState(false);
   const { data: queryData, isLoading } = useProfile();
-  const { state } = useSidebar();
 
   return (
     <>
-      <div
-        className={cn(
-          "bg-[#7c8cbc]/10 mt-2 px-5 text-black h-[50px] fixed! top-0 left-2  z-50 transition-all duration-200 right-0  backdrop-blur-sm border border-white/20  rounded-full",
-          state === "expanded" ? "lg:right-[16.5rem]" : "lg:right-[4.5rem]",
-        )}
-      >
+      <div className="bg-primary max-md:bg-[#161C25] text-white h-[75px] px-10 w-full! ">
         <div className=" flex justify-between items-center h-full!">
           <div id="right-header " className="flex gap-3">
-            <SidebarTrigger />
+            <HiOutlineDotsVertical
+              onClick={() => {
+                setFisrtMenu(!fisrtMenu);
+              }}
+              className="w-8 h-8 md:hidden"
+            />
+            <AiOutlineMenu
+              onClick={() => {
+                setSecoundMenu(!secoundMenu);
+              }}
+              className="w-8 h-8 md:hidden"
+            />
+            <ul
+              className={`flex transition! ease-in-out delay-150 duration-300  items-center gap-5 ${
+                fisrtMenu ? "max-md:top-[75px]" : "max-md:top-[-100px]"
+              } max-md:fixed max-md:-z-10!  max-md:bg-white max-md:right-0 max-md:w-full max-md:text-primary `}
+            >
+              {isLoading ? (
+                "درحال بارگزاری"
+              ) : (
+                <li className="px-5 py-1">
+                  <a href="#" className="flex items-center gap-2">
+                    <div>
+                      {queryData?.image ? (
+                        <img
+                          className="w-20 h-20 object-cover rounded-full"
+                          src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'}/${queryData?.image}`}
+                          alt=""
+                        />
+                      ) : (
+                        <HiUserCircle className="w-20 h-25" />
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <span>
+                        {queryData?.firstName} {queryData?.lastName}
+                      </span>
+                      <span>{queryData?.username}</span>
+                    </div>
+                  </a>
+                </li>
+              )}
+            </ul>
           </div>
           <div id="left-header" className="flex items-center gap-3 relative">
             <div

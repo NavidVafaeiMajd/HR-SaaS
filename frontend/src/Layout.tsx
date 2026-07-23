@@ -80,9 +80,9 @@ const AppLayout = () => {
   return (
     <>
       <Navbar />
-
       <SidebarInset>
-        <main className="p-6">
+        <main className="p-6 h-full bg-background overflow-hidden! rounded-2xl ">
+          <Header />
           <Outlet />
         </main>
       </SidebarInset>
@@ -153,8 +153,8 @@ const Layout = () => {
                 {TeachingRoutes}
                 {DocumentsRoutes}
                 {/* Not Found */}
+                <Route path="*" element={<NotFound />} />
               </Route>
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
         </LoadingProvider>

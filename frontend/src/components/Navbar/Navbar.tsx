@@ -25,8 +25,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { CiHome } from "react-icons/ci";
+import { FiUsers, FiUserCheck } from "react-icons/fi";
+import { TfiTarget } from "react-icons/tfi";
+import { GoClock } from "react-icons/go";
+import { RiCameraLensLine, RiCustomerService2Fill } from "react-icons/ri";
+import { CiSquarePlus } from "react-icons/ci";
+import { MdOutlineRadar } from "react-icons/md";
+import { BsExclamationCircle } from "react-icons/bs";
 
 const data = {
   user: {
@@ -34,121 +41,153 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+
   navMain: [
+    {
+      title: "پیشخوان",
+      url: "/",
+      icon: CiHome,
+      isActive: true,
+    },
+
     {
       title: "پرسنل",
       url: "/staff",
-      icon: SquareTerminal,
-      isActive: true,
+      icon: FiUsers,
       items: [
-        {
+                {
           title: "لیست پرسنل",
-          url: "#",
+          url: "/staff",
         },
         {
-          title: "شیفت اداری",
-          url: "#",
+          title: "شیفت و برنامه ریزی",
+          url: "/staff/office-shifts",
         },
         {
           title: "انفصال از خدمت",
-          url: "#",
+          url: "/staff/employ-exit",
+        }
+      ],
+    },
+
+    {
+      title: "مدیریت منابع انسانی",
+      url: "/hr",
+      icon: TfiTarget,
+      items: [
+        {
+          title: "واحد سازمانی",
+          url: "/hr/departments-list",
+        },
+        {
+          title: "سمت سازمانی",
+          url: "/hr/designation-list",
+        },
+        {
+          title: "ابلاغیه",
+          url: "/hr/news-list",
         },
       ],
     },
+
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "حضور و غیاب",
+      url: "/rollcall",
+      icon: GoClock,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "حضور و غیاب",
+          url: "/rollcall/attendance-list",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "ثبت تردد دستی پرسنل",
+          url: "/rollcall/manual-attendance",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "گزارش کارکرد ماهانه",
+          url: "/rollcall/monthly-attendance",
         },
       ],
     },
+
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "مدیریت مشتریان",
+      url: "/clients-list",
+      icon: FiUserCheck,
+    },
+
+    {
+      title: "CRM",
+      url: "/crm",
+      icon: RiCustomerService2Fill,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "نیرو ها",
+          url: "/crm/marketing-staff",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "لیست شرکت ها",
+          url: "/crm/companies",
         },
         {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "آمار",
+          url: "/crm/statistics",
         },
       ],
     },
+
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      title: "ارزیابی عملکرد کارکنان",
+      url: "/performance",
+      icon: RiCameraLensLine,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "رتبه بندی شاخص ها",
+          url: "/performance/indicator-rating",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "ارزیابی کارکنان",
+          url: "/performance/employee-rating",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "پیگیری اهداف (OKR)",
+          url: "/performance/track-goals",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "تنظیم اندیکاتور",
+          url: "/performance/setup-indicator",
         },
       ],
+    },
+
+    {
+      title: "درخواست مرخصی",
+      url: "/leave/list",
+      icon: CiSquarePlus,
+    },
+
+    {
+      title: "آموزش",
+      url: "/teaching",
+      icon: MdOutlineRadar,
+    },
+
+    {
+      title: "پرونده های انضباطی",
+      url: "/disciplinary/list",
+      icon: BsExclamationCircle,
+    },
+
+    {
+      title: "مدیریت اسناد",
+      url: "/documents",
+      icon: BsExclamationCircle,
     },
   ],
+
   navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
+    { title: "Support", url: "#", icon: LifeBuoy },
+    { title: "Feedback", url: "#", icon: Send },
   ],
 };
 
@@ -178,7 +217,6 @@ export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarTrigger />
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
