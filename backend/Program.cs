@@ -1,18 +1,24 @@
-using HrSaaS.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using HrSaaS.Infrastructure.Bootstrap;
+using HrSaaS.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-
-builder.Services.AddDbContextPool<HRSaaSContext>(
+builder.Services.AddDbContextPool<HRSaaSDbContext>(
     options =>
     {
         options.UseSqlServer(
@@ -32,22 +38,27 @@ builder.Services.AddDbContextPool<HRSaaSContext>(
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    options.AddPolicy(
+        "Frontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
 });
 
 //add auth
 builder.Services.AddAuthorization();
 
-builder.Services
-    .AddIdentity<Users, IdentityRole>()
-    .AddEntityFrameworkStores<HRSaaSContext>()
+builder
+    .Services.AddIdentity<Users, Role>()
+    .AddEntityFrameworkStores<HRSaaSDbContext>()
     .AddDefaultTokenProviders();
+
 //add cookies config
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -88,7 +99,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
 
-app.UseAuthentication();  
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HrSaaS.Migrations
 {
-    [DbContext(typeof(HRSaaSContext))]
+    [DbContext(typeof(HRSaaSDbContext))]
     [Migration("20260720072821_AddEntity")]
     partial class AddEntity
     {

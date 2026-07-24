@@ -10,7 +10,7 @@ public static class ApplicationBootstrapper
     {
         using var scope = services.CreateScope();
 
-        var db = scope.ServiceProvider.GetRequiredService<HRSaaSContext>();
+        var db = scope.ServiceProvider.GetRequiredService<HRSaaSDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Users>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -21,9 +21,6 @@ public static class ApplicationBootstrapper
         string[] roles =
         {
             "Admin",
-            "HR",
-            "Manager",
-            "Employee"
         };
 
         foreach (var role in roles)

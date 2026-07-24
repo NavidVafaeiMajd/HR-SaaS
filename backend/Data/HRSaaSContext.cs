@@ -3,12 +3,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HrSaaS.Models;
 
-public class HRSaaSContext : IdentityDbContext<Users>
+public class HRSaaSDbContext : IdentityDbContext<Users,Role,string>
 {
-    public HRSaaSContext(DbContextOptions<HRSaaSContext> options)
-        : base(options)
-    {
-    }
+    public HRSaaSDbContext(DbContextOptions<HRSaaSDbContext> options)
+        : base(options) { }
 
-    // public DbSet<TodoItem> TodoItems { get; set; } = null!;
+    public DbSet<RolePermission> RolePermission { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+            base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<RolePermission>().HasKey(x => new { x.RoleId,x.Permission  });
+    }
 }
