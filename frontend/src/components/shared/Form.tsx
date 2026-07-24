@@ -515,6 +515,7 @@ interface FormCheckboxProps<T extends FieldValues> {
   label: string;
   required?: boolean;
   className?: string;
+  value?: string;
 }
 
 function FormCheckbox<T extends FieldValues>({
@@ -522,6 +523,7 @@ function FormCheckbox<T extends FieldValues>({
   label,
   required,
   className,
+  value,
 }: FormCheckboxProps<T>) {
   const { control } = useFormContextSafe<T>();
 
@@ -540,6 +542,7 @@ function FormCheckbox<T extends FieldValues>({
               checked={field.value}
               onCheckedChange={field.onChange}
               className="size-6"
+              value={value}
             />
           </FormControl>
           <div className="space-y-1 leading-none">

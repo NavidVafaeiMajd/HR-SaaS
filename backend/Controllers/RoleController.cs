@@ -12,7 +12,7 @@ public class RoleCreateDTO
 }
 
 [ApiController]
-[Route("api/role")]
+[Route("api/roles")]
 
 public class RoleController : ControllerBase
 {

@@ -28,6 +28,7 @@ import { PerformanceRoutes } from "./routes/performance.routes";
 import { TeachingRoutes } from "./routes/teaching.routes";
 import { DocumentsRoutes } from "./routes/documents.routes";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
+import { RolesRoutes } from "./routes/role.routes";
 // Documents components - now lazy loaded
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
@@ -152,6 +153,7 @@ const Layout = () => {
                 {PerformanceRoutes}
                 {TeachingRoutes}
                 {DocumentsRoutes}
+                {RolesRoutes}
                 {/* Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Route>

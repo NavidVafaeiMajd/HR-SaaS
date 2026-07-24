@@ -55,7 +55,7 @@ const data = {
       url: "/staff",
       icon: FiUsers,
       items: [
-                {
+        {
           title: "لیست پرسنل",
           url: "/staff",
         },
@@ -66,8 +66,14 @@ const data = {
         {
           title: "انفصال از خدمت",
           url: "/staff/employ-exit",
-        }
+        },
       ],
+    },
+    {
+      title: "مدیریت نقش های کاربری",
+      url: "/roles",
+      icon: TfiTarget,
+      items: [],
     },
 
     {
