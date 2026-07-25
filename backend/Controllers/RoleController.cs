@@ -11,6 +11,7 @@ public class RoleCreateDTO
     public List<Permission> Permissions { get; set; } = [];
 }
 
+//api/roles
 [ApiController]
 [Route("api/roles")]
 
