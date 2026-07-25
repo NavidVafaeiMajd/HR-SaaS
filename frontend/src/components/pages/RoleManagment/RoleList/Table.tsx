@@ -3,10 +3,12 @@ import { userColumns } from "./columns";
 import { useGetRowsToTable } from "@/hook/useGetRows";
 
 export interface Roles {
-   id: number;
-   name: string;
-   description: string;
-   [key: string]: string | number | boolean | null;
+  id: number;
+  name: string;
+  description: string;
+  permissions: string[];
+
+  [key: string]: string | number | boolean |  string[] |null;
 }
 
 const Table: React.FC = () => {

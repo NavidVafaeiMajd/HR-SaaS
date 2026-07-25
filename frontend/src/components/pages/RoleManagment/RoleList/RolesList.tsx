@@ -7,19 +7,8 @@ import { validation } from "./validation";
 import { usePostRows } from "@/hook/usePostRows";
 
 import SectionAcc from "@/components/shared/section/SectionAcc";
+import { getPermissionLabel, permission } from "../utils/utils";
 
-const getPermissionLabel = (permission: string) => {
-  const action = permission.split("_")[1];
-
-  const labels: Record<string, string> = {
-    view: "خواندن",
-    post: "نوشتن",
-    edit: "ویرایش",
-    delete: "حذف",
-  };
-
-  return labels[action] || action;
-};
 
 const RolesList: React.FC = () => {
   const title = "نقش کاربری ها";
@@ -27,30 +16,22 @@ const RolesList: React.FC = () => {
     document.title = title;
   }, []);
 
-  const defaultValues = {}
+const defaultValues = {
+  name: "",
+  description: "",
 
-  const permittions = [
-    {
-      name: "پرسنل",
-      itemPermission: [
-        "Users_view",
-        "Users_post",
-        "Users_edit",
-        "Users_delete",
-      ],
+  ...permission.reduce(
+    (acc, curr) => {
+      curr.itemPermission.forEach((item) => {
+        acc[item] = false;
+      });
+
+      return acc;
     },
-    {
-      name: "منابع انسانی",
-      itemPermission: ["Hr_view", "Hr_post", "Hr_edit", "Hr_delete"],
-    },
-    {
-      name: "مدیریت نقش های کاربری",
-      itemPermission: ["Role_view", "Role_post", "Role_edit", "Role_delete"],
-    },
-  ];
-    
+    {} as Record<string, boolean>,
+  ),
+};
   
-
   const { mutation, form } = usePostRows(
     "roles",
     ["roles"],
@@ -71,7 +52,7 @@ const RolesList: React.FC = () => {
       <Form.Input name="name" label="نام نقش کاربری" required />
       <Form.Input name="description" label="توضیحات" required />
 
-      {permittions.map((permission) => (
+      {permission.map((permission) => (
         <div className="flex flex-col gap-3">
           <h2>{permission.name} :</h2>
           <div className="flex flex-col md:flex-row gap-5">

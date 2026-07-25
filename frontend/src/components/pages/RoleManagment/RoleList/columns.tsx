@@ -6,6 +6,11 @@ import { cn } from "@/lib/utils";
 import ActionsCell from "@/components/shared/ActionsCell";
 import { DeleteDialog } from "@/components/shared/DeleteDialog";
 import { useDeleteRows } from "@/hook/useDeleteRows";
+import { validation } from "./validation";
+import { EditDialog } from "@/components/shared/EditDialog";
+import { Form } from "@/components/shared/Form";
+import { useUpdateRows } from "@/hook/useUpdateRows";
+import { getPermissionLabel, permission } from "../utils/utils";
 
 export const userColumns: ColumnDef<Roles>[] = [
   {
@@ -49,18 +54,71 @@ export const userColumns: ColumnDef<Roles>[] = [
     accessorKey: "id",
     cell: ({ row }) => {
       const deleteRow = useDeleteRows({
-        url: "employees",
-        queryKey: ["employees"],
+        url: "roles",
+        queryKey: ["roles"],
       });
-      const user = row.original;
+      const { mutation } = useUpdateRows(
+        `roles/${row.original.id}`,
+        ["roles"],
+        validation,
+        "نقش کاربری",
+      );
+
+      const role = row.original;
+
+      const defaultValues = {
+        name: role.name,
+        description: role.description,
+
+        ...permission.reduce(
+          (acc, curr) => {
+            curr.itemPermission.forEach((item) => {
+              acc[item] = role.permissions?.includes(item) ?? false;
+            });
+
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        ),
+      };
+
+      console.log("defulte", defaultValues, role);
+
       return (
         <div className="flex items-center gap-2">
-          <ActionsCell
-            actions={[{ label: "نمایش جزییات", path: `/users/${user.id}` }]}
+          <EditDialog
+            title="ویرایش  "
+            triggerLabel="ویرایش"
+            fields={
+              <>
+                <Form.Input name="name" label="نام نقش کاربری" required />
+                <Form.Input name="description" label="توضیحات" required />
+
+                {permission.map((permission) => (
+                  <div className="flex flex-col gap-3">
+                    <h2>{permission.name} :</h2>
+                    <div className="flex flex-col md:flex-row gap-5">
+                      {permission.itemPermission.map((item) => (
+                        <Form.Checkbox
+                          name={item}
+                          label={getPermissionLabel(item)}
+                          required
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </>
+            }
+            defaultValues={defaultValues}
+            onSave={(data) => {
+              mutation.mutate(data);
+            }}
+            schema={validation}
           />
           <DeleteDialog
             onConfirm={() => {
-              deleteRow.mutate(user.id);
+              deleteRow.mutate(role.id);
             }}
           />
         </div>
