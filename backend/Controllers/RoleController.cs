@@ -137,7 +137,7 @@ public class RoleController : ControllerBase
                     .RolePermission.Where(rp => rp.RoleId == x.Id)
                     .Select(rp => rp.Permission)
                     .ToList(),
-            })
+            }).Where(r => r.Name != "Admin")
             .ToListAsync();
 
         return Ok(roles);

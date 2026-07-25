@@ -10,7 +10,7 @@ export const useUpdateRows = (url: string, queryKey: string[], validation: any, 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof validation> | FormData) => {
       const res = api.patch(url, data)
-      if (!res.ok) {
+      if ((await res).status !== 200) {
         toast.error(`ثبت ${message} ناموفق بود`);
       }
       return (await res).data;

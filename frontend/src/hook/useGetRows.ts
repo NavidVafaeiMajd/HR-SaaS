@@ -1,17 +1,14 @@
-import Cookies from "js-cookie";
+import api from "@/api/axios";
 
 export const useGetRowsToTable = async (url: string): Promise<{ data: any[] }> => {
    try {
-    const token = Cookies.get("token");
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/${url}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    const res = api.get(url)
      
-     if (!res.ok) {
-       throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
+     if ((await res).status == 500) {
+       throw new Error(`Failed to fetch data: ${(await res).status} ${(await res).statusText}`);
      }
      
-     const result = await res.json();
+     const result = await (await res).data;
      
      // Ensure we always return { data: array } structure
      return {

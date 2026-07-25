@@ -15,7 +15,7 @@ export const useDeleteRows = ({ url, queryKey = [] }: UseDeleteRowsProps) => {
   return useMutation({
     mutationFn: async (id: number) => {
       const res = api.delete(`${ url }/${id}`)
-      if (!res.ok) {
+      if ((await res).status !== 204) {
         let message = "حذف ناموفق بود";
         try {
           const data = res.data;
