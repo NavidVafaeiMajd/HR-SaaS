@@ -112,7 +112,14 @@ export const userColumns: ColumnDef<Roles>[] = [
             }
             defaultValues={defaultValues}
             onSave={(data) => {
-              mutation.mutate(data);
+              const permissions = Object.entries(data)
+                .filter(([_, value]) => value === true)
+                .map(([key]) => key);
+              const body = {
+                name: data.name,
+                permissions,
+              };
+              mutation.mutate(body);
             }}
             schema={validation}
           />

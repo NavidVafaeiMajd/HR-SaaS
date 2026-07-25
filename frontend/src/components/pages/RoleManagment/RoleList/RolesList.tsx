@@ -9,29 +9,28 @@ import { usePostRows } from "@/hook/usePostRows";
 import SectionAcc from "@/components/shared/section/SectionAcc";
 import { getPermissionLabel, permission } from "../utils/utils";
 
-
 const RolesList: React.FC = () => {
   const title = "نقش کاربری ها";
   useEffect(() => {
     document.title = title;
   }, []);
 
-const defaultValues = {
-  name: "",
-  description: "",
+  const defaultValues = {
+    name: "",
+    description: "",
 
-  ...permission.reduce(
-    (acc, curr) => {
-      curr.itemPermission.forEach((item) => {
-        acc[item] = false;
-      });
+    ...permission.reduce(
+      (acc, curr) => {
+        curr.itemPermission.forEach((item) => {
+          acc[item] = false;
+        });
 
-      return acc;
-    },
-    {} as Record<string, boolean>,
-  ),
-};
-  
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    ),
+  };
+
   const { mutation, form } = usePostRows(
     "roles",
     ["roles"],
@@ -57,7 +56,11 @@ const defaultValues = {
           <h2>{permission.name} :</h2>
           <div className="flex flex-col md:flex-row gap-5">
             {permission.itemPermission.map((item) => (
-              <Form.Checkbox name={item} label={getPermissionLabel(item)} required />
+              <Form.Checkbox
+                name={item}
+                label={getPermissionLabel(item)}
+                required
+              />
             ))}
           </div>
         </div>
@@ -66,14 +69,13 @@ const defaultValues = {
   );
 
   const onSubmit = (data) => {
-    const permissions =Object.entries(data)
-  .filter(([_, value]) => value === true)
-  .map(([key]) => key);
+    const permissions = Object.entries(data)
+      .filter(([_, value]) => value === true)
+      .map(([key]) => key);
     const body = {
-  name: data.name,
-  permissions,
-};
-    console.log(body);
+      name: data.name,
+      permissions,
+    };
     mutation.mutate(body);
   };
 

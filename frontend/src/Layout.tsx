@@ -80,6 +80,7 @@ const AppLayout = () => {
 
   return (
     <>
+      <ToastContainer toastClassName="custom-toast-font" position="top-right" />
       <Navbar />
       <SidebarInset>
         <main className="p-6 h-full bg-background overflow-hidden! rounded-2xl ">

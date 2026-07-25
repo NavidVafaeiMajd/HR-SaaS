@@ -27,6 +27,7 @@ public class RoleController : ControllerBase
         _db = db;
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IResult> Create(RoleCreateDTO dto)
     {
@@ -53,7 +54,7 @@ public class RoleController : ControllerBase
         return Results.Ok();
     }
 
-[Authorize]
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -81,6 +82,7 @@ public class RoleController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(RoleCreateDTO dto, string id)
     {
@@ -121,6 +123,7 @@ public class RoleController : ControllerBase
         return Ok(role);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetRoles()
     {
