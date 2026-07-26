@@ -14,8 +14,8 @@ public class LoginRequest
 
 public class ChangePasswordRequest
 {
-    public string CurrentPassword {get;set;}="";
-    public string NewPassword {get;set;}="";
+    public string CurrentPassword { get; set; } = "";
+    public string NewPassword { get; set; } = "";
 }
 
 public class MeResponse
@@ -47,9 +47,8 @@ public class AuthController : ControllerBase
     {
         var user = await _userManager.FindByNameAsync(request.UserName);
 
-if (user is null)
-    return Unauthorized();
-
+        if (user is null)
+            return Unauthorized();
 
         var result = await _signInManager.PasswordSignInAsync(
             request.UserName,
@@ -72,7 +71,6 @@ if (user is null)
 
         return Ok();
     }
-
 
     [Authorize]
     [HttpGet("me")]
@@ -98,25 +96,18 @@ if (user is null)
 
     [Authorize]
     [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword(
-        ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
-
-        var user =
-            await _userManager.GetUserAsync(User);
-
+        var user = await _userManager.GetUserAsync(User);
 
         if (user == null)
             return Unauthorized();
 
-
-        var result =
-            await _userManager.ChangePasswordAsync(
-                user,
-                request.CurrentPassword,
-                request.NewPassword);
-
-
+        var result = await _userManager.ChangePasswordAsync(
+            user,
+            request.CurrentPassword,
+            request.NewPassword
+        );
 
         if (!result.Succeeded)
             return BadRequest(result.Errors);

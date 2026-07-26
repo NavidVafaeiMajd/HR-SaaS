@@ -24,9 +24,11 @@ services:
     networks:
       - hr-network
   api:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: hr_api
-    working_dir: /src/backend/
+    working_dir: /src/backend
     command: dotnet watch run --urls=http://+:8080 --non-interactive
     ports:
       - "5000:8080"

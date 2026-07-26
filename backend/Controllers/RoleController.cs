@@ -28,6 +28,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
+        [Permission(Permission.Role_view)]
     [HttpPost]
     public async Task<IResult> Create(RoleCreateDTO dto)
     {
@@ -55,6 +56,8 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
+        [Permission(Permission.Role_delete)]
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -83,6 +86,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
+        [Permission(Permission.Role_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(RoleCreateDTO dto, string id)
     {
@@ -124,6 +128,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
+    [Permission(Permission.Role_view)]
     [HttpGet]
     public async Task<IActionResult> GetRoles()
     {

@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using HrSaaS.Infrastructure.Bootstrap;
 using HrSaaS.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,8 +53,26 @@ builder.Services.AddCors(options =>
 });
 
 //add auth
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(option =>
+{
+    foreach (var permission in Enum.GetValues<Permission>())
+    {
+        option.AddPolicy(
+            permission.ToString(),
+            policy =>
+                policy.Requirements.Add(
+                    new PermissionRequirement(permission.ToString())
+                )
+        );
+    }
+});
+//change defulte cliam system with cutome for generate permition on it
+builder.Services.AddScoped<
+    IUserClaimsPrincipalFactory<Users>,
+    AppClaimsPrincipalFactory>();
 
+//automatic check of permission
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 builder
     .Services.AddIdentity<Users, Role>()
     .AddEntityFrameworkStores<HRSaaSDbContext>()
