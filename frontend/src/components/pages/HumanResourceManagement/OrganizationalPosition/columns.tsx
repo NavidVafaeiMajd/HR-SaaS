@@ -9,15 +9,15 @@ import { useDepartments } from "@/hook/useDepartments";
 import { useDeleteRows } from "@/hook/useDeleteRows";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 export interface designationColumnProps extends Record<string, unknown> {
-  department_id: string;
-  title: string;
+  departmentId: string;
+  name: string;
   description?: string | undefined;
 }
 
 
 const validation = z.object({
-  department_id: z.string().min(1, "واحد سازمانی الزامی است"),
-  title: z.string().min(1, "نام سمت سازمانی الزامی است"),
+  departmentId: z.string().min(1, "واحد سازمانی الزامی است"),
+  name: z.string().min(1, "نام سمت سازمانی الزامی است"),
   description: z.string().optional(),
 });
 
@@ -87,9 +87,9 @@ export const columns: ColumnDef<designationColumnProps>[] = [
             triggerLabel="ویرایش"
             fields={
               <>
-                <Form.Select name="department_id" label="واحد سازمانی" options={departmentsMapped ||[]} required/>
+                <Form.Select name="departmentId" label="واحد سازمانی" options={departmentsMapped ||[]} required/>
                 <Form.Input
-                  name="title"
+                  name="name"
                   label="نام سمت سازمانی"
                   required
                 />
@@ -97,8 +97,8 @@ export const columns: ColumnDef<designationColumnProps>[] = [
               </>
             }
             defaultValues={{
-              department_id: rowInf.department_id,
-              title: rowInf.title,
+              departmentId: rowInf.departmentId,
+              name: rowInf.name,
               description: rowInf.description,
             }}
             onSave={(data) => {
