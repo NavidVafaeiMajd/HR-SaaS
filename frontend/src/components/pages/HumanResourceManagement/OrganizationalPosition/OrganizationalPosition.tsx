@@ -10,9 +10,9 @@ import { useGetRowsToTable } from "@/hook/useGetRows";
 import { useDepartments } from "@/hook/useDepartments";
 
 const defaultValues = {
-  title: "",
+  name: "",
   description: "",
-  department_id: "",
+  departmentId: "",
 };
 
 const OrganizationalPosition = () => {
@@ -70,14 +70,14 @@ const OrganizationalPosition = () => {
               )}
               <Form.Select
                 label="واحد سازمانی  "
-                name="department_id"
+                name="departmentId"
                 placeholder="انتخاب واحد سازمانی "
                 options={departmentsMapped || []}
                 required
               />
               <Form.Input
                 label="نام سمت سازمانی "
-                name="title"
+                name="name"
                 placeholder="انتخاب نام سمت سازمانی "
                 required
               />
