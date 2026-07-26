@@ -1,0 +1,78 @@
+using HrSaaS.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+public class PositionCreateDTO
+{
+    public string Name { get; set; } = "";
+    public int DepartmentId { get; set; }
+
+        public string Description { get; set; }
+
+
+}
+
+[ApiController]
+[Route("api/designations")]
+public class PositionsController : ControllerBase
+{
+    private readonly HRSaaSDbContext _db;
+
+    public PositionsController(HRSaaSDbContext db)
+    {
+        _db = db;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var position = await _db.Positions.ToListAsync();
+
+        if (position == null || position.Count == 0)
+        {
+            return NotFound("No position found.");
+        }
+
+        return Ok(position);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(PositionCreateDTO dto)
+    {
+        var position = new Position { Name = dto.Name, DepartmentId = dto.DepartmentId , Description = dto.Description };
+        _db.Positions.Add(position);
+        await _db.SaveChangesAsync();
+
+        return Ok(position);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var position = await _db.Positions.FindAsync(id);
+        if (position == null)
+        {
+            return NotFound();
+        }
+
+        _db.Positions.Remove(position);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Update(int id, PositionCreateDTO dto)
+    {
+        var position = _db.Positions.Find(id);
+        if (position == null)
+        {
+            return NotFound();
+        }
+        position.Name = dto.Name;
+        position.DepartmentId = dto.DepartmentId;
+        await _db.SaveChangesAsync();
+
+        return Ok(position);
+    }
+}

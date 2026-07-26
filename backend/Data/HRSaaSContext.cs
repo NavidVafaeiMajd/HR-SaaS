@@ -38,6 +38,12 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<RolePermission>().HasKey(x => new { x.RoleId, x.Permission });
-        
+
+        modelBuilder.Entity<Position>()
+    .HasOne(p => p.Department)
+    .WithMany(d => d.Positions)
+    .HasForeignKey(p => p.DepartmentId)
+    .OnDelete(DeleteBehavior.Cascade);
+    
     }
 }

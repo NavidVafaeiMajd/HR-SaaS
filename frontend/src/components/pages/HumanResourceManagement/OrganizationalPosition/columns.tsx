@@ -23,7 +23,7 @@ const validation = z.object({
 
 export const columns: ColumnDef<designationColumnProps>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "name",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -35,7 +35,7 @@ export const columns: ColumnDef<designationColumnProps>[] = [
     ),
   },
   {
-    accessorKey: "department_id",
+    accessorKey: "departmentId",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -49,7 +49,7 @@ export const columns: ColumnDef<designationColumnProps>[] = [
       const { data: departments } = useDepartments();
       const rowData = row.original;
       const department = departments?.data?.find(
-        (item) => item?.id === rowData.department_id.id
+        (item) => item?.id === rowData.departmentId
       );
 
       return department ? department.name : "-";

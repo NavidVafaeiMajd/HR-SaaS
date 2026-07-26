@@ -12,7 +12,7 @@ import { useDepartments } from "@/hook/useDepartments";
 const defaultValues = {
   title: "",
   description: "",
-  department_id: "",
+  departmentId: "",
 };
 
 const OrganizationalPosition = () => {
@@ -70,7 +70,7 @@ const OrganizationalPosition = () => {
               )}
               <Form.Select
                 label="واحد سازمانی  "
-                name="department_id"
+                name="departmentId"
                 placeholder="انتخاب واحد سازمانی "
                 options={departmentsMapped || []}
                 required
