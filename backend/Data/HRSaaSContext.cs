@@ -10,6 +10,7 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
 
     public DbSet<RolePermission> RolePermission { get; set; } = null!;
 
+    public DbSet<Departments> Departments { get; set; } = null!;
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries<IAuditable>();
@@ -35,5 +36,6 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<RolePermission>().HasKey(x => new { x.RoleId, x.Permission });
+        
     }
 }

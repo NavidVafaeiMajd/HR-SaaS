@@ -33,10 +33,10 @@ export const columns: ColumnDef<organizationUnitColumnProps>[] = [
     },
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "createdAt",
     header: "تاریخ ایجاد",
     cell: ({ row }) => {
-      const rawDate = row.getValue("created_at") as string | null;
+      const rawDate = row.getValue("createdAt") as string | null;
 
       if (!rawDate) return "-";
 
