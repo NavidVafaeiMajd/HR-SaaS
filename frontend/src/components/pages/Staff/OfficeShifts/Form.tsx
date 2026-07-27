@@ -15,36 +15,59 @@ interface Props {
   setAccordion: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const dayLabels = {
-  saturday: "شنبه",
-  sunday: "یک‌شنبه",
-  monday: "دوشنبه",
-  tuesday: "سه‌شنبه",
-  wednesday: "چهارشنبه",
-  thursday: "پنج‌شنبه",
-  friday: "جمعه",
-};
+export const DAYS = [
+  {
+    key: "saturday",
+    label: "شنبه",
+    value: 0,
+  },
+  {
+    key: "sunday",
+    label: "یک‌شنبه",
+    value: 1,
+  },
+  {
+    key: "monday",
+    label: "دوشنبه",
+    value: 2,
+  },
+  {
+    key: "tuesday",
+    label: "سه‌شنبه",
+    value: 3,
+  },
+  {
+    key: "wednesday",
+    label: "چهارشنبه",
+    value: 4,
+  },
+  {
+    key: "thursday",
+    label: "پنج‌شنبه",
+    value: 5,
+  },
+  {
+    key: "friday",
+    label: "جمعه",
+    value: 6,
+  },
+] as const; 
 
 const ShiftForm = ({ accordion, setAccordion }: Props) => {
   const form = useForm<FormData>({
     resolver: zodResolver(validation),
-    defaultValues: {
-      name: "",
-      saturday_start: "",
-      saturday_end: "",
-      sunday_start: "",
-      sunday_end: "",
-      monday_start: "",
-      monday_end: "",
-      tuesday_start: "",
-      tuesday_end: "",
-      wednesday_start: "",
-      wednesday_end: "",
-      thursday_start: "",
-      thursday_end: "",
-      friday_start: "",
-      friday_end: "",
-    },
+defaultValues: {
+    name: "",
+    shiftTimes: [
+    { dayOfWeek: 0, startTime: "", endTime: "" },
+    { dayOfWeek: 1, startTime: "", endTime: "" },
+    { dayOfWeek: 2, startTime: "", endTime: "" },
+    { dayOfWeek: 3, startTime: "", endTime: "" },
+    { dayOfWeek: 4, startTime: "", endTime: "" },
+    { dayOfWeek: 5, startTime: "", endTime: "" },
+    { dayOfWeek: 6, startTime: "", endTime: "" },
+  ]
+}
   });
 
   const { mutation } = usePostRows(
@@ -90,29 +113,36 @@ const ShiftForm = ({ accordion, setAccordion }: Props) => {
                 />
               </div>
 
-                     {Object.entries(dayLabels).map(([day, label]) => (
-                        <div key={day} className="border border-gray-200 rounded-lg p-4">
-                           <h3 className="font-bold mb-4 text-lg">{label}</h3>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <Form.TimePicker
-                                 name={`${day}_start` as keyof FormData}
-                                 label="ساعت شروع"
-                                 placeholder="انتخاب ساعت شروع"
-                              />
-                              <Form.TimePicker
-                                 name={`${day}_end` as keyof FormData}
-                                 label="ساعت پایان"
-                                 placeholder="انتخاب ساعت پایان"
-                              />
-                           </div>
-                        </div>
-                     ))}
+              {DAYS.map((day, index) => (
+                <div
+                  key={day.key}
+                  className="border border-gray-200 rounded-lg p-4"
+                >
+                  <h3 className="font-bold mb-4 text-lg">{day.label}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Form.TimePicker
+                      name={`shiftTimes.${index}.startTime`}
+                      label="ساعت شروع"
+                      placeholder="انتخاب ساعت شروع"
+                    />
+                    <Form.TimePicker
+                      name={`shiftTimes.${index}.endTime`}
+                      label="ساعت پایان"
+                      placeholder="انتخاب ساعت پایان"
+                    />
+                  </div>
+                </div>
+              ))}
 
               <div className="flex gap-3 mt-5">
                 <Button type="submit" disabled={mutation.isPending}>
                   {mutation.isPending ? "در حال ثبت..." : "ثبت شیفت"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => form.reset()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                >
                   بازنشانی
                 </Button>
               </div>

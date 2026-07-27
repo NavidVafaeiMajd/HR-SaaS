@@ -2,29 +2,43 @@ import { DataTable } from "@/components/shared/data-table";
 import { userColumns } from "./columns";
 import { useGetRowsToTable } from "@/hook/useGetRows";
 
-interface DaySchedule {
-   entry?: string;
-   exit?: string;
+export interface Shift {
+  id: number;
+  name: string;
+  shiftTimes: ShiftTime[];
+
+  createdAt: string;
+  updatedAt: string | null;
 }
 
-export interface User {
-   id: number;
-   shift: string;
-   saturday: DaySchedule;
-   sunday: DaySchedule;
-   monday: DaySchedule;
-   tuesday: DaySchedule;
-   wednesday: DaySchedule;
-   thursday: DaySchedule;
-   friday: DaySchedule;
-   [key: string]: unknown;
+export interface ShiftTime {
+  id: number;
+
+  dayOfWeek: WeekDay;
+
+  startTime: string;
+  endTime: string;
+
+  shiftId: number;
+
+  createdAt: string;
+  updatedAt: string | null;
 }
+
+export type WeekDay =
+  | "Saturday"
+  | "Sunday"
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday";
 
 const Table: React.FC = () => {
 
    const fetchData = useGetRowsToTable("shifts");
    return (
-      <DataTable<User, unknown>
+      <DataTable<Shift, unknown>
          columns={userColumns}
          queryKey={["shifts"]}
          queryFn={() => fetchData}
