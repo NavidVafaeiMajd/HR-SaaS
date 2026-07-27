@@ -62,4 +62,49 @@ public class ShiftController : ControllerBase
 
         return Created("", shift);
     }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> EditShift(CreateShiftDto dto, int id)
+    {
+        var shift = await _db
+            .Shifts.Include(x => x.ShiftTimes)
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (shift == null)
+        {
+            NotFound();
+        }
+
+        shift.Name = dto.Name;
+
+        _db.ShiftsTime.RemoveRange(shift.ShiftTimes);
+
+        shift.ShiftTimes = dto
+            .ShiftTimes.Select(x => new ShiftTime
+            {
+                DayOfWeek = x.DayOfWeek,
+                StartTime = x.StartTime,
+                EndTime = x.EndTime,
+            })
+            .ToList();
+
+        await _db.SaveChangesAsync();
+
+        return Ok(shift);
+    }
+
+    [HttpDelete("{id}")]
+public async Task<IActionResult> Delete(int id)
+{
+    var shift = await _db.Shifts
+        .FirstOrDefaultAsync(x => x.Id == id);
+
+    if (shift is null)
+        return NotFound();
+
+    _db.Shifts.Remove(shift);
+
+    await _db.SaveChangesAsync();
+
+    return NoContent();
+}
 }

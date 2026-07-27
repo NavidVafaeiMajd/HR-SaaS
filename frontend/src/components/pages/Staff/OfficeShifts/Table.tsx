@@ -36,14 +36,14 @@ export type WeekDay =
 
 const Table: React.FC = () => {
 
-   const fetchData = useGetRowsToTable("shifts");
+   const fetchData = () => useGetRowsToTable("shifts");
    return (
-      <DataTable<Shift, unknown>
-         columns={userColumns}
-         queryKey={["shifts"]}
-         queryFn={() => fetchData}
-         searchableKeys={["shift"]}
-      />
+     <DataTable<Shift, unknown>
+       columns={userColumns}
+       queryKey={["shifts"]}
+       queryFn={fetchData}
+       searchableKeys={["shift"]}
+     />
    );
 };
 
