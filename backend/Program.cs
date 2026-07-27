@@ -59,17 +59,13 @@ builder.Services.AddAuthorization(option =>
     {
         option.AddPolicy(
             permission.ToString(),
-            policy =>
-                policy.Requirements.Add(
-                    new PermissionRequirement(permission.ToString())
-                )
+            policy => policy.Requirements.Add(new PermissionRequirement(permission.ToString()))
         );
     }
 });
+
 //change defulte cliam system with cutome for generate permition on it
-builder.Services.AddScoped<
-    IUserClaimsPrincipalFactory<Users>,
-    AppClaimsPrincipalFactory>();
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<Users>, AppClaimsPrincipalFactory>();
 
 //automatic check of permission
 builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
