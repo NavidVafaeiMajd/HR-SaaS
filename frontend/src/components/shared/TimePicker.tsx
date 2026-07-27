@@ -7,10 +7,13 @@ interface TimePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  name?: string;
+
 }
 
 const TimePicker: React.FC<TimePickerProps> = ({
   value = "",
+  name ="",
   onChange,
   placeholder = "انتخاب زمان",
   disabled = false,
@@ -42,6 +45,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
     <div className="relative">
       <input
         type="text"
+        name={name}
         readOnly
         value={value}
         onClick={handleInputClick}
@@ -51,7 +55,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
           disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
         } ${className}`}
       />
-      
+
       {value && (
         <button
           type="button"

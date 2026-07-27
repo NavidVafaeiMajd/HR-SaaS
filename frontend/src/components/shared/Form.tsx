@@ -587,6 +587,7 @@ function FormTimePicker<T extends FieldValues>({
           <FormControl>
             <TimePicker
               value={field.value}
+              name={name}
               onChange={field.onChange}
               placeholder={placeholder}
             />
