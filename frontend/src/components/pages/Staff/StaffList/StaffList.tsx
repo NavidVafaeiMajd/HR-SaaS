@@ -26,6 +26,7 @@ const StaffList: React.FC = () => {
     department: "1",
     designation: "1",
     position: "فعال",
+    role : "",
     image: null,
   };
 
@@ -164,7 +165,7 @@ const StaffList: React.FC = () => {
           required
         />
         <Form.Select
-          name="designation"
+          name="role"
           label="نقش کاربری"
           placeholder="نقش کاربری"
           options={rolesMapped  || []}
