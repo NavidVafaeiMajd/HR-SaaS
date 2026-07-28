@@ -19,15 +19,18 @@ const StaffList: React.FC = () => {
   const defaultValues = {
     firstName: "",
     lastName: "",
-    personeliCode: "",
+    PersonnelCode: "",
     phoneNumber: "",
     gender: "مرد",
-    shift: "",
-    department: "1",
-    designation: "1",
-    position: "فعال",
-    role : "",
+    shiftId: "",
+    departmentId: "1",
+    positionId: "1",
+    isActive: true,
+    role: "",
     image: null,
+    password: "",
+    username : "",
+    dashboardType :"employee",
   };
 
   const { data: roles, isPending: rolesLoading } = useRoles();
@@ -46,7 +49,7 @@ const StaffList: React.FC = () => {
     label: item.name,
   }));
   const rolesMapped = roles?.data?.map((item) => ({
-    value: String(item.id),
+    value: String(item.name),
     label: item.name,
   }));
   const shiftsMapped = shifts?.data?.map((item) => ({
@@ -85,30 +88,30 @@ const StaffList: React.FC = () => {
       </div>
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Input
-          name="firstName"
+          name="username"
           label="نام کاربری"
           required
-          placeholder="نام"
+          placeholder="نام کاربری"
         />
         <Form.Password
-          name="lastName"
+          name="password"
           label="رمز عبور"
           required
-          placeholder="نام خانوادگی"
+          placeholder="رمز عبور"
         />
         <Form.Select
-          name="gender"
+          name="dashboardType"
           label="نوع داشبورد"
           options={[
-            { label: "کارمندی", value: "employe" },
-            { label: "مدیریتی", value: "managment" },
+            { label: "کارمندی", value: "employee" },
+            { label: "مدیریتی", value: "management" },
           ]}
           required
         />
       </div>
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Input
-          name="personeliCode"
+          name="PersonnelCode"
           label="کد پرسنلی"
           placeholder="کد پرسنلی"
           required
@@ -123,27 +126,27 @@ const StaffList: React.FC = () => {
           name="gender"
           label="جنسیت"
           options={[
-            { label: "مرد", value: "مرد" },
-            { label: "زن", value: "زن" },
+            { label: "مرد", value: "man" },
+            { label: "زن", value: "woman" },
           ]}
           required
         />
       </div>
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Select
-          name="shift"
+          name="shiftId"
           label="شیفت اداره ای"
           placeholder="شیفت اداره ای"
           options={shiftsMapped || []}
           required
         />
         <Form.Select
-          name="position"
+          name="isActive"
           label="وضعیت"
           placeholder="وضعیت"
           options={[
-            { label: "ممنوع", value: "ممنوع" },
-            { label: "فعال", value: "فعال" },
+            { label: "ممنوع", value: false },
+            { label: "فعال", value: true },
           ]}
           required
         />
@@ -151,14 +154,14 @@ const StaffList: React.FC = () => {
 
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Select
-          name="department"
+          name="departmentId"
           label="واحد سازمانی"
           placeholder="واحد سازمانی"
           options={departmentsMapped || []}
           required
         />
         <Form.Select
-          name="designation"
+          name="positionId"
           label="سمت سازمانی"
           placeholder="سمت سازمانی"
           options={designationstsMapped || []}
@@ -168,7 +171,7 @@ const StaffList: React.FC = () => {
           name="role"
           label="نقش کاربری"
           placeholder="نقش کاربری"
-          options={rolesMapped  || []}
+          options={rolesMapped || []}
           required
         />
       </div>

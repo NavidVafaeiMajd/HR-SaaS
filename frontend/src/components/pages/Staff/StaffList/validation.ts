@@ -14,7 +14,7 @@ export const validation = z.object({
     .regex(/^[\u0600-\u06FF\s]+$/, "فقط حروف فارسی مجاز است")
     .describe("مثلاً: محمدی"),
 
-  personeliCode: z
+  PersonnelCode: z
     .string()
     .regex(/^\d+$/, "فقط عدد مجاز است")
     .min(1, "کد پرسنلی الزامی است")
@@ -29,17 +29,23 @@ export const validation = z.object({
     message: "لطفاً یک گزینه انتخاب کنید",
   }),
 
-  shift: z.string().refine((val) => val !== "", {
+  shiftId: z.string().refine((val) => val !== "", {
     message: "لطفاً یک گزینه انتخاب کنید",
   }),
 
-  department: z.coerce.number().min(1, "واحد سازمانی الزامی است"),
+  departmentId: z.coerce.number().min(1, "واحد سازمانی الزامی است"),
 
-  designation: z.coerce.number().min(1, "سمت سازمانی الزامی است"),
+  positionId: z.coerce.number().min(1, "سمت سازمانی الزامی است"),
 
-  position: z.string().refine((val) => val !== "", {
-    message: "لطفاً یک گزینه انتخاب کنید",
-  }),
+  isActive: z.boolean().default(true),
 
   image: imageSchema,
+  username: z.string().min(1, "نام کاربری الزامی است"),
+  password: z.string().min(1, "رمز عبور الزامی است"),
+  dashboardType: z.string().refine((val) => val !== "", {
+    message: "لطفاً یک گزینه انتخاب کنید",
+  }),
+  role: z.string().refine((val) => val !== "", {
+    message: "لطفاً یک گزینه انتخاب کنید",
+  }),
 });

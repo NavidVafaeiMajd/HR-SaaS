@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 public enum DashboardType
 {
-    managment,
+    management,
     employee
 }
 public enum Gender

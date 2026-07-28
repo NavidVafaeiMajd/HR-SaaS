@@ -9,6 +9,24 @@ import { useDeleteRows } from "@/hook/useDeleteRows";
 
 export const userColumns: ColumnDef<User>[] = [
   {
+    accessorKey: "userName",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <LuArrowUpDown className="ml-2 h-4 w-4" />
+          نام کاربری
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const userName = row.getValue("userName");
+      return userName ? userName : "—";
+    },
+  },
+  {
     accessorKey: "firstName",
     header: ({ column }) => {
       return (
@@ -23,11 +41,12 @@ export const userColumns: ColumnDef<User>[] = [
     },
     cell: ({ row }) => {
       const firstName = row.getValue("firstName");
-      return firstName ? firstName : "—";
+      const lastName = row.original.lastName
+      return firstName ? firstName + " " + lastName : "—";
     },
   },
   {
-    accessorKey: "department",
+    accessorKey: "position",
     header: ({ column }) => {
       return (
         <Button
@@ -40,8 +59,8 @@ export const userColumns: ColumnDef<User>[] = [
       );
     },
     cell: ({ row }) => {
-      const department = row.getValue("department");
-      return department ? department.name : "—";
+      const position = row.getValue("position");
+      return position ? position.name : "—";
     },
   },
   {
@@ -81,7 +100,8 @@ export const userColumns: ColumnDef<User>[] = [
       const status = props.getValue() as boolean;
       return (
         <span
-          className={cn("p-1 rounded-md",
+          className={cn(
+            "p-1 rounded-md",
             status == true
               ? "bg-green-100 text-green-500"
               : "bg-red-100 text-red-500",
