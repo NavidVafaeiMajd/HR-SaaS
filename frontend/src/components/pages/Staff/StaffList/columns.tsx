@@ -72,34 +72,22 @@ export const userColumns: ColumnDef<User>[] = [
       );
     },
     cell(props) {
-      return <span>{props.getValue() === "male" ? "مذکر" : "مونث"}</span>;
+      return <span>{props.getValue() === "man" ? "مذکر" : "مونث"}</span>;
     },
   },
   {
-    accessorKey: "position",
+    accessorKey: "isActive",
     cell(props) {
-      const status = props.getValue() as string;
+      const status = props.getValue() as boolean;
       return (
         <span
-          className={cn(
-            status === "فعال"
+          className={cn("p-1 rounded-md",
+            status == true
               ? "bg-green-100 text-green-500"
-              : status === "ممنوع"
-                ? "bg-red-100 text-red-500"
-                : status === "در حال بررسی"
-                  ? "bg-yellow-100 text-yellow-500"
-                  : "",
-
-            "p-2 rounded-sm",
+              : "bg-red-100 text-red-500",
           )}
         >
-          {status === "فعال"
-            ? "فعال"
-            : status === "ممنوع"
-              ? "ممنوع"
-              : status === "در حال بررسی"
-                ? "در حال بررسی"
-                : ""}
+          {status === true ? "فعال" : "غیر فعال"}
         </span>
       );
     },
