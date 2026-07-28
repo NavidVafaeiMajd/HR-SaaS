@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260728151801_AddMoreInfoToUser")]
+    partial class AddMoreInfoToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -306,13 +309,12 @@ namespace HrSaaS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address1")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Address2")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -372,6 +374,7 @@ namespace HrSaaS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Religion")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
@@ -388,12 +391,15 @@ namespace HrSaaS.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("bloodGroup")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("citizenship")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("city")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("dashboardType")
@@ -403,12 +409,15 @@ namespace HrSaaS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("maritalStatus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("nationality")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("province")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

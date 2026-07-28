@@ -72,13 +72,13 @@ const EmployeDetailse = () => {
                     {queryData?.firstName} {queryData?.lastName}
                   </span>
                   <span className="text-gray-400">
-                    {queryData?.designation.title}{" "}
+                    {queryData?.position.name}{" "}
                   </span>
                 </div>
               </div>
               <div>
                 <span className="bg-greenLight text-greenDark py-1 px-4 rounded-sm text-sm!">
-                  {queryData?.position}
+                  {queryData?.isActive ? "فعال" : "غیر فعال"}
                 </span>
               </div>
             </div>

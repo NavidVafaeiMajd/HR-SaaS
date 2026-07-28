@@ -1,33 +1,33 @@
 import { z } from "zod";
 
 export const validation = z.object({
-  firstName: z
+  FirstName: z
     .string()
     .trim()
     .min(2, "نام باید حداقل 2 کاراکتر باشد")
     .max(50, "نام نباید بیشتر از 50 کاراکتر باشد")
     .regex(/^[\u0600-\u06FF]+$/, "فقط حروف فارسی مجاز است"),
 
-  lastName: z
+  LastName: z
     .string()
     .trim()
     .min(2, "نام خانوادگی باید حداقل 2 کاراکتر باشد")
     .max(50, "نام خانوادگی نباید بیشتر از 50 کاراکتر باشد")
     .regex(/^[\u0600-\u06FF]+$/, "فقط حروف فارسی مجاز است"),
 
-  phoneNumber: z
+  PhoneNumber: z
     .string()
     .regex(/^09\d{9}$/, "شماره تماس باید 11 رقم و با 09 شروع شود"),
 
-  personeliCode: z
+  PersonnelCode: z
     .string()
     .regex(/^\d{5,10}$/, "کد پرسنلی باید بین 5 تا 10 رقم باشد"),
 
   birthDate: z.date({ error: "تاریخ پرونده الزامی است" })
-    .max( new Date ,"تاریخ تولد نمی‌تواند درحال یا آینده باشد")
+    .max(new Date, "تاریخ تولد نمی‌تواند درحال یا آینده باشد")
     .optional(),
 
-  gender: z.string().min(1, "جنسیت الزامی است"),
+  Gender: z.string().min(1, "جنسیت الزامی است"),
   maritalStatus: z.string().optional(),
 
   religion: z.string().optional(),
@@ -54,8 +54,8 @@ export const validation = z.object({
     .max(200, "نشانی 2 نباید بیشتر از 200 کاراکتر باشد")
     .optional(),
 
-  department: z.string().optional(),
-  designation: z.string().optional(),
-  position: z.string().optional(),
-  shifts: z.string().optional(),
+  DepartmentId: z.string().optional(),
+  PositionId: z.string().optional(),
+  ShiftId: z.string().optional(),
+  IsActive: z.boolean().optional(),
 });

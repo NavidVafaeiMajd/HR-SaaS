@@ -26,5 +26,15 @@ public class Users : IdentityUser
     public Position? Position { get; set; } = null!;
     public int PersonnelCode { get; set; }
     public bool IsActive { get; set; } = true;
-
+    public string? Address1 { get; set; } = null!;
+    public string? Address2 { get; set; }= null!;
+    public string? Religion { get; set; }= null!;
+    public string? bloodGroup { get; set; }= null!;
+    public string? nationality { get; set; }= null!;
+    public string? citizenship { get; set; }= null!;
+    public string? maritalStatus { get; set; }= null!;
+    public string? city { get; set; }= null!;
+    public string? province { get; set; } = null!;
+    public DateTime? BirthDate { get; set; } 
+    
 }
