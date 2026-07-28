@@ -51,11 +51,38 @@ public class UserController : ControllerBase
                 x.PhoneNumber,
                 x.gender,
                 x.IsActive,
-x.Position
+                x.Position,
             })
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return NoContent();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(user);
     }
 
     [HttpPost]

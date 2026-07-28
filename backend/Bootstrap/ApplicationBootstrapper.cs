@@ -12,22 +12,21 @@ public static class ApplicationBootstrapper
 
         var db = scope.ServiceProvider.GetRequiredService<HRSaaSDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Users>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
 
         // Apply Migrations
         await db.Database.MigrateAsync();
 
         // Seed Roles
-        string[] roles =
-        {
-            "Admin",
-        };
+        string[] roles = { "Admin" };
 
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                await roleManager.CreateAsync(
+                    new Role { Name = role, NormalizedName = role.ToUpper() }
+                );
             }
         }
 
@@ -40,16 +39,16 @@ public static class ApplicationBootstrapper
             {
                 UserName = "admin",
                 Email = "admin@company.local",
-                EmailConfirmed = true
+                EmailConfirmed = true,
             };
 
             var result = await userManager.CreateAsync(user, "Admin@123456");
 
             if (!result.Succeeded)
             {
-                throw new Exception(string.Join(
-                    Environment.NewLine,
-                    result.Errors.Select(e => e.Description)));
+                throw new Exception(
+                    string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))
+                );
             }
 
             await userManager.AddToRoleAsync(user, "Admin");
