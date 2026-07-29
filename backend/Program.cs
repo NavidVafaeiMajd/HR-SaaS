@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +75,9 @@ builder
     .AddEntityFrameworkStores<HRSaaSDbContext>()
     .AddDefaultTokenProviders();
 
+///////////Set Image service
+/// 
+builder.Services.AddScoped<IImageService, ImageService>();
 //add cookies config
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -118,5 +122,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "..", "storage", "uploads");
 
+Directory.CreateDirectory(uploadPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadPath),
+    RequestPath = "/uploads"
+});
 app.Run();

@@ -6,6 +6,7 @@
 bin/
 obj/
 
+storage/
 # User specific files
 *.user
 *.rsuser

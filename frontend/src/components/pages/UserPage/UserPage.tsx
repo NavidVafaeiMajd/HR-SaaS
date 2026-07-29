@@ -60,7 +60,7 @@ const EmployeDetailse = () => {
                   {queryData?.image ? (
                     <img
                       className="w-25 h-25 object-cover rounded-full"
-                      src={`${import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:8000"}/${queryData?.image}`}
+                      src={`http://localhost:5000/uploads/${queryData?.image}`}
                       alt=""
                     />
                   ) : (

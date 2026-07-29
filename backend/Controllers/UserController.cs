@@ -30,6 +30,10 @@ public class UpdateUserDto
     public string? province { get; set; } = null!;
 }
 
+public class UpdateImageUserDto
+{
+     public IFormFile? Image { get; set; }   
+}
 public class CreateUserDto
 {
     public string FirstName { get; set; } = "";
@@ -44,7 +48,7 @@ public class CreateUserDto
     public int ShiftId { get; set; }
 
     public string Role { get; set; } = "";
-    public string? Image { get; set; }
+    public IFormFile? Image { get; set; }
     public DashboardType dashboardType { get; set; } = DashboardType.employee;
     public Gender gender { get; set; }
     public int PersonnelCode { get; set; }
@@ -79,10 +83,12 @@ public class UserController : ControllerBase
     private readonly UserManager<Users> _userManager;
     private readonly HRSaaSDbContext _db;
 
-    public UserController(UserManager<Users> userManager, HRSaaSDbContext db)
+    private readonly IImageService _imageService;
+
+    public UserController(UserManager<Users> userManager, IImageService imageService)
     {
         _userManager = userManager;
-        _db = db;
+        _imageService = imageService;
     }
 
     [HttpGet]
@@ -120,6 +126,7 @@ public class UserController : ControllerBase
 
         if (!result.Succeeded)
             return BadRequest(result.Errors);
+        _imageService.Delete(user.Image);
 
         return NoContent();
     }
@@ -206,7 +213,7 @@ public class UserController : ControllerBase
             dashboardType = dto.dashboardType,
             gender = dto.gender,
             PhoneNumber = dto.PhoneNumber,
-            Image = dto.Image,
+            Image = await _imageService.SaveAsync(dto.Image),
 
             DepartmentId = dto.DepartmentId,
             PositionId = dto.PositionId,
@@ -261,6 +268,50 @@ public class UserController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(biography);
+    }
+    [HttpPost("image/{id}")]
+    public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto, string id)
+    {
+        if (dto.Image == null)
+            return BadRequest("Image is required.");
+
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+
+        user.Image = await _imageService.ReplaceAsync(user.Image, dto.Image);
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+
+        return Ok();
+    }
+        [HttpDelete("image/{id}")]
+    public async Task<IActionResult> DeleteImage( string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+
+        _imageService.Delete(user.Image);
+        user.Image = null;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+
+        return Ok();
     }
 
     [HttpPost("social-media/{userId}")]
