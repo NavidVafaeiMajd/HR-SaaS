@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260728192812_AddUserPrivateInfo")]
+    partial class AddUserPrivateInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,17 +36,13 @@ namespace HrSaaS.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("WorkExperience")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Biography");
                 });
@@ -85,14 +84,10 @@ namespace HrSaaS.Migrations
                     b.Property<string>("EmergencyPhone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("EmergencyCall");
                 });
@@ -369,14 +364,10 @@ namespace HrSaaS.Migrations
                     b.Property<string>("Twitter")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("SocialMedia");
                 });
@@ -395,6 +386,9 @@ namespace HrSaaS.Migrations
                     b.Property<string>("Address2")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("BiographyId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -411,6 +405,9 @@ namespace HrSaaS.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("EmergencyCallId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -464,6 +461,9 @@ namespace HrSaaS.Migrations
                     b.Property<int?>("ShiftId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SocialMediaId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -497,7 +497,15 @@ namespace HrSaaS.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BiographyId")
+                        .IsUnique()
+                        .HasFilter("[BiographyId] IS NOT NULL");
+
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("EmergencyCallId")
+                        .IsUnique()
+                        .HasFilter("[EmergencyCallId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -511,29 +519,11 @@ namespace HrSaaS.Migrations
 
                     b.HasIndex("ShiftId");
 
+                    b.HasIndex("SocialMediaId")
+                        .IsUnique()
+                        .HasFilter("[SocialMediaId] IS NOT NULL");
+
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Biography", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("Biography")
-                        .HasForeignKey("Biography", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EmergencyCall", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("EmergencyCall")
-                        .HasForeignKey("EmergencyCall", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HrSaaS.Models.RolePermission", b =>
@@ -618,22 +608,19 @@ namespace HrSaaS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SocialMedia", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("SocialMedia")
-                        .HasForeignKey("SocialMedia", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Users", b =>
                 {
+                    b.HasOne("Biography", "Biography")
+                        .WithOne("User")
+                        .HasForeignKey("Users", "BiographyId");
+
                     b.HasOne("Departments", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId");
+
+                    b.HasOne("EmergencyCall", "EmergencyCall")
+                        .WithOne("User")
+                        .HasForeignKey("Users", "EmergencyCallId");
 
                     b.HasOne("Position", "Position")
                         .WithMany()
@@ -643,11 +630,27 @@ namespace HrSaaS.Migrations
                         .WithMany()
                         .HasForeignKey("ShiftId");
 
+                    b.HasOne("SocialMedia", "SocialMedia")
+                        .WithOne("User")
+                        .HasForeignKey("Users", "SocialMediaId");
+
+                    b.Navigation("Biography");
+
                     b.Navigation("Department");
+
+                    b.Navigation("EmergencyCall");
 
                     b.Navigation("Position");
 
                     b.Navigation("Shift");
+
+                    b.Navigation("SocialMedia");
+                });
+
+            modelBuilder.Entity("Biography", b =>
+                {
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Departments", b =>
@@ -655,18 +658,21 @@ namespace HrSaaS.Migrations
                     b.Navigation("Positions");
                 });
 
+            modelBuilder.Entity("EmergencyCall", b =>
+                {
+                    b.Navigation("User")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Shift", b =>
                 {
                     b.Navigation("ShiftTimes");
                 });
 
-            modelBuilder.Entity("Users", b =>
+            modelBuilder.Entity("SocialMedia", b =>
                 {
-                    b.Navigation("Biography");
-
-                    b.Navigation("EmergencyCall");
-
-                    b.Navigation("SocialMedia");
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

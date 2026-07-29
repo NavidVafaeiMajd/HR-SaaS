@@ -48,7 +48,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
   }));
 
   const positionMapped = position?.data?.map((item) => ({
-    value: String(item.name),
+    value: String(item.id),
     label: item.name,
   }));
 
@@ -74,8 +74,8 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
         ? String(queryData.department.id)
         : "",
 
-      PositionId: queryData?.position ? String(queryData.position.id) : "",
-      ShiftId: queryData?.shift ? String(queryData.shift.id) : "",
+      PositionId: queryData?.positionId ? String(queryData.positionId) : "",
+      ShiftId: queryData?.shiftId ? String(queryData.shiftId) : "",
       IsActive: queryData?.isActive ?? true,
       province: queryData?.province == null ? "" : queryData?.province,
       city: queryData?.city == null ? "" : queryData?.city,

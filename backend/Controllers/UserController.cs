@@ -1,3 +1,4 @@
+using HrSaaS.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,15 +52,25 @@ public class CreateUserDto
     public bool IsActive { get; set; } = true;
 }
 
+public class SocialMediaDto
+{
+    public string? Instagram { set; get; } = null!;
+    public string? Twitter { set; get; } = null!;
+    public string? Linkedin { set; get; } = null!;
+    public string? Email { set; get; } = null!;
+}
+
 [ApiController]
 [Route("api/employees")]
 public class UserController : ControllerBase
 {
     private readonly UserManager<Users> _userManager;
+    private readonly HRSaaSDbContext _db;
 
-    public UserController(UserManager<Users> userManager)
+    public UserController(UserManager<Users> userManager, HRSaaSDbContext db)
     {
         _userManager = userManager;
+        _db = db;
     }
 
     [HttpGet]
@@ -154,7 +165,7 @@ public class UserController : ControllerBase
         var user = await _userManager
             .Users.Include(x => x.Department)
             .Include(x => x.Position)
-            .Include(x => x.Shift)
+            .Include(x=>x.SocialMedia)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (user == null)
@@ -166,7 +177,6 @@ public class UserController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreateUserDto dto)
     {
-        // بررسی تکراری نبودن نام کاربری
         var exists = await _userManager.FindByNameAsync(dto.UserName);
 
         if (exists != null)
@@ -212,5 +222,35 @@ public class UserController : ControllerBase
                 user.LastName,
             }
         );
+    }
+
+    [HttpPost("social-media/{userId}")]
+    public async Task<IActionResult> UpsertSocialMedia(string userId, SocialMediaDto dto)
+    {
+
+        var socialMedia = await _db.SocialMedia.FirstOrDefaultAsync();
+
+        if (socialMedia == null)
+        {
+            socialMedia = new SocialMedia
+            {
+                Instagram = dto.Instagram,
+                Linkedin = dto.Linkedin,
+                Twitter = dto.Twitter,
+                Email = dto.Email,
+                UserId = userId,
+            };
+            _db.SocialMedia.Add(socialMedia);
+        }
+
+        socialMedia.Instagram = dto.Instagram;
+        socialMedia.Linkedin = dto.Linkedin;
+        socialMedia.Twitter = dto.Twitter;
+        socialMedia.Email = dto.Email;
+        socialMedia.UserId = userId;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(socialMedia);
     }
 }

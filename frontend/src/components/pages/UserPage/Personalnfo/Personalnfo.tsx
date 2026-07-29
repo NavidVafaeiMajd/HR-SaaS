@@ -2,7 +2,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FiUser } from "react-icons/fi";
 import Biography from "./Biography/Biography";
 import SochialMedia from "./SochialMedia/SochialMedia";
-import BankAccountForm from "./Bank/Bank";
 import EmergencyCall from "./EmergencyCall/EmergencyCall";
 
 const PersonalInfo = ({ queryData }: { queryData: any }) => {
@@ -21,26 +20,20 @@ const PersonalInfo = ({ queryData }: { queryData: any }) => {
           </TabsTrigger>
           <TabsTrigger value="socialProfile" className="justify-center">
             پروفایل اجتماعی
-          </TabsTrigger>
-          <TabsTrigger value="bankAccount" className="justify-center">
-            حساب بانکی
-          </TabsTrigger>
+          </TabsTrigger>  
           <TabsTrigger value="emergencyContact" className="justify-center">
             تماس اضطراری
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="biography" className="p-5 w-full!">
-          <Biography queryData={queryData?.biography[0]} />
+          <Biography queryData={queryData?.biography} />
         </TabsContent>
         <TabsContent value="socialProfile" className="p-5 w-full!">
-          <SochialMedia queryData={queryData?.sochialMedia[0]} />
-        </TabsContent>
-        <TabsContent value="bankAccount" className="p-5 w-full!">
-          <BankAccountForm queryData={queryData?.bank[0]} />
+          <SochialMedia queryData={queryData?.socialMedia} />
         </TabsContent>
         <TabsContent value="emergencyContact" className="p-5 w-full!">
-          <EmergencyCall queryData={queryData?.emergencyCall[0]} />
+          <EmergencyCall queryData={queryData?.emergencyCall} />
         </TabsContent>
       </Tabs>
     </div>

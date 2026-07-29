@@ -1,16 +1,19 @@
+using System.Text.Json.Serialization;
 using HrSaaS.Models;
 using Microsoft.AspNetCore.Identity;
 
 public enum DashboardType
 {
     management,
-    employee
+    employee,
 }
+
 public enum Gender
 {
     man,
-    woman
+    woman,
 }
+
 public class Users : IdentityUser
 {
     public string FirstName { get; set; } = "";
@@ -27,14 +30,16 @@ public class Users : IdentityUser
     public int PersonnelCode { get; set; }
     public bool IsActive { get; set; } = true;
     public string? Address1 { get; set; } = null!;
-    public string? Address2 { get; set; }= null!;
-    public string? Religion { get; set; }= null!;
-    public string? bloodGroup { get; set; }= null!;
-    public string? nationality { get; set; }= null!;
-    public string? citizenship { get; set; }= null!;
-    public string? maritalStatus { get; set; }= null!;
-    public string? city { get; set; }= null!;
+    public string? Address2 { get; set; } = null!;
+    public string? Religion { get; set; } = null!;
+    public string? bloodGroup { get; set; } = null!;
+    public string? nationality { get; set; } = null!;
+    public string? citizenship { get; set; } = null!;
+    public string? maritalStatus { get; set; } = null!;
+    public string? city { get; set; } = null!;
     public string? province { get; set; } = null!;
-    public DateTime? BirthDate { get; set; } 
-    
+    public DateTime? BirthDate { get; set; }
+    public EmergencyCall? EmergencyCall { get; set; }
+    public Biography? Biography { get; set; }
+    public SocialMedia? SocialMedia { get; set; }
 }

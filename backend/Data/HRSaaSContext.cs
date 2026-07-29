@@ -11,6 +11,11 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<RolePermission> RolePermission { get; set; } = null!;
     public DbSet<Departments> Departments { get; set; } = null!;
     public DbSet<Position> Positions { get; set; } = null!;
+    public DbSet<SocialMedia> SocialMedia { get; set; } = null!;
+    public DbSet<EmergencyCall> EmergencyCall { get; set; } = null!;
+    public DbSet<Biography> Biography { get; set; } = null!;
+
+
     public DbSet<Shift> Shifts { get; set; } = null!;
     public DbSet<ShiftTime> ShiftsTime { get; set; } = null!;
 
@@ -46,5 +51,24 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
             .WithMany(d => d.Positions)
             .HasForeignKey(p => p.DepartmentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Users>()
+            .HasOne(u => u.EmergencyCall)
+            .WithOne(b => b.User)
+            .HasForeignKey<EmergencyCall>(b => b.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Users>()
+        .HasOne(u => u.SocialMedia)
+        .WithOne(b => b.User)
+        .HasForeignKey<SocialMedia>(b => b.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<Users>()
+        .HasOne(u => u.Biography)
+        .WithOne(b => b.User)
+        .HasForeignKey<Biography>(b => b.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+    
     }
 }

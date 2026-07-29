@@ -1,8 +1,18 @@
-import * as z from "zod";
+import z from "zod";
+
+const optionalUrl = z.union([
+  z.literal(""),
+  z.string().url("لینک معتبر وارد کنید"),
+]);
+
+const optionalEmail = z.union([
+  z.literal(""),
+  z.string().email("ایمیل وارد شده معتبر نیست"),
+]);
 
 export const validation = z.object({
-  instagram: z.string().url("لینک معتبر اینستاگرام وارد کنید"),
-  twitter: z.string().url("لینک معتبر توییتر وارد کنید"),
-  linkedin: z.string().url("لینک معتبر لینکدین وارد کنید"),
-  email: z.string().email("ایمیل وارد شده معتبر نیست"),
+  instagram: optionalUrl,
+  twitter: optionalUrl,
+  linkedin: optionalUrl,
+  email: optionalEmail,
 });
