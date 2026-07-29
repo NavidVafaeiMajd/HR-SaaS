@@ -32,8 +32,9 @@ public class UpdateUserDto
 
 public class UpdateImageUserDto
 {
-     public IFormFile? Image { get; set; }   
+    public IFormFile? Image { get; set; }
 }
+
 public class CreateUserDto
 {
     public string FirstName { get; set; } = "";
@@ -74,6 +75,11 @@ public class BiographyDto
 {
     public string? Bio { set; get; } = null!;
     public string? WorkExperience { set; get; } = null!;
+}
+
+public class ResetPasswordDto
+{
+    public string NewPassword { get; set; } = "";
 }
 
 [ApiController]
@@ -269,6 +275,7 @@ public class UserController : ControllerBase
 
         return Ok(biography);
     }
+
     [HttpPost("image/{id}")]
     public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto, string id)
     {
@@ -289,11 +296,29 @@ public class UserController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-
-        return Ok();
+        return Ok(new { image = user.Image });
     }
-        [HttpDelete("image/{id}")]
-    public async Task<IActionResult> DeleteImage( string id)
+
+    [HttpPatch("{id}/reset-password")]
+    public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        var result = await _userManager.ResetPasswordAsync(user, token, dto.NewPassword);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { Message = "Password reset successfully." });
+    }
+
+    [HttpDelete("image/{id}")]
+    public async Task<IActionResult> DeleteImage(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
 
@@ -310,8 +335,7 @@ public class UserController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost("social-media/{userId}")]

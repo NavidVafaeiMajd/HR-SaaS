@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { HiUserCircle } from "react-icons/hi2";
 import Cookies from "js-cookie";
+import ChangePass from "./ChangePass/ChangePass";
 
 const EmployeDetailse = () => {
   const { id } = useParams();
@@ -126,10 +127,10 @@ const EmployeDetailse = () => {
               <IoIosArrowBack className="w-7! h-7!" />
             </span>
           </TabsTrigger>
-          <TabsTrigger value="accountInfo">
+          <TabsTrigger value="ChangePassword">
             <span className="flex gap-2 justify-center items-center">
               <IoMdInformationCircleOutline className="w-7! h-7!" />
-              اطلاعات حساب
+             عوض کردن رمز
             </span>
             <span>
               <IoIosArrowBack className="w-7! h-7!" />
@@ -145,8 +146,8 @@ const EmployeDetailse = () => {
         <TabsContent value="profImg">
           <ProfileImg queryData={queryData} />
         </TabsContent>
-        <TabsContent value="accountInfo">
-          <AccountInfo queryData={queryData} />
+        <TabsContent value="ChangePassword">
+          <ChangePass />
         </TabsContent>
       </Tabs>
     </>

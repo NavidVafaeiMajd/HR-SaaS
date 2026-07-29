@@ -6,6 +6,7 @@ import { usePostRows } from "@/hook/usePostRows";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import api from "@/api/axios";
 
 const ProfileImg = ({ queryData }: { queryData: any }) => {
   const { id } = useParams();
@@ -26,25 +27,23 @@ const ProfileImg = ({ queryData }: { queryData: any }) => {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `http://localhost:5000/api/employees/image/${queryData?.id}`,
-        {
-          method: "DELETE",
-        },
-      );
-      if (!res.ok) {
-        throw new Error("حذف تصویر ناموفق بود");
-      }
-      return res.json();
+      await api.delete(`employees/image/${queryData?.id}`);
     },
+
     onSuccess: () => {
       toast.success("تصویر با موفقیت حذف شد");
-      queryClient.invalidateQueries({ queryKey: ["employeesDetailse", id] });
-      // Clear the form image field
+
+      queryClient.invalidateQueries({
+        queryKey: ["employeesDetailse", id],
+      });
+
       form.setValue("image", undefined);
     },
+
     onError: (error: any) => {
-      toast.error(error?.message || "خطا در حذف تصویر");
+      toast.error(
+        error?.response?.data?.message ?? error?.message ?? "خطا در حذف تصویر",
+      );
     },
   });
 
