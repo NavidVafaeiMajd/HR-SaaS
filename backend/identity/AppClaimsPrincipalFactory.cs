@@ -25,19 +25,16 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<Users, Role>
 
         var roles = await UserManager.GetRolesAsync(user);
 
-        var permissions = await _db.RolePermission
-            .Where(rp => roles.Contains(rp.Role.Name))
+        var permissions = await _db
+            .RolePermission.Where(rp => roles.Contains(rp.Role.Name))
             .Select(rp => rp.Permission)
             .Distinct()
             .ToListAsync();
-    
+
         foreach (var permission in permissions)
-{
-    identity.AddClaim(
-        new Claim(
-            "permission",
-            permission.ToString()));
-}
+        {
+            identity.AddClaim(new Claim("permission", permission.ToString()));
+        }
         return identity;
     }
 }

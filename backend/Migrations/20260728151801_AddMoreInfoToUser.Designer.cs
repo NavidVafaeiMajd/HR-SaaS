@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260728151801_AddMoreInfoToUser")]
+    partial class AddMoreInfoToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,32 +24,6 @@ namespace HrSaaS.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Biography", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("WorkExperience")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Biography");
-                });
 
             modelBuilder.Entity("Departments", b =>
                 {
@@ -69,32 +46,6 @@ namespace HrSaaS.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Departments");
-                });
-
-            modelBuilder.Entity("EmergencyCall", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("EmergencyName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmergencyPhone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("EmergencyCall");
                 });
 
             modelBuilder.Entity("HrSaaS.Models.Role", b =>
@@ -349,38 +300,6 @@ namespace HrSaaS.Migrations
                     b.ToTable("ShiftsTime");
                 });
 
-            modelBuilder.Entity("SocialMedia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Instagram")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Linkedin")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Twitter")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("SocialMedia");
-                });
-
             modelBuilder.Entity("Users", b =>
                 {
                     b.Property<string>("Id")
@@ -390,13 +309,12 @@ namespace HrSaaS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address1")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Address2")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -455,10 +373,8 @@ namespace HrSaaS.Migrations
                     b.Property<int?>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PostalCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Religion")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
@@ -475,12 +391,15 @@ namespace HrSaaS.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("bloodGroup")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("citizenship")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("city")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("dashboardType")
@@ -490,12 +409,15 @@ namespace HrSaaS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("maritalStatus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("nationality")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("province")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -515,28 +437,6 @@ namespace HrSaaS.Migrations
                     b.HasIndex("ShiftId");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Biography", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("Biography")
-                        .HasForeignKey("Biography", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EmergencyCall", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("EmergencyCall")
-                        .HasForeignKey("EmergencyCall", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HrSaaS.Models.RolePermission", b =>
@@ -621,17 +521,6 @@ namespace HrSaaS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SocialMedia", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithOne("SocialMedia")
-                        .HasForeignKey("SocialMedia", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Users", b =>
                 {
                     b.HasOne("Departments", "Department")
@@ -661,15 +550,6 @@ namespace HrSaaS.Migrations
             modelBuilder.Entity("Shift", b =>
                 {
                     b.Navigation("ShiftTimes");
-                });
-
-            modelBuilder.Entity("Users", b =>
-                {
-                    b.Navigation("Biography");
-
-                    b.Navigation("EmergencyCall");
-
-                    b.Navigation("SocialMedia");
                 });
 #pragma warning restore 612, 618
         }

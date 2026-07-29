@@ -43,6 +43,7 @@ services:
       - /src/backend/bin
       - /src/backend/obj
       - nuget_cache:/root/.nuget/packages
+      - uploads:/src/backend/wwwroot/uploads
     networks:
       - hr-network
 
@@ -65,6 +66,7 @@ services:
 volumes:
   sqlserver-data:
   nuget_cache:
+  uploads:
 
 networks:
   hr-network:

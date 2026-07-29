@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const validation = z.object({
-  currentPassword: z.string().min(6, "رمز فعلی باید حداقل ۶ کاراکتر باشد"),
   newPassword: z.string().min(6, "رمز جدید باید حداقل ۶ کاراکتر باشد"),
   confirmPassword: z
     .string()

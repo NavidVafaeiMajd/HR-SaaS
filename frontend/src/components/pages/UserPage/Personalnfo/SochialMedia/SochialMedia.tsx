@@ -18,7 +18,14 @@ const SocialMedia = ({ queryData }: { queryData: any }) => {
   const {id} = useParams() as {id: string}
 
 
-  const { mutation, form } = usePostRows(`employeeSocialProfile/upsert/${id}`, ["employeesDetailse", id] , defaultValues, validation  , " شبکه های اجتماعی ",false);
+  const { mutation, form } = usePostRows(
+    `employees/social-media/${id}`,
+    ["employeesDetailse", id],
+    defaultValues,
+    validation,
+    " شبکه های اجتماعی ",
+    false,
+  );
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     mutation.mutate(data);

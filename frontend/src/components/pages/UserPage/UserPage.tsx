@@ -7,13 +7,13 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { CiImageOn } from "react-icons/ci";
 import { IoPersonAddSharp } from "react-icons/io5";
 import BasicInfo from "./BasicInfo/BasicInfo";
-import AccountInfo from "./AccountInfo/AccountInfo";
 import Personalnfo from "./Personalnfo/Personalnfo";
 import ProfileImg from "./ProfileImg/ProfileImg";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { HiUserCircle } from "react-icons/hi2";
 import Cookies from "js-cookie";
+import ChangePass from "./ChangePass/ChangePass";
 
 const EmployeDetailse = () => {
   const { id } = useParams();
@@ -60,7 +60,7 @@ const EmployeDetailse = () => {
                   {queryData?.image ? (
                     <img
                       className="w-25 h-25 object-cover rounded-full"
-                      src={`${import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:8000"}/${queryData?.image}`}
+                      src={`http://localhost:5000/uploads/${queryData?.image}`}
                       alt=""
                     />
                   ) : (
@@ -72,13 +72,13 @@ const EmployeDetailse = () => {
                     {queryData?.firstName} {queryData?.lastName}
                   </span>
                   <span className="text-gray-400">
-                    {queryData?.designation.title}{" "}
+                    {queryData?.position.name}{" "}
                   </span>
                 </div>
               </div>
               <div>
                 <span className="bg-greenLight text-greenDark py-1 px-4 rounded-sm text-sm!">
-                  {queryData?.position}
+                  {queryData?.isActive ? "فعال" : "غیر فعال"}
                 </span>
               </div>
             </div>
@@ -126,10 +126,10 @@ const EmployeDetailse = () => {
               <IoIosArrowBack className="w-7! h-7!" />
             </span>
           </TabsTrigger>
-          <TabsTrigger value="accountInfo">
+          <TabsTrigger value="ChangePassword">
             <span className="flex gap-2 justify-center items-center">
               <IoMdInformationCircleOutline className="w-7! h-7!" />
-              اطلاعات حساب
+             عوض کردن رمز
             </span>
             <span>
               <IoIosArrowBack className="w-7! h-7!" />
@@ -145,8 +145,8 @@ const EmployeDetailse = () => {
         <TabsContent value="profImg">
           <ProfileImg queryData={queryData} />
         </TabsContent>
-        <TabsContent value="accountInfo">
-          <AccountInfo queryData={queryData} />
+        <TabsContent value="ChangePassword">
+          <ChangePass />
         </TabsContent>
       </Tabs>
     </>

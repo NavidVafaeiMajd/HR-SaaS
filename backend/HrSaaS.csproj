@@ -20,6 +20,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
+  <Content Update="wwwroot/uploads/**">
+    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+  </Content>
+    </ItemGroup>
 
 </Project>

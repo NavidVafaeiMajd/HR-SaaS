@@ -8,6 +8,7 @@ import { usePostRows } from "@/hook/usePostRows";
 import { useDepartments } from "@/hook/useDepartments";
 import { useDesignationsts } from "@/hook/useDesignationsts";
 import { useShifts } from "@/hook/useShifts";
+import { useRoles } from "@/hook/useRoles";
 
 const StaffList: React.FC = () => {
   const title = "پرسنل";
@@ -18,18 +19,24 @@ const StaffList: React.FC = () => {
   const defaultValues = {
     firstName: "",
     lastName: "",
-    personeliCode: "",
+    PersonnelCode: "",
     phoneNumber: "",
     gender: "مرد",
-    shift: "",
-    department: "1",
-    designation: "1",
-    position: "فعال",
+    shiftId: "",
+    departmentId: "1",
+    positionId: "1",
+    isActive: true,
+    role: "",
     image: null,
+    password: "",
+    username : "",
+    dashboardType :"employee",
   };
 
+  const { data: roles, isPending: rolesLoading } = useRoles();
   const { data: departments, isPending: departmentsLoading } = useDepartments();
-  const { data: designationsts, isPending: designationstsLoading } = useDesignationsts();
+  const { data: designationsts, isPending: designationstsLoading } =
+    useDesignationsts();
   const { data: shifts, isPending: shiftsLoading } = useShifts();
 
   const departmentsMapped = departments?.data?.map((item) => ({
@@ -39,9 +46,12 @@ const StaffList: React.FC = () => {
 
   const designationstsMapped = designationsts?.data?.map((item) => ({
     value: String(item.id),
-    label: item.title,
+    label: item.name,
   }));
-
+  const rolesMapped = roles?.data?.map((item) => ({
+    value: String(item.name),
+    label: item.name,
+  }));
   const shiftsMapped = shifts?.data?.map((item) => ({
     value: String(item.id),
     label: item.name,
@@ -53,17 +63,20 @@ const StaffList: React.FC = () => {
     defaultValues,
     validation,
     "پرسنل",
-    true
+    true,
   );
 
   const formFields = (
     <div className="relative">
-      {mutation.isPending &&  departmentsLoading && designationstsLoading && shiftsLoading &&(
-        <div className="flex justify-center items-center absolute p-4 top-0 left-0 right-0 bottom-0 bg-bgBack/90 z-50">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="mr-2">در حال ارسال اطلاعات...</span>
-        </div>
-      )}
+      {mutation.isPending &&
+        departmentsLoading &&
+        designationstsLoading &&
+        shiftsLoading && (
+          <div className="flex justify-center items-center absolute p-4 top-0 left-0 right-0 bottom-0 bg-bgBack/90 z-50">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <span className="mr-2">در حال ارسال اطلاعات...</span>
+          </div>
+        )}
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Input name="firstName" label="نام" required placeholder="نام" />
         <Form.Input
@@ -75,7 +88,30 @@ const StaffList: React.FC = () => {
       </div>
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Input
-          name="personeliCode"
+          name="username"
+          label="نام کاربری"
+          required
+          placeholder="نام کاربری"
+        />
+        <Form.Password
+          name="password"
+          label="رمز عبور"
+          required
+          placeholder="رمز عبور"
+        />
+        <Form.Select
+          name="dashboardType"
+          label="نوع داشبورد"
+          options={[
+            { label: "کارمندی", value: "employee" },
+            { label: "مدیریتی", value: "management" },
+          ]}
+          required
+        />
+      </div>
+      <div className="flex flex-col md:flex-row gap-5">
+        <Form.Input
+          name="PersonnelCode"
           label="کد پرسنلی"
           placeholder="کد پرسنلی"
           required
@@ -90,27 +126,27 @@ const StaffList: React.FC = () => {
           name="gender"
           label="جنسیت"
           options={[
-            { label: "مرد", value: "مرد" },
-            { label: "زن", value: "زن" },
+            { label: "مرد", value: "man" },
+            { label: "زن", value: "woman" },
           ]}
           required
         />
       </div>
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Select
-          name="shift"
+          name="shiftId"
           label="شیفت اداره ای"
           placeholder="شیفت اداره ای"
           options={shiftsMapped || []}
           required
         />
         <Form.Select
-          name="position"
+          name="isActive"
           label="وضعیت"
           placeholder="وضعیت"
           options={[
-            { label: "ممنوع", value: "ممنوع" },
-            { label: "فعال", value: "فعال" },
+            { label: "ممنوع", value: false },
+            { label: "فعال", value: true },
           ]}
           required
         />
@@ -118,17 +154,24 @@ const StaffList: React.FC = () => {
 
       <div className="flex flex-col md:flex-row gap-5">
         <Form.Select
-          name="department"
+          name="departmentId"
           label="واحد سازمانی"
           placeholder="واحد سازمانی"
           options={departmentsMapped || []}
           required
         />
         <Form.Select
-          name="designation"
+          name="positionId"
           label="سمت سازمانی"
           placeholder="سمت سازمانی"
           options={designationstsMapped || []}
+          required
+        />
+        <Form.Select
+          name="role"
+          label="نقش کاربری"
+          placeholder="نقش کاربری"
+          options={rolesMapped || []}
           required
         />
       </div>

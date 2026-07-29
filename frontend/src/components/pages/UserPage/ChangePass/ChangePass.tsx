@@ -5,19 +5,28 @@ import { useForm } from "react-hook-form";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { z } from "zod";
 import { validation } from "./validation";
+import { useChangePassword } from "@/hook/useChangePassword";
+import { useParams } from "react-router-dom";
 
 const ChangePass = () => {
+  const { id } = useParams();
+
+  const mutation = useChangePassword(id!);
+
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
     defaultValues: {
-      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
   });
 
   const onSubmit = (data: z.infer<typeof validation>) => {
-    console.log(data);
+    mutation.mutate(data, {
+      onSuccess: () => {
+        form.reset();
+      },
+    });
   };
 
   return (
@@ -26,26 +35,23 @@ const ChangePass = () => {
         <IoDocumentTextOutline className="w-7 h-7" />
         <span>تغییر رمز عبور</span>
       </div>
+
       <div className="p-3">
         <Form
           formProp={form}
           onSubmit={onSubmit}
           className="flex flex-col gap-5"
         >
-          <Form.Input
-            label="رمز فعلی"
-            name="currentPassword"
-            placeholder="رمز فعلی خود را وارد کنید"
-            required
-          />
+
           <div className="flex gap-5">
-            <Form.Input
+            <Form.Password
               label="رمز جدید"
               name="newPassword"
               placeholder="رمز جدید را وارد کنید"
               required
             />
-            <Form.Input
+
+            <Form.Password
               label="تکرار رمز جدید"
               name="confirmPassword"
               placeholder="رمز جدید را دوباره وارد کنید"
@@ -53,11 +59,9 @@ const ChangePass = () => {
             />
           </div>
 
-          <div>
-            <Button type="submit" className="mt-4">
-              تغییر رمز عبور
-            </Button>
-          </div>
+          <Button type="submit" className="mt-4" disabled={mutation.isPending}>
+            {mutation.isPending ? "در حال تغییر..." : "تغییر رمز عبور"}
+          </Button>
         </Form>
       </div>
     </div>

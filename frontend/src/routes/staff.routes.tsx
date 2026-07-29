@@ -6,9 +6,7 @@ import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
 const StaffList = lazy(
   () => import("../components/pages/Staff/StaffList/StaffList"),
 );
-const SetRoles = lazy(
-  () => import("../components/pages/Staff/SetRoles/SetRoles"),
-);
+
 const OfficeShifts = lazy(
   () => import("../components/pages/Staff/OfficeShifts/OfficeShifts"),
 );
@@ -32,7 +30,6 @@ export const staffRoutes = (
       }
     >
       <Route index element={<StaffList />} />
-      <Route path="set-roles" element={<SetRoles />} />
       <Route path="office-shifts" element={<OfficeShifts />} />
       <Route path="employ-exit" element={<EmployExit />} />
     </Route>

@@ -14,7 +14,14 @@ const EmergencyCall = ({ queryData }: { queryData: any }) => {
   };
   const {id} = useParams() as {id: string}
 
-  const { mutation, form } = usePostRows(`employeeEmergencyContact/upsert/${id}`, ["employeesDetailse", id] , defaultValues, validation  , "تماس اضطراری  ",false);
+  const { mutation, form } = usePostRows(
+    `employees/emergencyCall/${id}`,
+    ["employeesDetailse", id],
+    defaultValues,
+    validation,
+    "تماس اضطراری  ",
+    false,
+  );
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     mutation.mutate(data);
