@@ -60,6 +60,18 @@ public class SocialMediaDto
     public string? Email { set; get; } = null!;
 }
 
+public class EmergencyCallDTO
+{
+    public string? EmergencyName { set; get; } = null!;
+    public string? EmergencyPhone { set; get; } = null!;
+}
+
+public class BiographyDto
+{
+    public string? Bio { set; get; } = null!;
+    public string? WorkExperience { set; get; } = null!;
+}
+
 [ApiController]
 [Route("api/employees")]
 public class UserController : ControllerBase
@@ -165,7 +177,9 @@ public class UserController : ControllerBase
         var user = await _userManager
             .Users.Include(x => x.Department)
             .Include(x => x.Position)
-            .Include(x=>x.SocialMedia)
+            .Include(x => x.SocialMedia)
+            .Include(x => x.EmergencyCall)
+            .Include(x => x.Biography)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (user == null)
@@ -224,10 +238,34 @@ public class UserController : ControllerBase
         );
     }
 
+    [HttpPost("biography/{userId}")]
+    public async Task<IActionResult> UpsertBiography(string userId, BiographyDto dto)
+    {
+        var biography = await _db.Biography.FirstOrDefaultAsync();
+
+        if (biography == null)
+        {
+            biography = new Biography
+            {
+                Bio = dto.Bio,
+                WorkExperience = dto.WorkExperience,
+                UserId = userId,
+            };
+            _db.Biography.Add(biography);
+        }
+
+        biography.Bio = dto.Bio;
+        biography.WorkExperience = dto.WorkExperience;
+        biography.UserId = userId;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(biography);
+    }
+
     [HttpPost("social-media/{userId}")]
     public async Task<IActionResult> UpsertSocialMedia(string userId, SocialMediaDto dto)
     {
-
         var socialMedia = await _db.SocialMedia.FirstOrDefaultAsync();
 
         if (socialMedia == null)
@@ -252,5 +290,31 @@ public class UserController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(socialMedia);
+    }
+
+    [HttpPost("emergencyCall/{userId}")]
+    public async Task<IActionResult> UpsertEmergencyCall(string userId, EmergencyCallDTO dto)
+    {
+        var emergencyCall = await _db.EmergencyCall.FirstOrDefaultAsync();
+
+        if (emergencyCall == null)
+        {
+            emergencyCall = new EmergencyCall
+            {
+                EmergencyName = dto.EmergencyName,
+                EmergencyPhone = dto.EmergencyPhone,
+
+                UserId = userId,
+            };
+            _db.EmergencyCall.Add(emergencyCall);
+        }
+
+        emergencyCall.EmergencyName = dto.EmergencyName;
+        emergencyCall.EmergencyPhone = dto.EmergencyPhone;
+        emergencyCall.UserId = userId;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(emergencyCall);
     }
 }
