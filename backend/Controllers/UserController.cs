@@ -9,6 +9,7 @@ public class UpdateUserDto
     public string LastName { get; set; } = "";
     public string UserName { get; set; } = "";
     public string Email { get; set; } = "";
+    public string PostalCode { get; set; } = "";
     public int DepartmentId { get; set; }
     public int PositionId { get; set; }
     public int ShiftId { get; set; }
@@ -165,6 +166,8 @@ public class UserController : ControllerBase
         user.maritalStatus = dto.maritalStatus;
         user.city = dto.city;
         user.province = dto.province;
+        user.Email = dto.Email;
+        user.PostalCode = dto.PostalCode;
 
         var result = await _userManager.UpdateAsync(user);
 

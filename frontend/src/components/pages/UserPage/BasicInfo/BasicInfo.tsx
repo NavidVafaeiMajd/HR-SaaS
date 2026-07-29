@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 type BasicInfoQueryData = {
   id?: string | number;
   firstName?: string;
+  email?: string;
   lastName?: string;
   phoneNumber?: string;
   gender?: string;
@@ -65,7 +66,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
       PhoneNumber: queryData?.phoneNumber == null ? "" : queryData?.phoneNumber,
       Gender: queryData?.gender == null ? "" : queryData?.gender,
       PersonnelCode:
-        queryData?.personnelCode == null ? "" : queryData?.personnelCode,
+        queryData?.personnelCode == null ? "" : String(queryData?.personnelCode),
       birthDate: queryData?.birthDate
         ? new Date(queryData.birthDate)
         : new Date(),
@@ -88,6 +89,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
       address2: queryData?.address2 == null ? "" : queryData?.address2,
       maritalStatus:
         queryData?.maritalStatus == null ? "" : queryData?.maritalStatus,
+      email: queryData?.email == null ? "" : queryData?.email,
     },
   });
 
@@ -97,6 +99,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
     mutationFn: async (data: z.infer<typeof validation>) => {
       const apiData = {
         FirstName: data.FirstName,
+        Email: data.email,
         LastName: data.LastName,
         PhoneNumber: data.PhoneNumber,
         Gender: data.Gender,
@@ -243,6 +246,12 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
                 label="ساعت کاری"
                 placeholder="ساعت کاری"
                 options={shiftsMapped || []}
+                required
+              />
+              <Form.Input
+                label="ایمیل"
+                name="email"
+                placeholder="ایمیل"
                 required
               />
             </div>

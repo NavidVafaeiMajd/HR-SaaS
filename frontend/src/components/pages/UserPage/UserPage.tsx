@@ -7,7 +7,6 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 import { CiImageOn } from "react-icons/ci";
 import { IoPersonAddSharp } from "react-icons/io5";
 import BasicInfo from "./BasicInfo/BasicInfo";
-import AccountInfo from "./AccountInfo/AccountInfo";
 import Personalnfo from "./Personalnfo/Personalnfo";
 import ProfileImg from "./ProfileImg/ProfileImg";
 import { useParams } from "react-router-dom";

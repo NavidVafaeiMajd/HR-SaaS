@@ -37,6 +37,7 @@ public class Users : IdentityUser
     public string? citizenship { get; set; } = null!;
     public string? maritalStatus { get; set; } = null!;
     public string? city { get; set; } = null!;
+    public string? PostalCode { get; set; } = null!;
     public string? province { get; set; } = null!;
     public DateTime? BirthDate { get; set; }
     public EmergencyCall? EmergencyCall { get; set; }

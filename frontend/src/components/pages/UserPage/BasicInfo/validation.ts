@@ -55,6 +55,7 @@ export const validation = z.object({
     .optional(),
 
   DepartmentId: z.string().optional(),
+  email: z.email().optional(),
   PositionId: z.string().optional(),
   ShiftId: z.string().optional(),
   IsActive: z.boolean().optional(),
