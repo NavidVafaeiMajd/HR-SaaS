@@ -28,7 +28,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
-        [Permission(Permission.Role_view)]
+    [Permission(Permission.Role_view)]
     [HttpPost]
     public async Task<IResult> Create(RoleCreateDTO dto)
     {
@@ -56,8 +56,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
-        [Permission(Permission.Role_delete)]
-
+    [Permission(Permission.Role_delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -86,7 +85,7 @@ public class RoleController : ControllerBase
     }
 
     [Authorize]
-        [Permission(Permission.Role_edit)]
+    [Permission(Permission.Role_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(RoleCreateDTO dto, string id)
     {
@@ -142,7 +141,8 @@ public class RoleController : ControllerBase
                     .RolePermission.Where(rp => rp.RoleId == x.Id)
                     .Select(rp => rp.Permission)
                     .ToList(),
-            }).Where(r => r.Name != "Admin")
+            })
+            .Where(r => r.Name != "Admin")
             .ToListAsync();
 
         return Ok(roles);

@@ -89,13 +89,14 @@ public class UserController : ControllerBase
 {
     private readonly UserManager<Users> _userManager;
     private readonly HRSaaSDbContext _db;
-
+    private readonly RoleManager<Role> _roleManager;
     private readonly IImageService _imageService;
 
-    public UserController(UserManager<Users> userManager, IImageService imageService)
+    public UserController(UserManager<Users> userManager, IImageService imageService,RoleManager<Role> roleManager)
     {
         _userManager = userManager;
         _imageService = imageService;
+        _roleManager = roleManager;
     }
 
     [HttpGet]

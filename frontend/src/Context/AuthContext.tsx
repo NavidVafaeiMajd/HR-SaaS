@@ -55,7 +55,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData);
     setIsLoggedIn(true);
 
-    Cookies.set("user", JSON.stringify(userData));
   };
 
   const logout = () => {

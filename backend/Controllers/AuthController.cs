@@ -2,6 +2,7 @@ using HrSaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HrSaaS.Controllers;
 
@@ -20,13 +21,16 @@ public class ChangePasswordRequest
 
 public class MeResponse
 {
-    public string Id { get; set; } = default!;
-
-    public string Email { get; set; } = default!;
-
-    public string UserName { get; set; } = default!;
+    public string Id { get; set; } = "";
+    public string UserName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? Image { get; set; }
 
     public IList<string> Roles { get; set; } = [];
+
+    public List<Permission> Permissions { get; set; } = [];
 }
 
 [ApiController]
@@ -35,11 +39,17 @@ public class AuthController : ControllerBase
 {
     private readonly SignInManager<Users> _signInManager;
     private readonly UserManager<Users> _userManager;
+    private readonly HRSaaSDbContext _db;
 
-    public AuthController(SignInManager<Users> signInManager, UserManager<Users> userManager)
+    public AuthController(
+        SignInManager<Users> signInManager,
+        UserManager<Users> userManager,
+        HRSaaSDbContext db
+    )
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _db = db;
     }
 
     [HttpPost("login")]
@@ -83,13 +93,28 @@ public class AuthController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
 
+        var roleIds = await _db
+            .Roles.Where(r => roles.Contains(r.Name!))
+            .Select(r => r.Id)
+            .ToListAsync();
+
+        var permissions = await _db
+            .RolePermission.Where(rp => roleIds.Contains(rp.RoleId))
+            .Select(rp => rp.Permission)
+            .Distinct()
+            .ToListAsync();
+
         return Ok(
             new MeResponse
             {
                 Id = user.Id,
-                Email = user.Email!,
                 UserName = user.UserName!,
+                Email = user.Email!,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Image = user.Image,
                 Roles = roles,
+                Permissions = permissions,
             }
         );
     }

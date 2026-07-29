@@ -17,12 +17,19 @@ export const getPermissionLabel = (permission: string) => {
      itemPermission: ["Users_view", "Users_post", "Users_edit", "Users_delete"],
    },
    {
-     name: "منابع انسانی",
-     itemPermission: ["Hr_view", "Hr_post", "Hr_edit", "Hr_delete"],
+     name: "دپارتمان",
+     itemPermission: ["Department_view", "Department_post", "Department_edit", "Department_delete"],
+   },
+   {
+     name: "سمت شغلی",
+     itemPermission: ["Position_view", "Position_post", "Position_edit", "Position_delete"],
+   },
+   {
+     name: "شیفت کاری",
+     itemPermission: ["Shift_view", "Shift_post", "Shift_edit", "Shift_delete"],
    },
    {
      name: "مدیریت نقش های کاربری",
      itemPermission: ["Role_view", "Role_post", "Role_edit", "Role_delete"],
    },
  ];
-    
