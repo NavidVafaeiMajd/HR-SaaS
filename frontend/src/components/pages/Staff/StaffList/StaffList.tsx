@@ -104,7 +104,7 @@ const StaffList: React.FC = () => {
           label="نوع داشبورد"
           options={[
             { label: "کارمندی", value: "employee" },
-            { label: "مدیریتی", value: "management" },
+            { label: "مدیریتی", value: "manager" },
           ]}
           required
         />

@@ -19,6 +19,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { NavLink } from "react-router-dom";
+import { useAuthContext } from "@/Context/AuthContext";
 
 export function NavMain({
   items,
@@ -28,52 +29,64 @@ export function NavMain({
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
+    authorize: Array<string>
     items?: {
       title: string;
       url: string;
     }[];
   }[];
 }) {
+  const { user } = useAuthContext();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <NavLink to={item.url}>
-                  <item.icon />
+        {items
+          .filter((item) => {
+            if (!item.authorize || user?.roles =="Admin") return true;
 
-                  <span>{item.title}</span>
-                </NavLink>
-              </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink to={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
-            </SidebarMenuItem>
-          </Collapsible>
-        ))}
+            return item.authorize.includes(user?.dashboardType);
+          })
+          .map((item) => {
+   
+            return (
+              <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip={item.title}>
+                    <NavLink to={item.url}>
+                      <item.icon />
+
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  {item.items?.length ? (
+                    <>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuAction className="data-[state=open]:rotate-90">
+                          <ChevronRight />
+                          <span className="sr-only">Toggle</span>
+                        </SidebarMenuAction>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton asChild>
+                                <NavLink to={subItem.url}>
+                                  <span>{subItem.title}</span>
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </>
+                  ) : null}
+                </SidebarMenuItem>
+              </Collapsible>
+            );
+          })}
       </SidebarMenu>
     </SidebarGroup>
   );

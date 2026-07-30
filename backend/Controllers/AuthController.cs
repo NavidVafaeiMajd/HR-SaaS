@@ -27,6 +27,7 @@ public class MeResponse
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Image { get; set; }
+    public DashboardType? DashboardType { get; set; }
 
     public IList<string> Roles { get; set; } = [];
 
@@ -114,6 +115,7 @@ public class AuthController : ControllerBase
                 LastName = user.LastName,
                 Image = user.Image,
                 Roles = roles,
+                DashboardType = user.dashboardType,
                 Permissions = permissions,
             }
         );

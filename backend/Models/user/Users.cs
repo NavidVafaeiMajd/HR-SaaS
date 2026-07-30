@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 public enum DashboardType
 {
-    management,
+    manager,
     employee,
 }
 

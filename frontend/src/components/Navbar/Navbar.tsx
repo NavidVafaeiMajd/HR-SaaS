@@ -34,6 +34,7 @@ import { RiCameraLensLine, RiCustomerService2Fill } from "react-icons/ri";
 import { CiSquarePlus } from "react-icons/ci";
 import { MdOutlineRadar } from "react-icons/md";
 import { BsExclamationCircle } from "react-icons/bs";
+import { useAuthContext } from "@/Context/AuthContext";
 
 const data = {
   user: {
@@ -54,6 +55,7 @@ const data = {
       title: "پرسنل",
       url: "/staff",
       icon: FiUsers,
+      authorize: ["manager", "both"],
       items: [
         {
           title: "لیست پرسنل",
@@ -73,12 +75,14 @@ const data = {
       title: "مدیریت نقش های کاربری",
       url: "/roles",
       icon: TfiTarget,
+      authorize: ["manager", "both"],
       items: [],
     },
 
     {
       title: "مدیریت منابع انسانی",
       url: "/hr",
+      authorize: ["manager", "both"],
       icon: TfiTarget,
       items: [
         {
@@ -115,33 +119,6 @@ const data = {
         },
       ],
     },
-
-    {
-      title: "مدیریت مشتریان",
-      url: "/clients-list",
-      icon: FiUserCheck,
-    },
-
-    {
-      title: "CRM",
-      url: "/crm",
-      icon: RiCustomerService2Fill,
-      items: [
-        {
-          title: "نیرو ها",
-          url: "/crm/marketing-staff",
-        },
-        {
-          title: "لیست شرکت ها",
-          url: "/crm/companies",
-        },
-        {
-          title: "آمار",
-          url: "/crm/statistics",
-        },
-      ],
-    },
-
     {
       title: "ارزیابی عملکرد کارکنان",
       url: "/performance",
@@ -196,7 +173,6 @@ const data = {
     { title: "Feedback", url: "#", icon: Send },
   ],
 };
-
 export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar

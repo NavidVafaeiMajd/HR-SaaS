@@ -38,6 +38,7 @@ type BasicInfoQueryData = {
   address1?: string;
   address2?: string;
   maritalStatus?: string;
+  dashboardType?: string;
 };
 
 const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
@@ -45,7 +46,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
   const { data: position, isPending: positionLoading } = useDesignationsts();
   const { data: shifts, isPending: shiftsLoading } = useShifts();
 
-  const { queryKey , url} =useProfileApi(queryData?.id);
+  const { queryKey, url } = useProfileApi(queryData?.id);
   const departmentsMapped = departments?.data?.map((item) => ({
     value: String(item.id),
     label: item.name,
@@ -69,7 +70,9 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
       PhoneNumber: queryData?.phoneNumber == null ? "" : queryData?.phoneNumber,
       Gender: queryData?.gender == null ? "" : queryData?.gender,
       PersonnelCode:
-        queryData?.personnelCode == null ? "" : String(queryData?.personnelCode),
+        queryData?.personnelCode == null
+          ? ""
+          : String(queryData?.personnelCode),
       birthDate: queryData?.birthDate
         ? new Date(queryData.birthDate)
         : new Date(),
@@ -93,57 +96,59 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
       maritalStatus:
         queryData?.maritalStatus == null ? "" : queryData?.maritalStatus,
       email: queryData?.email == null ? "" : queryData?.email,
+      dashboardType: queryData?.dashboardType == null ? "" : queryData?.dashboardType,
     },
   });
 
   const queryClient = useQueryClient();
 
-const mutation = useMutation({
-  mutationFn: async (data: z.infer<typeof validation>) => {
-    const apiData = {
-      FirstName: data.FirstName,
-      Email: data.email,
-      LastName: data.LastName,
-      PhoneNumber: data.PhoneNumber,
-      Gender: data.Gender,
-      PersonnelCode: data.PersonnelCode,
-      BirthDate: data.birthDate?.toISOString().slice(0, 19) ?? null,
-      IsActive: data.IsActive,
-      MaritalStatus: data.maritalStatus ?? "",
-      Province: data.province ?? "",
-      City: data.city ?? "",
-      PostalCode: data.postalCode ?? "",
-      Religion: data.religion ?? "",
-      BloodGroup: data.bloodGroup ?? "",
-      Nationality: data.nationality ?? "",
-      Citizenship: data.citizenship ?? "",
-      Address1: data.address1 ?? "",
-      Address2: data.address2 ?? "",
-      DepartmentId: data.DepartmentId ? parseInt(data.DepartmentId) : null,
-      PositionId: data.PositionId ? parseInt(data.PositionId) : null,
-      ShiftId: data.ShiftId ? parseInt(data.ShiftId) : null,
-    };
+  const mutation = useMutation({
+    mutationFn: async (data: z.infer<typeof validation>) => {
+      const apiData = {
+        FirstName: data.FirstName,
+        Email: data.email,
+        LastName: data.LastName,
+        PhoneNumber: data.PhoneNumber,
+        Gender: data.Gender,
+        PersonnelCode: data.PersonnelCode,
+        BirthDate: data.birthDate?.toISOString().slice(0, 19) ?? null,
+        IsActive: data.IsActive,
+        MaritalStatus: data.maritalStatus ?? "",
+        Province: data.province ?? "",
+        City: data.city ?? "",
+        PostalCode: data.postalCode ?? "",
+        Religion: data.religion ?? "",
+        BloodGroup: data.bloodGroup ?? "",
+        Nationality: data.nationality ?? "",
+        Citizenship: data.citizenship ?? "",
+        Address1: data.address1 ?? "",
+        Address2: data.address2 ?? "",
+        DepartmentId: data.DepartmentId ? parseInt(data.DepartmentId) : null,
+        PositionId: data.PositionId ? parseInt(data.PositionId) : null,
+        ShiftId: data.ShiftId ? parseInt(data.ShiftId) : null,
+        dashboardType: data.dashboardType ? data.dashboardType : "",
+      };
 
-    const res = await api.put(url, apiData);
+      const res = await api.put(url, apiData);
 
-    return res.data;
-  },
+      return res.data;
+    },
 
-  onSuccess: () => {
-    toast.success("اطلاعات با موفقیت به‌روزرسانی شد");
+    onSuccess: () => {
+      toast.success("اطلاعات با موفقیت به‌روزرسانی شد");
 
-    queryClient.invalidateQueries({
-      queryKey: [{queryKey}],
-    });
-  },
+      queryClient.invalidateQueries({
+        queryKey: [{ queryKey }],
+      });
+    },
 
-  onError: (error: any) => {
-    const message =
-      error.response?.data?.title || error.response?.data || error.message;
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.title || error.response?.data || error.message;
 
-    toast.error(message || "به‌روزرسانی ناموفق بود");
-  },
-});
+      toast.error(message || "به‌روزرسانی ناموفق بود");
+    },
+  });
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     mutation.mutate(data);
@@ -261,6 +266,16 @@ const mutation = useMutation({
                 label="سمت سازمانی"
                 placeholder="سمت سازمانی"
                 options={positionMapped || []}
+                required
+              />
+              <Form.Select
+                name="dashboardType"
+                label="نوع داشبورد"
+                placeholder="سمت سازمانی"
+                options={[
+                  { label: "کارمندی", value: "employee" },
+                  { label: "مدیر", value: "manager" },
+                ]}
                 required
               />
             </div>

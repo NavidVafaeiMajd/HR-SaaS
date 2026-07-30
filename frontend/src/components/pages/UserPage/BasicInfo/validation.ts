@@ -58,5 +58,6 @@ export const validation = z.object({
   email: z.email().optional(),
   PositionId: z.string().optional(),
   ShiftId: z.string().optional(),
+  dashboardType: z.string().optional(),
   IsActive: z.boolean().optional(),
 });

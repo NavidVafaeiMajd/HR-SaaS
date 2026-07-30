@@ -3,6 +3,7 @@ import { EditDialog } from "@/components/shared/EditDialog";
 import { Form } from "@/components/shared/Form";
 import { Button } from "@/components/ui/button";
 import { useDeleteRows } from "@/hook/useDeleteRows";
+import { usePermission } from "@/hook/usePermission";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 import type { ColumnDef } from "@tanstack/react-table";
 import { LuArrowUpDown } from "react-icons/lu";
@@ -63,24 +64,28 @@ export const columns: ColumnDef<organizationUnitColumnProps>[] = [
         validation,
         "واحد سازمانی"
       );
+      const {can}=usePermission();
       return (
         <div className="flex items-center gap-2">
-          <EditDialog
-            title="ویرایش  "
-            triggerLabel="ویرایش"
-            fields={
-              <>
-                <Form.Input name="name" label="نام " required />
-              </>
-            }
-            defaultValues={ {
-              name: user.name,
-            }}
-            onSave={(data) => {
-              mutation.mutate(data);
-            }}
-            schema={validation}
-          />
+          {can("Department_Edit") && (
+            <EditDialog
+              title="ویرایش  "
+              triggerLabel="ویرایش"
+              fields={
+                <>
+                  <Form.Input name="name" label="نام " required />
+                </>
+              }
+              defaultValues={{
+                name: user.name,
+              }}
+              onSave={(data) => {
+                mutation.mutate(data);
+              }}
+              schema={validation}
+            />
+          )}
+
           <DeleteDialog
             onConfirm={() => {
               deleteRow.mutate(user.id);
