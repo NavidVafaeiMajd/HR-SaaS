@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { validation } from "./validation";
 import { useParams } from "react-router-dom";
 import { usePostRows } from "@/hook/usePostRows";
+import { useProfileApi } from "@/hook/useProfileApi";
 
 const EmergencyCall = ({ queryData }: { queryData: any }) => {
 
@@ -13,10 +14,11 @@ const EmergencyCall = ({ queryData }: { queryData: any }) => {
     emergencyPhone: queryData?.emergencyPhone == null ? "" : queryData?.emergencyPhone,
   };
   const {id} = useParams() as {id: string}
+const{queryKey,url}=useProfileApi(id)
 
   const { mutation, form } = usePostRows(
-    `employees/emergencyCall/${id}`,
-    ["employeesDetailse", id],
+    `${url}/emergencyCall`,
+    [{ queryKey }],
     defaultValues,
     validation,
     "تماس اضطراری  ",

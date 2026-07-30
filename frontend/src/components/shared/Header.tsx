@@ -3,7 +3,6 @@ import { FiUserCheck } from "react-icons/fi";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useProfile } from "@/hook/useProfile";
 import { HiUserCircle } from "react-icons/hi2";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -14,7 +13,6 @@ interface ChildProps {
 const Header: React.FC<ChildProps> = ({ headerMenu }) => {
   const [fisrtMenu, setFisrtMenu] = useState(false);
   const [secoundMenu, setSecoundMenu] = useState(false);
-  const { data: queryData, isLoading } = useProfile();
   const { state } = useSidebar();
 
   return (

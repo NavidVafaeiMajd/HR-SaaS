@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { validation } from "./validation";
 import { useParams } from "react-router-dom";
 import { usePostRows } from "@/hook/usePostRows";
+import { useProfileApi } from "@/hook/useProfileApi";
 
 const SocialMedia = ({ queryData }: { queryData: any }) => {
 
@@ -16,11 +17,11 @@ const SocialMedia = ({ queryData }: { queryData: any }) => {
   }
 
   const {id} = useParams() as {id: string}
-
+const{queryKey,url}=useProfileApi(id)
 
   const { mutation, form } = usePostRows(
-    `employees/social-media/${id}`,
-    ["employeesDetailse", id],
+    `${url}/social-media`,
+    [{ queryKey }],
     defaultValues,
     validation,
     " شبکه های اجتماعی ",

@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuthContext } from "@/Context/AuthContext";
 import { Button } from "../ui/button";
+import { NavLink } from "react-router-dom";
 
 export function NavUser({
   user,
@@ -39,7 +40,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const { user:userData} =useAuthContext()
+  const { user: userData } = useAuthContext();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -98,10 +99,12 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
+              <NavLink to={`account`}>
+                <DropdownMenuItem>
+                  <BadgeCheck />
+                  Account
+                </DropdownMenuItem>
+              </NavLink>
               <DropdownMenuItem>
                 <CreditCard />
                 Billing

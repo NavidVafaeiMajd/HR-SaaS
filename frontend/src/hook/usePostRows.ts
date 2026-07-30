@@ -4,58 +4,63 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import Cookies from "js-cookie";
+import api from "@/api/axios";
 
 export const usePostRows = (
-  url: string, 
-  queryKey: string[], 
-  defaultValues: any, 
-  validation: any, 
-  message: string, 
+  url: string,
+  queryKey: string[],
+  defaultValues: any,
+  validation: any,
+  message: string,
   reset?: boolean
 ) => {
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation as any),
     defaultValues,
   });
-  
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof validation> | FormData) => {
       const isFormData = data instanceof FormData;
-      const token = Cookies.get("token");
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/${url}`, {
-        method: "POST",
-        headers: {
-          ...(isFormData ? {} : { "Content-Type": "application/json" }),
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: isFormData ? data : JSON.stringify(data),
-      });
-      if (!res.ok) {
-        throw new Error(`ثبت ${message} ناموفق بود`);
-      }
-      return res.json();
+
+      const res = await api.post(
+        `/${url}`,
+        isFormData ? data : data
+      );
+
+      return res.data;
     },
+
     onSuccess: () => {
       toast.success(`${message} با موفقیت ثبت شد`);
+
       queryClient.invalidateQueries({ queryKey });
+
       if (reset) {
         form.reset(defaultValues);
       }
-      
-      // بستن خودکار accordion بعد از موفقیت
+
       setTimeout(() => {
-        const accordionElement = document.querySelector('[data-accordion="form"]') as HTMLElement;
+        const accordionElement = document.querySelector(
+          '[data-accordion="form"]'
+        ) as HTMLElement | null;
+
         if (accordionElement) {
-          accordionElement.style.display = 'none';
+          accordionElement.style.display = "none";
         }
       }, 100);
     },
-    
-    onError: (error) => {
-      toast.error(error.message || `ثبت ${message} ناموفق بود`);
+
+    onError: (error: any) => {
+      const messageError =
+        error.response?.data?.message ||
+        error.response?.data?.title ||
+        error.response?.data ||
+        error.message;
+
+      toast.error(messageError ?? `ثبت ${message} ناموفق بود`);
     },
   });
   return { mutation, form };

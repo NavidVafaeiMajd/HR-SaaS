@@ -58,8 +58,8 @@ const StaffList: React.FC = () => {
   }));
 
   const { mutation, form } = usePostRows(
-    "employees",
-    ["employees"],
+    "users",
+    ["users"],
     defaultValues,
     validation,
     "پرسنل",

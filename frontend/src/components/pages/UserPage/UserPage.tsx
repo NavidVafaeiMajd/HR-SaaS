@@ -14,21 +14,16 @@ import { useQuery } from "@tanstack/react-query";
 import { HiUserCircle } from "react-icons/hi2";
 import ChangePass from "./ChangePass/ChangePass";
 import api from "@/api/axios";
+import { useProfileApi } from "@/hook/useProfileApi";
 
-const EmployeDetailse = () => {
+const UsersDetaile = () => {
   const { id } = useParams();
 
-const location = useLocation();
+const{queryKey,url}=useProfileApi(id)
+const useGetUser = async () => {
 
-const useGetEmployee = async () => {
-  const baseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
-
-  const url = location.pathname.includes("/account")
-    ? `${baseUrl}/account`
-    : `${baseUrl}/employees/${id}`;
-
-  const res = await api.get(url);
+  const res =
+    await api.get(`/${url}`);
   return res.data;
 };
 
@@ -38,8 +33,8 @@ const useGetEmployee = async () => {
     isError,
     error,
   } = useQuery<any>({
-    queryKey: ["employeesDetailse", id],
-    queryFn: useGetEmployee,
+    queryKey: [{ queryKey }],
+    queryFn: useGetUser,
   });
 
   if (isLoading) return <div className="p-4">در حال بارگذاری...</div>;
@@ -152,4 +147,4 @@ const useGetEmployee = async () => {
   );
 };
 
-export default EmployeDetailse;
+export default UsersDetaile;

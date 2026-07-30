@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import api from "@/api/axios";
+import { useProfileApi } from "@/hook/useProfileApi";
 
 const ProfileImg = ({ queryData }: { queryData: any }) => {
   const { id } = useParams();
@@ -14,10 +15,11 @@ const ProfileImg = ({ queryData }: { queryData: any }) => {
   const defaultValues = {
     image: queryData?.image == null ? undefined : queryData?.image,
   };
+  const { url ,queryKey} = useProfileApi(id);
 
   const { form, mutation } = usePostRows(
-    `employees/image/${queryData?.id}`,
-    ["employeesDetailse", id as string],
+    `${url}/image`,
+    [{ queryKey }],
     defaultValues,
     validation,
     "تصویر پروفایل",
@@ -27,14 +29,14 @@ const ProfileImg = ({ queryData }: { queryData: any }) => {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await api.delete(`employees/image/${queryData?.id}`);
+      await api.delete(`${url}/image`);
     },
 
     onSuccess: () => {
       toast.success("تصویر با موفقیت حذف شد");
 
       queryClient.invalidateQueries({
-        queryKey: ["employeesDetailse", id],
+        queryKey: [{queryKey}],
       });
 
       form.setValue("image", undefined);

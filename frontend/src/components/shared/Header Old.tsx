@@ -3,7 +3,6 @@ import { FiUserCheck } from "react-icons/fi";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useProfile } from "@/hook/useProfile";
 import { HiUserCircle } from "react-icons/hi2";
 
 interface ChildProps {
@@ -12,7 +11,6 @@ interface ChildProps {
 const Header: React.FC<ChildProps> = ({ headerMenu }) => {
   const [fisrtMenu, setFisrtMenu] = useState(false);
   const [secoundMenu, setSecoundMenu] = useState(false);
-  const { data: queryData, isLoading } = useProfile();
 
   return (
     <>
@@ -45,7 +43,7 @@ const Header: React.FC<ChildProps> = ({ headerMenu }) => {
                       {queryData?.image ? (
                         <img
                           className="w-20 h-20 object-cover rounded-full"
-                          src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'}/${queryData?.image}`}
+                          src={`${import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:8000"}/${queryData?.image}`}
                           alt=""
                         />
                       ) : (

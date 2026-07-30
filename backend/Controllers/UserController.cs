@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 [ApiController]
-[Route("api/employees")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly UserManager<Users> _userManager;
@@ -13,11 +12,17 @@ public class UserController : ControllerBase
     private readonly RoleManager<Role> _roleManager;
     private readonly IImageService _imageService;
 
-    public UserController(UserManager<Users> userManager, IImageService imageService,RoleManager<Role> roleManager)
+    public UserController(
+        UserManager<Users> userManager,
+        IImageService imageService,
+        RoleManager<Role> roleManager,
+        HRSaaSDbContext db
+    )
     {
         _userManager = userManager;
         _imageService = imageService;
         _roleManager = roleManager;
+        _db = db;
     }
 
     [HttpGet]
@@ -112,7 +117,7 @@ public class UserController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
-      var account = await _userManager
+        var account = await _userManager
             .Users.AsNoTracking()
             .Where(x => x.Id == id)
             .Select(x => new AccountResponse
@@ -124,17 +129,24 @@ public class UserController : ControllerBase
                 Email = x.Email!,
                 PhoneNumber = x.PhoneNumber,
                 Image = x.Image,
-
-                Department =
-                    x.Department == null
-                        ? null
-                        : new DepartmentDto { Id = x.Department.Id, Name = x.Department.Name },
-
-                Position =
-                    x.Position == null
-                        ? null
-                        : new PositionDto { Id = x.Position.Id, Name = x.Position.Name },
-
+                Address1 = x.Address1,
+                Address2 = x.Address2,
+                BirthDate = x.BirthDate,
+                bloodGroup = x.bloodGroup,
+                citizenship = x.citizenship,
+                city = x.city,
+                dashboardType = x.dashboardType,
+                DepartmentId = x.DepartmentId,
+                gender = x.gender,
+                IsActive = x.IsActive,
+                maritalStatus = x.maritalStatus,
+                nationality = x.nationality,
+                PersonnelCode = x.PersonnelCode,
+                PositionId = x.PositionId,
+                PostalCode = x.PostalCode,
+                province = x.province,
+                Religion = x.Religion,
+                ShiftId = x.ShiftId,
                 Biography =
                     x.Biography == null
                         ? null
@@ -152,7 +164,7 @@ public class UserController : ControllerBase
                             Linkedin = x.SocialMedia.Linkedin,
                             Email = x.SocialMedia.Email,
                             Instagram = x.SocialMedia.Instagram,
-                            Twitter = x.SocialMedia.Email,
+                            Twitter = x.SocialMedia.Twitter,
                         },
 
                 EmergencyCall =
@@ -170,7 +182,6 @@ public class UserController : ControllerBase
             return NotFound();
 
         return Ok(account);
-
     }
 
     [HttpPost]
@@ -223,11 +234,17 @@ public class UserController : ControllerBase
         );
     }
 
-    [HttpPost("biography/{userId}")]
+    [HttpPost("{userId}/biography")]
     public async Task<IActionResult> UpsertBiography(string userId, BiographyDto dto)
     {
-        var biography = await _db.Biography.FirstOrDefaultAsync();
-
+if (dto == null)
+{
+    return BadRequest("DTO is null");
+}
+        var biography = await _db.Biography
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+    
+    Console.WriteLine(biography == null);
         if (biography == null)
         {
             biography = new Biography
@@ -248,7 +265,7 @@ public class UserController : ControllerBase
         return Ok(biography);
     }
 
-    [HttpPost("image/{id}")]
+    [HttpPost("{id}/image")]
     public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto, string id)
     {
         if (dto.Image == null)
@@ -289,7 +306,7 @@ public class UserController : ControllerBase
         return Ok(new { Message = "Password reset successfully." });
     }
 
-    [HttpDelete("image/{id}")]
+    [HttpDelete("{id}/image")]
     public async Task<IActionResult> DeleteImage(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
@@ -310,7 +327,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("social-media/{userId}")]
+    [HttpPost("{userId}/social-media")]
     public async Task<IActionResult> UpsertSocialMedia(string userId, SocialMediaDto dto)
     {
         var socialMedia = await _db.SocialMedia.FirstOrDefaultAsync();
@@ -339,7 +356,7 @@ public class UserController : ControllerBase
         return Ok(socialMedia);
     }
 
-    [HttpPost("emergencyCall/{userId}")]
+    [HttpPost("{userId}/emergencyCall")]
     public async Task<IActionResult> UpsertEmergencyCall(string userId, EmergencyCallDTO dto)
     {
         var emergencyCall = await _db.EmergencyCall.FirstOrDefaultAsync();

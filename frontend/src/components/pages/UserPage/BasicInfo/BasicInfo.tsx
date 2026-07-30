@@ -12,6 +12,8 @@ import { useDesignationsts } from "@/hook/useDesignationsts";
 import PostLoad from "@/components/ui/postLoad";
 import { useShifts } from "@/hook/useShifts";
 import Cookies from "js-cookie";
+import { useProfileApi } from "@/hook/useProfileApi";
+import api from "@/api/axios";
 
 type BasicInfoQueryData = {
   id?: string | number;
@@ -43,6 +45,7 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
   const { data: position, isPending: positionLoading } = useDesignationsts();
   const { data: shifts, isPending: shiftsLoading } = useShifts();
 
+  const { queryKey , url} =useProfileApi(queryData?.id);
   const departmentsMapped = departments?.data?.map((item) => ({
     value: String(item.id),
     label: item.name,
@@ -71,8 +74,8 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
         ? new Date(queryData.birthDate)
         : new Date(),
 
-      DepartmentId: queryData?.department
-        ? String(queryData.department.id)
+      DepartmentId: queryData?.departmentId
+        ? String(queryData.departmentId)
         : "",
 
       PositionId: queryData?.positionId ? String(queryData.positionId) : "",
@@ -95,62 +98,52 @@ const BasicInfo = ({ queryData }: { queryData?: BasicInfoQueryData }) => {
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: async (data: z.infer<typeof validation>) => {
-      const apiData = {
-        FirstName: data.FirstName,
-        Email: data.email,
-        LastName: data.LastName,
-        PhoneNumber: data.PhoneNumber,
-        Gender: data.Gender,
-        PersonnelCode: data.PersonnelCode,
-        birthDate: data.birthDate?.toISOString().slice(0, 19) || null,
-        IsActive: data.IsActive,
-        maritalStatus: data.maritalStatus ?? "",
-        province: data.province ?? "",
-        city: data.city ?? "",
-        postalCode: data.postalCode ?? "",
-        religion: data.religion ?? "",
-        bloodGroup: data.bloodGroup ?? "",
-        nationality: data.nationality ?? "",
-        citizenship: data.citizenship ?? "",
-        address1: data.address1 ?? "",
-        address2: data.address2 ?? "",
-        DepartmentId: data.DepartmentId ? parseInt(data.DepartmentId) : null,
-        PositionId: data.PositionId ? parseInt(data.PositionId) : null,
-        ShiftId: data.ShiftId ? parseInt(data.ShiftId) : null,
-      };
+const mutation = useMutation({
+  mutationFn: async (data: z.infer<typeof validation>) => {
+    const apiData = {
+      FirstName: data.FirstName,
+      Email: data.email,
+      LastName: data.LastName,
+      PhoneNumber: data.PhoneNumber,
+      Gender: data.Gender,
+      PersonnelCode: data.PersonnelCode,
+      BirthDate: data.birthDate?.toISOString().slice(0, 19) ?? null,
+      IsActive: data.IsActive,
+      MaritalStatus: data.maritalStatus ?? "",
+      Province: data.province ?? "",
+      City: data.city ?? "",
+      PostalCode: data.postalCode ?? "",
+      Religion: data.religion ?? "",
+      BloodGroup: data.bloodGroup ?? "",
+      Nationality: data.nationality ?? "",
+      Citizenship: data.citizenship ?? "",
+      Address1: data.address1 ?? "",
+      Address2: data.address2 ?? "",
+      DepartmentId: data.DepartmentId ? parseInt(data.DepartmentId) : null,
+      PositionId: data.PositionId ? parseInt(data.PositionId) : null,
+      ShiftId: data.ShiftId ? parseInt(data.ShiftId) : null,
+    };
 
-      const token = Cookies.get("token");
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/employees/${queryData?.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(apiData),
-        },
-      );
+    const res = await api.put(url, apiData);
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        toast.error(`خطا ${res.status}: ${errorText}`);
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      toast.success("اطلاعات با موفقیت به‌روزرسانی شد");
-      queryClient.invalidateQueries({
-        queryKey: ["employeesDetailse", queryData?.id],
-      });
-    },
-    onError: () => {
-      toast.error("به‌روزرسانی ناموفق بود");
-    },
-  });
+    return res.data;
+  },
+
+  onSuccess: () => {
+    toast.success("اطلاعات با موفقیت به‌روزرسانی شد");
+
+    queryClient.invalidateQueries({
+      queryKey: [{queryKey}],
+    });
+  },
+
+  onError: (error: any) => {
+    const message =
+      error.response?.data?.title || error.response?.data || error.message;
+
+    toast.error(message || "به‌روزرسانی ناموفق بود");
+  },
+});
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     mutation.mutate(data);

@@ -33,7 +33,7 @@ import { RolesRoutes } from "./routes/role.routes";
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
 
-const EmployeDetailse = lazy(
+const UsersDetaile = lazy(
   () => import("./components/pages/UserPage/UserPage"),
 );
 const NotFound = lazy(() => import("./NotFound"));
@@ -122,7 +122,7 @@ const Layout = () => {
                   path="account"
                   element={
                     <ProtectedRoute>
-                      <EmployeDetailse />
+                      <UsersDetaile />
                     </ProtectedRoute>
                   }
                 />
@@ -130,7 +130,7 @@ const Layout = () => {
                   path="users/:id"
                   element={
                     <ProtectedRoute>
-                      <EmployeDetailse />
+                      <UsersDetaile />
                     </ProtectedRoute>
                   }
                 />

@@ -16,12 +16,14 @@ public class AccountController : ControllerBase
     public AccountController(
         UserManager<Users> userManager,
         IImageService imageService,
-        RoleManager<Role> roleManager
+        RoleManager<Role> roleManager,
+        HRSaaSDbContext db
     )
     {
         _userManager = userManager;
         _imageService = imageService;
         _roleManager = roleManager;
+        _db = db;
     }
 
     [HttpDelete("{id}")]
@@ -110,17 +112,24 @@ public class AccountController : ControllerBase
                 Email = x.Email!,
                 PhoneNumber = x.PhoneNumber,
                 Image = x.Image,
-
-                Department =
-                    x.Department == null
-                        ? null
-                        : new DepartmentDto { Id = x.Department.Id, Name = x.Department.Name },
-
-                Position =
-                    x.Position == null
-                        ? null
-                        : new PositionDto { Id = x.Position.Id, Name = x.Position.Name },
-
+                Address1 = x.Address1,
+                Address2 = x.Address2,
+                BirthDate = x.BirthDate,
+                bloodGroup = x.bloodGroup,
+                citizenship = x.citizenship,
+                city = x.city,
+                dashboardType = x.dashboardType,
+                DepartmentId = x.DepartmentId,
+                gender = x.gender,
+                IsActive = x.IsActive,
+                maritalStatus = x.maritalStatus,
+                nationality = x.nationality,
+                PersonnelCode = x.PersonnelCode,
+                PositionId = x.PositionId,
+                PostalCode = x.PostalCode,
+                province = x.province,
+                Religion = x.Religion,
+                ShiftId = x.ShiftId,
                 Biography =
                     x.Biography == null
                         ? null
@@ -138,7 +147,7 @@ public class AccountController : ControllerBase
                             Linkedin = x.SocialMedia.Linkedin,
                             Email = x.SocialMedia.Email,
                             Instagram = x.SocialMedia.Instagram,
-                            Twitter = x.SocialMedia.Email,
+                            Twitter = x.SocialMedia.Twitter,
                         },
 
                 EmergencyCall =
@@ -208,10 +217,11 @@ public class AccountController : ControllerBase
         );
     }
 
-    [HttpPost("biography/{userId}")]
-    public async Task<IActionResult> UpsertBiography(string userId, BiographyDto dto)
+    [HttpPost("biography")]
+    public async Task<IActionResult> UpsertBiography(BiographyDto dto)
     {
         var biography = await _db.Biography.FirstOrDefaultAsync();
+        var userId = _userManager.GetUserId(User);
 
         if (biography == null)
         {
@@ -233,16 +243,13 @@ public class AccountController : ControllerBase
         return Ok(biography);
     }
 
-    [HttpPost("image/{id}")]
-    public async Task<IActionResult> UpdateImage(
-        [FromForm] UpdateImageUserDto dto,
-        string id
-    )
+    [HttpPost("image")]
+    public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto)
     {
         if (dto.Image == null)
-            return BadRequest("Image is required.");
+            return BadRequest("Image is required."); 
 
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _userManager.GetUserAsync(User);
 
         if (user == null)
             return NotFound();
@@ -259,11 +266,8 @@ public class AccountController : ControllerBase
         return Ok(new { image = user.Image });
     }
 
-    [HttpPatch("{id}/reset-password")]
-    public async Task<IActionResult> ResetPassword(
-        string id,
-        [FromBody] ResetPasswordDto dto
-    )
+    [HttpPatch("{reset-password")]
+    public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto dto)
     {
         var user = await _userManager.FindByIdAsync(id);
 
@@ -280,10 +284,10 @@ public class AccountController : ControllerBase
         return Ok(new { Message = "Password reset successfully." });
     }
 
-    [HttpDelete("image/{id}")]
-    public async Task<IActionResult> DeleteImage(string id)
+    [HttpDelete("image")]
+    public async Task<IActionResult> DeleteImage()
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _userManager.GetUserAsync(User);
 
         if (user == null)
             return NotFound();
@@ -301,10 +305,11 @@ public class AccountController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("social-media/{userId}")]
-    public async Task<IActionResult> UpsertSocialMedia(string userId, SocialMediaDto dto)
+    [HttpPost("social-media")]
+    public async Task<IActionResult> UpsertSocialMedia(SocialMediaDto dto)
     {
         var socialMedia = await _db.SocialMedia.FirstOrDefaultAsync();
+        var userId = _userManager.GetUserId(User);
 
         if (socialMedia == null)
         {
@@ -330,10 +335,11 @@ public class AccountController : ControllerBase
         return Ok(socialMedia);
     }
 
-    [HttpPost("emergencyCall/{userId}")]
-    public async Task<IActionResult> UpsertEmergencyCall(string userId, EmergencyCallDTO dto)
+    [HttpPost("emergencyCall")]
+    public async Task<IActionResult> UpsertEmergencyCall( EmergencyCallDTO dto)
     {
         var emergencyCall = await _db.EmergencyCall.FirstOrDefaultAsync();
+        var userId = _userManager.GetUserId(User);
 
         if (emergencyCall == null)
         {

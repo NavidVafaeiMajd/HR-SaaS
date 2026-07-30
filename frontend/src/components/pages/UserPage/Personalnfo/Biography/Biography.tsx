@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import type z from "zod";
 import { usePostRows } from "@/hook/usePostRows";
 import { useParams } from "react-router-dom";
+import { useProfileApi } from "@/hook/useProfileApi";
 
 const Biography = ({ queryData }: { queryData: any }) => {
   const defaultValues = {
@@ -14,10 +15,11 @@ const Biography = ({ queryData }: { queryData: any }) => {
   };
 
   const { id } = useParams() as { id: string };
+const{queryKey,url}=useProfileApi(id)
 
   const { mutation, form } = usePostRows(
-    `employees/biography/${id}`,
-    ["employeesDetailse", id],
+    `${url}/biography`,
+    [{ queryKey }],
     defaultValues,
     validation,
     "بیوگرافی",
