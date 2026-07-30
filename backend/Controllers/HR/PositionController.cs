@@ -7,9 +7,7 @@ public class PositionCreateDTO
     public string Name { get; set; } = "";
     public int DepartmentId { get; set; }
 
-        public string Description { get; set; }
-
-
+    public string Description { get; set; }
 }
 
 [ApiController]
@@ -23,6 +21,7 @@ public class PositionsController : ControllerBase
         _db = db;
     }
 
+    [Permission(Permission.Position_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -36,16 +35,23 @@ public class PositionsController : ControllerBase
         return Ok(position);
     }
 
+    [Permission(Permission.Position_post)]
     [HttpPost]
     public async Task<IActionResult> Create(PositionCreateDTO dto)
     {
-        var position = new Position { Name = dto.Name, DepartmentId = dto.DepartmentId , Description = dto.Description };
+        var position = new Position
+        {
+            Name = dto.Name,
+            DepartmentId = dto.DepartmentId,
+            Description = dto.Description,
+        };
         _db.Positions.Add(position);
         await _db.SaveChangesAsync();
 
         return Ok(position);
     }
 
+    [Permission(Permission.Position_delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -61,6 +67,7 @@ public class PositionsController : ControllerBase
         return NoContent();
     }
 
+    [Permission(Permission.Position_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(int id, PositionCreateDTO dto)
     {

@@ -25,6 +25,7 @@ public class UserController : ControllerBase
         _db = db;
     }
 
+    [Permission(Permission.Users_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -48,6 +49,7 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [Permission(Permission.Users_delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -65,6 +67,7 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Edit(string id, UpdateUserDto dto)
     {
@@ -114,6 +117,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
+    [Permission(Permission.Users_view)]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
@@ -184,6 +188,7 @@ public class UserController : ControllerBase
         return Ok(account);
     }
 
+    [Permission(Permission.Users_create)]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreateUserDto dto)
     {
@@ -234,17 +239,17 @@ public class UserController : ControllerBase
         );
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPost("{userId}/biography")]
     public async Task<IActionResult> UpsertBiography(string userId, BiographyDto dto)
     {
-if (dto == null)
-{
-    return BadRequest("DTO is null");
-}
-        var biography = await _db.Biography
-            .FirstOrDefaultAsync(x => x.UserId == userId);
-    
-    Console.WriteLine(biography == null);
+        if (dto == null)
+        {
+            return BadRequest("DTO is null");
+        }
+        var biography = await _db.Biography.FirstOrDefaultAsync(x => x.UserId == userId);
+
+        Console.WriteLine(biography == null);
         if (biography == null)
         {
             biography = new Biography
@@ -265,6 +270,7 @@ if (dto == null)
         return Ok(biography);
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPost("{id}/image")]
     public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto, string id)
     {
@@ -288,6 +294,7 @@ if (dto == null)
         return Ok(new { image = user.Image });
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPatch("{id}/reset-password")]
     public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto dto)
     {
@@ -306,6 +313,7 @@ if (dto == null)
         return Ok(new { Message = "Password reset successfully." });
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpDelete("{id}/image")]
     public async Task<IActionResult> DeleteImage(string id)
     {
@@ -327,6 +335,7 @@ if (dto == null)
         return NoContent();
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPost("{userId}/social-media")]
     public async Task<IActionResult> UpsertSocialMedia(string userId, SocialMediaDto dto)
     {
@@ -356,6 +365,7 @@ if (dto == null)
         return Ok(socialMedia);
     }
 
+    [Permission(Permission.Users_edit)]
     [HttpPost("{userId}/emergencyCall")]
     public async Task<IActionResult> UpsertEmergencyCall(string userId, EmergencyCallDTO dto)
     {

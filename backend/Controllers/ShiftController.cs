@@ -29,6 +29,7 @@ public class ShiftController : ControllerBase
         _db = db;
     }
 
+    [Permission(Permission.Shift_view)]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -40,6 +41,7 @@ public class ShiftController : ControllerBase
         return Ok(shifts);
     }
 
+    [Permission(Permission.Shift_post)]
     [HttpPost]
     public async Task<IActionResult> AddShift(CreateShiftDto dto)
     {
@@ -63,6 +65,7 @@ public class ShiftController : ControllerBase
         return Created("", shift);
     }
 
+    [Permission(Permission.Shift_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> EditShift(CreateShiftDto dto, int id)
     {
@@ -92,6 +95,7 @@ public class ShiftController : ControllerBase
         return Ok(shift);
     }
 
+    [Permission(Permission.Shift_delete)]
     [HttpDelete("{id}")]
 public async Task<IActionResult> Delete(int id)
 {

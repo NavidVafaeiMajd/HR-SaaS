@@ -18,6 +18,7 @@ public class DepartmentsController : ControllerBase
         _db = db;
     }
 
+    [Permission(Permission.Department_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -31,6 +32,7 @@ public class DepartmentsController : ControllerBase
         return Ok(departments);
     }
 
+    [Permission(Permission.Department_post)]
     [HttpPost]
     public async Task<IActionResult> Create(DepartmentCreateDTO dto)
     {
@@ -41,6 +43,7 @@ public class DepartmentsController : ControllerBase
         return Ok(department);
     }
 
+    [Permission(Permission.Department_delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -56,6 +59,7 @@ public class DepartmentsController : ControllerBase
         return NoContent();
     }
 
+    [Permission(Permission.Department_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(int id, DepartmentCreateDTO dto)
     {

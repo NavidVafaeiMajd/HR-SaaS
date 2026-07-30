@@ -118,25 +118,4 @@ public class AuthController : ControllerBase
             }
         );
     }
-
-    [Authorize]
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
-    {
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user == null)
-            return Unauthorized();
-
-        var result = await _userManager.ChangePasswordAsync(
-            user,
-            request.CurrentPassword,
-            request.NewPassword
-        );
-
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        return Ok();
-    }
 }

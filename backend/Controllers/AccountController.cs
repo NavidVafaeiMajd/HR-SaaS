@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using HrSaaS.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ public class AccountController : ControllerBase
         _db = db;
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -43,6 +45,7 @@ public class AccountController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Edit(string id, UpdateUserDto dto)
     {
@@ -92,6 +95,7 @@ public class AccountController : ControllerBase
         return Ok(user);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<AccountResponse>> GetAccount()
     {
@@ -167,6 +171,7 @@ public class AccountController : ControllerBase
         return Ok(account);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreateUserDto dto)
     {
@@ -217,6 +222,7 @@ public class AccountController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("biography")]
     public async Task<IActionResult> UpsertBiography(BiographyDto dto)
     {
@@ -243,11 +249,12 @@ public class AccountController : ControllerBase
         return Ok(biography);
     }
 
+    [Authorize]
     [HttpPost("image")]
     public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto)
     {
         if (dto.Image == null)
-            return BadRequest("Image is required."); 
+            return BadRequest("Image is required.");
 
         var user = await _userManager.GetUserAsync(User);
 
@@ -265,8 +272,8 @@ public class AccountController : ControllerBase
 
         return Ok(new { image = user.Image });
     }
-
-    [HttpPatch("{reset-password")]
+    [Authorize]
+    [HttpPatch("reset-password")]
     public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto dto)
     {
         var user = await _userManager.FindByIdAsync(id);
@@ -284,6 +291,7 @@ public class AccountController : ControllerBase
         return Ok(new { Message = "Password reset successfully." });
     }
 
+    [Authorize]
     [HttpDelete("image")]
     public async Task<IActionResult> DeleteImage()
     {
@@ -305,6 +313,7 @@ public class AccountController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
     [HttpPost("social-media")]
     public async Task<IActionResult> UpsertSocialMedia(SocialMediaDto dto)
     {
@@ -335,8 +344,9 @@ public class AccountController : ControllerBase
         return Ok(socialMedia);
     }
 
+    [Authorize]
     [HttpPost("emergencyCall")]
-    public async Task<IActionResult> UpsertEmergencyCall( EmergencyCallDTO dto)
+    public async Task<IActionResult> UpsertEmergencyCall(EmergencyCallDTO dto)
     {
         var emergencyCall = await _db.EmergencyCall.FirstOrDefaultAsync();
         var userId = _userManager.GetUserId(User);
