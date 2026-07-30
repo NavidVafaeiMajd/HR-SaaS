@@ -14,7 +14,6 @@ import { setupInterceptors } from "@/api/interceptors";
 interface User {
   id: string;
   name: string;
-  // هر فیلدی که لازمه
 }
 
 interface AuthContextType {
