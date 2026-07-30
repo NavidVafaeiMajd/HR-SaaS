@@ -1,3 +1,4 @@
+import api from "@/api/axios";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 
@@ -26,14 +27,8 @@ export const useProfile = (): UseQueryResult<Profile> => {
    return useQuery<Profile>({
       queryKey: ["profile"],
       queryFn: async () => {
-         const token = Cookies.get("token");
-         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/profile`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-         });
-         if (!res.ok) {
-            throw new Error("Failed to fetch profile");
-         }
-         return res.json();
+         const res = api.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/profile`)
+         return (await res).data;
       },
       staleTime: 5 * 60_000,
       refetchOnWindowFocus: false,

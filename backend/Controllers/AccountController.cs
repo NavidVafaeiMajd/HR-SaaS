@@ -1,46 +1,27 @@
+using System.Security.Claims;
 using HrSaaS.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 [ApiController]
-[Route("api/employees")]
-public class UserController : ControllerBase
+[Route("api/account")]
+public class AccountController : ControllerBase
 {
     private readonly UserManager<Users> _userManager;
     private readonly HRSaaSDbContext _db;
     private readonly RoleManager<Role> _roleManager;
     private readonly IImageService _imageService;
 
-    public UserController(UserManager<Users> userManager, IImageService imageService,RoleManager<Role> roleManager)
+    public AccountController(
+        UserManager<Users> userManager,
+        IImageService imageService,
+        RoleManager<Role> roleManager
+    )
     {
         _userManager = userManager;
         _imageService = imageService;
         _roleManager = roleManager;
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var users = await _userManager
-            .Users.Include(x => x.Position)
-            .AsNoTracking()
-            .Select(x => new
-            {
-                x.Id,
-                x.UserName,
-                x.FirstName,
-                x.LastName,
-                x.PositionId,
-                x.PhoneNumber,
-                x.gender,
-                x.IsActive,
-                x.Position,
-            })
-            .ToListAsync();
-
-        return Ok(users);
     }
 
     [HttpDelete("{id}")]
@@ -109,12 +90,17 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    [HttpGet]
+    public async Task<ActionResult<AccountResponse>> GetAccount()
     {
-      var account = await _userManager
+        var userId = _userManager.GetUserId(User);
+
+        if (userId is null)
+            return Unauthorized();
+
+        var account = await _userManager
             .Users.AsNoTracking()
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == userId)
             .Select(x => new AccountResponse
             {
                 Id = x.Id,
@@ -170,7 +156,6 @@ public class UserController : ControllerBase
             return NotFound();
 
         return Ok(account);
-
     }
 
     [HttpPost]
@@ -249,7 +234,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("image/{id}")]
-    public async Task<IActionResult> UpdateImage([FromForm] UpdateImageUserDto dto, string id)
+    public async Task<IActionResult> UpdateImage(
+        [FromForm] UpdateImageUserDto dto,
+        string id
+    )
     {
         if (dto.Image == null)
             return BadRequest("Image is required.");
@@ -272,7 +260,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPatch("{id}/reset-password")]
-    public async Task<IActionResult> ResetPassword(string id, [FromBody] ResetPasswordDto dto)
+    public async Task<IActionResult> ResetPassword(
+        string id,
+        [FromBody] ResetPasswordDto dto
+    )
     {
         var user = await _userManager.FindByIdAsync(id);
 

@@ -37,9 +37,7 @@ const EmployeDetailse = lazy(
   () => import("./components/pages/UserPage/UserPage"),
 );
 const NotFound = lazy(() => import("./NotFound"));
-const AccountPage = lazy(
-  () => import("./components/pages/AccountPage/AccountPage"),
-);
+
 
 const NewsListDetailes = lazy(
   () =>
@@ -124,7 +122,7 @@ const Layout = () => {
                   path="account"
                   element={
                     <ProtectedRoute>
-                      <AccountPage />
+                      <EmployeDetailse />
                     </ProtectedRoute>
                   }
                 />

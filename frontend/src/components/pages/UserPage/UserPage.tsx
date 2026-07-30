@@ -9,29 +9,28 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import BasicInfo from "./BasicInfo/BasicInfo";
 import Personalnfo from "./Personalnfo/Personalnfo";
 import ProfileImg from "./ProfileImg/ProfileImg";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { HiUserCircle } from "react-icons/hi2";
-import Cookies from "js-cookie";
 import ChangePass from "./ChangePass/ChangePass";
+import api from "@/api/axios";
 
 const EmployeDetailse = () => {
   const { id } = useParams();
 
-  const useGetEmployee = async (): Promise<any> => {
-    const token = Cookies.get("token");
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api"}/employees/${id}`,
-      {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      },
-    );
+const location = useLocation();
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch data");
-    }
-    return res.json();
-  };
+const useGetEmployee = async () => {
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+
+  const url = location.pathname.includes("/account")
+    ? `${baseUrl}/account`
+    : `${baseUrl}/employees/${id}`;
+
+  const res = await api.get(url);
+  return res.data;
+};
 
   const {
     data: queryData,
@@ -72,7 +71,7 @@ const EmployeDetailse = () => {
                     {queryData?.firstName} {queryData?.lastName}
                   </span>
                   <span className="text-gray-400">
-                    {queryData?.position.name}{" "}
+                    {queryData?.position?.name}{" "}
                   </span>
                 </div>
               </div>
