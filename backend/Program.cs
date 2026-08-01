@@ -92,7 +92,7 @@ builder.Services.AddScoped<IEventPublisher, EventPublisher>();
 
 ///
 /// add each handler
-builder.Services.AddScoped<IEventHandler<LeaveRequestedEvent>, LeaveRequestedNotificationHandler>();
+builder.Services.AddScoped<IEventHandler<UserRequestedEvent>, UserRequestedNotificationHandler>();
 
 ///
 /////add cookies config

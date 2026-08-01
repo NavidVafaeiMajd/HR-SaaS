@@ -11,18 +11,22 @@ public class UserController : ControllerBase
     private readonly HRSaaSDbContext _db;
     private readonly RoleManager<Role> _roleManager;
     private readonly IImageService _imageService;
+    private readonly IEventPublisher _publisher;
+
 
     public UserController(
         UserManager<Users> userManager,
         IImageService imageService,
         RoleManager<Role> roleManager,
-        HRSaaSDbContext db
+        HRSaaSDbContext db,
+        IEventPublisher publisher
     )
     {
         _userManager = userManager;
         _imageService = imageService;
         _roleManager = roleManager;
         _db = db;
+        _publisher = publisher;
     }
 
     [Permission(Permission.Users_view)]
@@ -227,6 +231,8 @@ public class UserController : ControllerBase
         {
             await _userManager.AddToRoleAsync(user, dto.Role);
         }
+        var createBy = await _userManager.GetUserAsync(User);
+        await _publisher.PublishAsync(new UserRequestedEvent(new[] { Permission.Users_create }, user.Id,$"{user.FirstName} {user.LastName}" ,new[]{"Admin"}, $"{createBy.FirstName} {createBy.LastName}"));
 
         return Created(
             "",

@@ -46,10 +46,10 @@ public class AccountController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Edit(string id, UpdateUserDto dto)
+    [HttpPut]
+    public async Task<IActionResult> Edit(UpdateUserDto dto)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _userManager.GetUserAsync(User);
 
         if (user == null)
             return NotFound();

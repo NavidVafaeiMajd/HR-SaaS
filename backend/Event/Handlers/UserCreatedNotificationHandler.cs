@@ -1,28 +1,27 @@
-public class LeaveRequestedNotificationHandler
-    : IEventHandler<LeaveRequestedEvent>
+public class UserRequestedNotificationHandler : IEventHandler<UserRequestedEvent>
 {
     private readonly INotificationService _notification;
-    private readonly IPermissionResolver _permission;
 
-    public LeaveRequestedNotificationHandler(
-        INotificationService notification,
-        IPermissionResolver permission)
+    public UserRequestedNotificationHandler(INotificationService notification)
     {
         _notification = notification;
-        _permission = permission;
     }
 
-    public async Task Handle(
-        LeaveRequestedEvent e)
+    public async Task Handle(UserRequestedEvent e)
     {
-        var users =
-            await _permission.GetUsersAsync(
-                Permissions.LeaveEdit);
-
-        await _notification.NotifyUsersAsync(
-            users,
+        await _notification.NotifyPermissionAsync(
+            e.Permission,
             "کاربر جدید",
-            $"{e.EmployeeName} کاربر جدید ثبت کرد.",
-            $"/leave/{e.LeaveId}");
+            $"کاربر {e.UserName} توسط {e.CreateBy} اضافه شد.",
+            e.roles,
+            $"/users/{e.UserId}"
+        );
+        await _notification.NotifyAsync(
+            e.UserId,
+            "کاربر جدید",
+            $"کاربر {e.UserName} توسط {e.CreateBy} اضافه شد.",
+            NotificationType.Info,
+            $"/users/{e.UserId}"
+        );
     }
 }
