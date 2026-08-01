@@ -78,7 +78,12 @@ builder
 ///////////Set Image service
 /// 
 builder.Services.AddScoped<IImageService, ImageService>();
-//add cookies config
+
+/////////add notification system
+/// 
+/// 
+builder.Services.AddScoped<INotificationService, NotificationService>();
+/////add cookies config
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -102,6 +107,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 ///
+/// add hub for signalR
+/// 
+builder.Services.AddSignalR();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -109,6 +119,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+///
+/// add hub for signalR
+/// 
+app.MapHub<NotificationHub>("/hubs/notification");
 
 ///bootstrap for create initial admin and roll
 /// //just for times that you just run the app for the first time and you want to create an admin user and role
