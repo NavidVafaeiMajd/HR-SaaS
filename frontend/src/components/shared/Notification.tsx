@@ -9,10 +9,12 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useNotification } from "@/hook/useNotification";
 import { NavLink } from "react-router-dom";
+import { useReadNotification } from "@/hook/useReadNotification";
 
-type Props = {};
-export const Notification = ({}: Props) => {
-  const { data: results } = useNotification();
+
+export const Notification = () => {
+    const { data: results } = useNotification();
+    const { readAllMutation,readMutation}=useReadNotification()
   console.log(results);
   return (
     <div>
@@ -38,7 +40,11 @@ export const Notification = ({}: Props) => {
                   className="cursor-pointer rounded-none hover:bg-black/5"
                   dir="rtl"
                 >
-                  <NavLink to={notification?.url || ""} className={"w-full!"}>
+                  <NavLink
+                    to={notification?.url || ""}
+                    className={"w-full!"}
+                    onClick={() => readMutation.mutate(notification.id)}
+                  >
                     <Alert
                       className="border-none flex justify-between items-center"
                       variant={notification.isRead == true ? "read" : "unread"}
@@ -63,8 +69,12 @@ export const Notification = ({}: Props) => {
 
           {results?.count >= 3 && (
             <DropdownMenuGroup className="h-10 flex justify-center items-center border-t-1">
-              <NavLink to={"/notification"} className="flex">
-                <ChevronLeft width={20}/>
+              <NavLink
+                to={"/notification"}
+                className="flex"
+                onClick={() => readAllMutation.mutate()}
+              >
+                <ChevronLeft width={20} />
                 <span> اعلانات بیشتر</span>
               </NavLink>
             </DropdownMenuGroup>

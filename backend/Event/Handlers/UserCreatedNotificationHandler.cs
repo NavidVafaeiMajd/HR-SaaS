@@ -21,7 +21,7 @@ public class UserRequestedNotificationHandler : IEventHandler<UserRequestedEvent
             "اضافه شدید",
             $"شما توسط {e.CreateBy}  اضافه شدید",
             NotificationType.Info,
-            $"/users/{e.UserId}"
+            $"/account"
         );
     }
 }
