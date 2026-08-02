@@ -192,7 +192,7 @@ public class UserController : ControllerBase
         return Ok(account);
     }
 
-    [Permission(Permission.Users_create)]
+    [Permission(Permission.Users_post)]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreateUserDto dto)
     {
@@ -232,7 +232,7 @@ public class UserController : ControllerBase
             await _userManager.AddToRoleAsync(user, dto.Role);
         }
         var createBy = await _userManager.GetUserAsync(User);
-        await _publisher.PublishAsync(new UserRequestedEvent(new[] { Permission.Users_create }, user.Id,$"{user.FirstName} {user.LastName}" ,new[]{"Admin"}, $"{createBy.FirstName} {createBy.LastName}"));
+        await _publisher.PublishAsync(new UserRequestedEvent(new[] { Permission.Users_post }, user.Id,$"{user.FirstName} {user.LastName}" ,new[]{"Admin"}, $"{createBy.FirstName} {createBy.LastName}"));
 
         return Created(
             "",

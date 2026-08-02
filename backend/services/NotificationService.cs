@@ -74,41 +74,32 @@ public class NotificationService : INotificationService
         IEnumerable<Permission> permissions,
         string title,
         string message,
-                IEnumerable<string>? roles = null,
-
+        IEnumerable<string>? roles = null,
         string? url = null,
         NotificationType type = NotificationType.Info
     )
     {
-var permissionUserIds = _db.RolePermission
-    .Where(rp => permissions.Contains(rp.Permission))
-    .Join(
-        _db.UserRoles,
-        rp => rp.RoleId,
-        ur => ur.RoleId,
-        (rp, ur) => ur.UserId
-    );
+        var permissionUserIds = _db
+            .RolePermission.Where(rp => permissions.Contains(rp.Permission))
+            .Join(_db.UserRoles, rp => rp.RoleId, ur => ur.RoleId, (rp, ur) => ur.UserId);
 
-var roleUserIds = Enumerable.Empty<string>().AsQueryable();
+        var roleUserIds = Enumerable.Empty<string>().AsQueryable();
 
-if (roles?.Any() == true)
-{
-    roleUserIds = _db.UserRoles
-        .Join(
-            _db.Roles,
-            ur => ur.RoleId,
-            r => r.Id,
-            (ur, r) => new { ur.UserId, r.Name }
-        )
-        .Where(x => roles.Contains(x.Name!))
-        .Select(x => x.UserId);
-}
+        if (roles?.Any() == true)
+        {
+            roleUserIds = _db
+                .UserRoles.Join(
+                    _db.Roles,
+                    ur => ur.RoleId,
+                    r => r.Id,
+                    (ur, r) => new { ur.UserId, r.Name }
+                )
+                .Where(x => roles.Contains(x.Name!))
+                .Select(x => x.UserId);
+        }
 
-var userIds = await permissionUserIds
-    .Union(roleUserIds)
-    .Distinct()
-    .ToListAsync();
+        var userIds = await permissionUserIds.Union(roleUserIds).Distinct().ToListAsync();
 
-await NotifyUsersAsync(userIds, title, message, url, type);
+        await NotifyUsersAsync(userIds, title, message, url, type);
     }
 }

@@ -28,24 +28,6 @@ public class AccountController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var user = await _userManager.FindByIdAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        var result = await _userManager.DeleteAsync(user);
-
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-        _imageService.Delete(user.Image);
-
-        return NoContent();
-    }
-
-    [Authorize]
     [HttpPut]
     public async Task<IActionResult> Edit(UpdateUserDto dto)
     {
@@ -169,57 +151,6 @@ public class AccountController : ControllerBase
             return NotFound();
 
         return Ok(account);
-    }
-
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> Create([FromForm] CreateUserDto dto)
-    {
-        var exists = await _userManager.FindByNameAsync(dto.UserName);
-
-        if (exists != null)
-            return BadRequest(new { message = "Username already exists." });
-
-        var user = new Users
-        {
-            PersonnelCode = dto.PersonnelCode,
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            UserName = dto.UserName,
-            Email = dto.Email,
-            dashboardType = dto.dashboardType,
-            gender = dto.gender,
-            PhoneNumber = dto.PhoneNumber,
-            Image = await _imageService.SaveAsync(dto.Image),
-
-            DepartmentId = dto.DepartmentId,
-            PositionId = dto.PositionId,
-            ShiftId = dto.ShiftId,
-
-            IsActive = true,
-        };
-
-        var result = await _userManager.CreateAsync(user, dto.Password);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.Role))
-        {
-            await _userManager.AddToRoleAsync(user, dto.Role);
-        }
-
-        return Created(
-            "",
-            new
-            {
-                user.Id,
-                user.FirstName,
-                user.LastName,
-            }
-        );
     }
 
     [Authorize]

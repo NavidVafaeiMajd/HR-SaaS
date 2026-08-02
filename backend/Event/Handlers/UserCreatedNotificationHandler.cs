@@ -18,8 +18,8 @@ public class UserRequestedNotificationHandler : IEventHandler<UserRequestedEvent
         );
         await _notification.NotifyAsync(
             e.UserId,
-            "کاربر جدید",
-            $"کاربر {e.UserName} توسط {e.CreateBy} اضافه شد.",
+            "اضافه شدید",
+            $"شما توسط {e.CreateBy}  اضافه شدید",
             NotificationType.Info,
             $"/users/{e.UserId}"
         );
