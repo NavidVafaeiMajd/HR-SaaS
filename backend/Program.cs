@@ -76,9 +76,26 @@ builder
     .AddDefaultTokenProviders();
 
 ///////////Set Image service
-/// 
+///
 builder.Services.AddScoped<IImageService, ImageService>();
-//add cookies config
+
+/////////add notification system
+///
+///
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+////
+///
+/// it system that when you add a new handler it's understand and sub that
+///
+builder.Services.AddScoped<IEventPublisher, EventPublisher>();
+
+///
+/// add each handler
+builder.Services.AddScoped<IEventHandler<UserRequestedEvent>, UserRequestedNotificationHandler>();
+
+///
+/////add cookies config
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -102,6 +119,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 ///
+/// add hub for signalR
+///
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -109,6 +130,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+///
+/// add hub for signalR
+///
+app.MapHub<NotificationHub>("/hubs/notification");
 
 ///bootstrap for create initial admin and roll
 /// //just for times that you just run the app for the first time and you want to create an admin user and role
@@ -126,9 +152,11 @@ var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "..", "storag
 
 Directory.CreateDirectory(uploadPath);
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadPath),
-    RequestPath = "/uploads"
-});
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadPath),
+        RequestPath = "/uploads",
+    }
+);
 app.Run();

@@ -1,7 +1,7 @@
 public enum Permission
 {
     Users_view,
-    Users_create,
+    Users_post,
     Users_edit,
     Users_delete,
     Role_view,

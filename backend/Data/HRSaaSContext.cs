@@ -16,6 +16,8 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<Biography> Biography { get; set; } = null!;
     public DbSet<Shift> Shifts { get; set; } = null!;
     public DbSet<ShiftTime> ShiftsTime { get; set; } = null!;
+    public DbSet<Notification> Notification { get; set; } = null!;
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
