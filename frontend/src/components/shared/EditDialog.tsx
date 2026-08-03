@@ -8,8 +8,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useForm, type UseFormReturn } from "react-hook-form";
+import { useEffect, useState } from "react";
 import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "./Form";
@@ -23,7 +23,10 @@ interface EditDialogProps<T extends z.ZodTypeAny> {
   schema: T;
   btnTitle?: string;
   variant?: "outline" | "default";
+  onFormReady?: (form: UseFormReturn<z.infer<T>>) => void;
+  form?: UseFormReturn<z.infer<T>>;
 }
+
 
 export function EditDialog<T extends z.ZodTypeAny<any, any, any>>({
   title = "ویرایش اطلاعات",
@@ -33,14 +36,21 @@ export function EditDialog<T extends z.ZodTypeAny<any, any, any>>({
   onSave,
   schema,
   btnTitle = "ذخیره",
-  variant ="outline"
+  variant = "outline",
+    onFormReady,
+    form: externalForm,
 }: EditDialogProps<T>) {
   const [open, setOpen] = useState(false);
-
-  const form = useForm<z.infer<typeof schema>>({
+  const internalForm = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema as any),
     defaultValues,
   });
+
+  const form = externalForm ?? internalForm;
+    useEffect(() => {
+      onFormReady?.(form);
+    }, [form]);
+
 
   const onSubmit = (values: z.infer<typeof schema>) => {
     onSave(values);

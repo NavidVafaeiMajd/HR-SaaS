@@ -5,6 +5,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
+public class UpdateAnnouncementDto
+{
+    public string Title { get; set; } = null!;
+
+    public string Content { get; set; } = null!;
+
+    public DateTime StartDate { get; set; }
+
+    public DateTime EndDate { get; set; }
+
+    public List<string> DepartmentIds { get; set; } = [];
+
+    public List<string> PositionIds { get; set; } = [];
+
+    public List<string> UserIds { get; set; } = [];
+}
+
 public class CreateAnnouncementDto
 {
     public string Title { get; set; } = null!;
@@ -59,8 +76,6 @@ public class AnnouncementController : ControllerBase
         {
             var announcements = await _db
                 .Announcement.Include(x => x.Users)
-                .Include(x => x.Departments)
-                .Include(x => x.Positions)
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => new
                 {
@@ -70,6 +85,26 @@ public class AnnouncementController : ControllerBase
                     x.CreatedAt,
                     x.StartDate,
                     x.EndDate,
+                    Departments = x.Departments.Select(d => new
+                    {
+                        value = d.DepartmentId.ToString(),
+                        label = d.Department.Name
+                    }),
+
+                    Positions = x.Positions.Select(p => new
+                    {
+                        value = p.PositionId.ToString(),
+                        label = p.Position.Name
+                    }),
+
+                    Users = x.Users.Select(u => new
+                    {
+                        value = u.UserId,
+                        label = _db.Users
+                            .Where(user => user.Id == u.UserId)
+                            .Select(user => user.FirstName + " " + user.LastName)
+                            .FirstOrDefault()
+                    }),
                     CreatedBy = _db
                         .Users.Where(u => u.Id == x.CreatedBy)
                         .Select(u => new
@@ -110,6 +145,60 @@ public class AnnouncementController : ControllerBase
             .ToListAsync();
 
         return Ok(announcementsForUser);
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Update(Guid id, UpdateAnnouncementDto dto)
+    {
+        var announcement = await _db
+            .Announcement
+            .Include(x => x.Departments)
+            .Include(x => x.Positions)
+            .Include(x => x.Users)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (announcement is null)
+            return NotFound();
+
+        announcement.Title = dto.Title;
+        announcement.Content = dto.Content;
+        announcement.StartDate = dto.StartDate;
+        announcement.EndDate = dto.EndDate;
+
+        announcement.Departments.Clear();
+        announcement.Positions.Clear();
+        announcement.Users.Clear();
+
+        announcement.Departments = dto.DepartmentIds
+            .Select(x => new AnnouncementDepartment
+            {
+                Id = Guid.NewGuid(),
+                AnnouncementId = announcement.Id,
+                DepartmentId = int.Parse(x)
+            })
+            .ToList();
+
+        announcement.Positions = dto.PositionIds
+            .Select(x => new AnnouncementPosition
+            {
+                Id = Guid.NewGuid(),
+                AnnouncementId = announcement.Id,
+                PositionId = int.Parse(x)
+            })
+            .ToList();
+
+        announcement.Users = dto.UserIds
+            .Select(x => new AnnouncementUser
+            {
+                Id = Guid.NewGuid(),
+                AnnouncementId = announcement.Id,
+                UserId = x
+            })
+            .ToList();
+
+        await _db.SaveChangesAsync();
+
+        return Ok();
     }
 
     [Authorize]

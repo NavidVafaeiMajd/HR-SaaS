@@ -9,10 +9,6 @@ export const validation = z.object({
     .string()
     .min(1, "متن ابلاغیه الزامی است"),
 
-  summary: z
-    .string()
-    .min(1, "اختصاری الزامی است"),
-
   publish_date: z.date().nullable(),
 
   end_date: z.date().nullable(),

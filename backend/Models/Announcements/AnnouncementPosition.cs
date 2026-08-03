@@ -5,4 +5,8 @@ public class AnnouncementPosition
     public Guid AnnouncementId { get; set; }
 
     public int PositionId { get; set; }
+
+    public Position Position { get; set; } = null!;
+
+    public Announcement Announcement { get; set; } = null!;
 }

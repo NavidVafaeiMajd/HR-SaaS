@@ -25,7 +25,6 @@ const defaultValues = {
   departmentIds: [],
   positionIds: [],
   userIds: [],
-  summary: "",
   content: "",
 };
   const { mutation, form } = usePostRows(
@@ -111,12 +110,6 @@ const defaultValues = {
           label="کارمند"
           options={usersMapped}
           disabled={!selectedPositions?.length}
-        />
-        <Form.Input
-          name="summary"
-          label="اختصاری"
-          required
-          placeholder="اختصاری"
         />
       </div>
       <Form.RichText name="content" label="متن ابلاغیه" required />

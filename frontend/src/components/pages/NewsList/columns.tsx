@@ -11,15 +11,34 @@ import { LuArrowUpDown } from "react-icons/lu";
 import { z } from "zod";
 import { useUsersQuery } from "./hooks/useUsersQuery";
 import { useEmployees } from "@/hook/useEmployees";
+import { AnnouncementActions } from "./news-actions";
 
 export interface PolicyColumnProps extends Record<string, unknown> {
   id: string;
+
   title: string;
-  publish_date: Date;
-  end_date: Date;
-  department: string;
-  summary: string;
   content: string;
+
+  publish_date: string | Date;
+  end_date: string | Date;
+
+  departments: {
+    value: string;
+    label: string;
+  }[];
+
+  positions: {
+    value: string;
+    label: string;
+  }[];
+
+  users: {
+    value: string;
+    label: string;
+  }[];
+
+  createdAt: string;
+  createdBy: string | null;
 }
 
 const validation = z.object({
@@ -57,14 +76,10 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
         واحد سازمانی
       </Button>
     ),
-    cell: ({ row }) => { 
-    const user= row.original.createdBy;
+    cell: ({ row }) => {
+      const user = row.original.createdBy;
 
-    
-
-      return user
-        ? `${user?.firstName} ${user?.lastName}`
-        : "-";
+      return user ? `${user?.firstName} ${user?.lastName}` : "-";
     },
   },
   {
@@ -117,91 +132,8 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
     header: "عملیات",
     cell: ({ row }) => {
       const news = row.original;
-      const deleteRow = useDeleteRows({
-        url: "hr-news",
-        queryKey: ["hr-news"],
-      });
-      const { mutation } = useUpdateRows(
-        `hr-news/${news.id}`,
-        ["hr-news"],
-        validation,
-        " ابلاغیه ",
-      );
-      const { data: departments } = useDepartments();
-      const departmentsMapped = departments?.data?.map((item) => ({
-        value: String(item.id),
-        label: item.name,
-      }));
 
-      return (
-        <div className="flex items-center gap-2">
-          <EditDialog
-            title="ویرایش  "
-            triggerLabel="ویرایش"
-            fields={
-              <>
-                <div className="flex flex-col gap-5">
-                  <Form.Input name="title" label=" موضوع ابلاغیه " required />
-                  <Form.Date name="publish_date" label=" تاریخ شروع  " />
-                  <Form.Date name="end_date" label=" تاریخ پایان " />
-                </div>
-                <div>
-                  <Form.Select
-                    name="department"
-                    label="واحد سازمانی"
-                    options={departmentsMapped || []}
-                    required
-                    placeholder="انتخاب واحد سازمانی"
-                  />
-                </div>
-                <div>
-                  <Form.Input name="summary" label="اختصاری" />
-                </div>
-                <div>
-                  <Form.RichText name="content" label="متن ابلاغیه" required />
-                </div>
-              </>
-            }
-            defaultValues={{
-              title: news.title,
-              publish_date: news.publish_date,
-              end_date: news.end_date,
-              department: news.department,
-              summary: news.summary,
-              content: news.content,
-            }}
-            onSave={(data) => {
-              const payload = {
-                ...data,
-                publish_date:
-                  data.publish_date instanceof Date
-                    ? data.publish_date
-                        .toISOString()
-                        .slice(0, 19)
-                        .replace("T", " ")
-                    : (data.publish_date as string)
-                        .slice(0, 19)
-                        .replace("T", " "),
-                end_date:
-                  data.end_date instanceof Date
-                    ? data.end_date.toISOString().slice(0, 19).replace("T", " ")
-                    : (data.end_date as string).slice(0, 19).replace("T", " "),
-              };
-
-              mutation.mutate(payload);
-            }}
-            schema={validation}
-          />
-          <DeleteDialog
-            onConfirm={() => {
-              deleteRow.mutate(news.id as any);
-            }}
-          />
-          <ActionsCell
-            actions={[{ label: "نمایش جزییات", path: `/news-list/${news.id}` }]}
-          />
-        </div>
-      );
+      return <AnnouncementActions news={news} />;
     },
   },
 ];
