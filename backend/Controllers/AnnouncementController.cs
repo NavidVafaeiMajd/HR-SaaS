@@ -15,9 +15,9 @@ public class UpdateAnnouncementDto
 
     public DateTime EndDate { get; set; }
 
-    public List<string> DepartmentIds { get; set; } = [];
+    public List<int> DepartmentIds { get; set; } = [];
 
-    public List<string> PositionIds { get; set; } = [];
+    public List<int> PositionIds { get; set; } = [];
 
     public List<string> UserIds { get; set; } = [];
 }
@@ -88,22 +88,22 @@ public class AnnouncementController : ControllerBase
                     Departments = x.Departments.Select(d => new
                     {
                         value = d.DepartmentId.ToString(),
-                        label = d.Department.Name
+                        label = d.Department.Name,
                     }),
 
                     Positions = x.Positions.Select(p => new
                     {
                         value = p.PositionId.ToString(),
-                        label = p.Position.Name
+                        label = p.Position.Name,
                     }),
 
                     Users = x.Users.Select(u => new
                     {
                         value = u.UserId,
-                        label = _db.Users
-                            .Where(user => user.Id == u.UserId)
+                        label = _db
+                            .Users.Where(user => user.Id == u.UserId)
                             .Select(user => user.FirstName + " " + user.LastName)
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
                     }),
                     CreatedBy = _db
                         .Users.Where(u => u.Id == x.CreatedBy)
@@ -150,14 +150,14 @@ public class AnnouncementController : ControllerBase
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(Guid id, UpdateAnnouncementDto dto)
     {
+                var user = await _userManager.GetUserAsync(User);
         var announcement = await _db
-            .Announcement
-            .Include(x => x.Departments)
+            .Announcement.Include(x => x.Departments)
             .Include(x => x.Positions)
             .Include(x => x.Users)
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (announcement is null)
+        if (announcement == null)
             return NotFound();
 
         announcement.Title = dto.Title;
@@ -165,40 +165,73 @@ public class AnnouncementController : ControllerBase
         announcement.StartDate = dto.StartDate;
         announcement.EndDate = dto.EndDate;
 
-        announcement.Departments.Clear();
-        announcement.Positions.Clear();
-        announcement.Users.Clear();
+        _db.AnnouncementDepartments.RemoveRange(announcement.Departments);
 
-        announcement.Departments = dto.DepartmentIds
-            .Select(x => new AnnouncementDepartment
+        _db.AnnouncementPositions.RemoveRange(announcement.Positions);
+
+        _db.AnnouncementUsers.RemoveRange(announcement.Users);
+
+        announcement.Departments = dto
+            .DepartmentIds.Select(x => new AnnouncementDepartment
             {
-                Id = Guid.NewGuid(),
                 AnnouncementId = announcement.Id,
-                DepartmentId = int.Parse(x)
+                DepartmentId = x,
             })
             .ToList();
 
-        announcement.Positions = dto.PositionIds
-            .Select(x => new AnnouncementPosition
+        announcement.Positions = dto
+            .PositionIds.Select(x => new AnnouncementPosition
             {
-                Id = Guid.NewGuid(),
                 AnnouncementId = announcement.Id,
-                PositionId = int.Parse(x)
+                PositionId = x,
             })
             .ToList();
 
-        announcement.Users = dto.UserIds
-            .Select(x => new AnnouncementUser
+        announcement.Users = dto
+            .UserIds.Select(x => new AnnouncementUser
             {
-                Id = Guid.NewGuid(),
                 AnnouncementId = announcement.Id,
-                UserId = x
+                UserId = x,
             })
             .ToList();
+
+        await _publisher.PublishAsync(
+            new AnnouncementRequestedEvent(
+                announcement.Users.Select(u => u.UserId).ToArray(),
+                announcement.Id,
+                $"{user.FirstName} {user.LastName}",
+                "update"
+            )
+        );
 
         await _db.SaveChangesAsync();
 
-        return Ok();
+        return Ok(new { message = "ابلاغیه با موفقیت ویرایش شد" });
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var announcement = await _db
+            .Announcement.Include(x => x.Departments)
+            .Include(x => x.Positions)
+            .Include(x => x.Users)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (announcement == null)
+            return NotFound(new { message = "ابلاغیه پیدا نشد" });
+
+        _db.AnnouncementDepartments.RemoveRange(announcement.Departments);
+
+        _db.AnnouncementPositions.RemoveRange(announcement.Positions);
+
+        _db.AnnouncementUsers.RemoveRange(announcement.Users);
+
+        _db.Announcement.Remove(announcement);
+
+        await _db.SaveChangesAsync();
+
+        return Ok(new { message = "ابلاغیه با موفقیت حذف شد" });
     }
 
     [Authorize]
@@ -254,7 +287,8 @@ public class AnnouncementController : ControllerBase
             new AnnouncementRequestedEvent(
                 announcement.Users.Select(u => u.UserId).ToArray(),
                 announcement.Id,
-                $"{user.FirstName} {user.LastName}"
+                $"{user.FirstName} {user.LastName}",
+                "create"
             )
         );
 

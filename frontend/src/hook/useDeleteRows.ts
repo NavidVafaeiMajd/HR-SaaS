@@ -1,38 +1,44 @@
 import api from "@/api/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Cookies from "js-cookie";
-import { useMemo } from "react";
 import { toast } from "react-toastify";
 
 type UseDeleteRowsProps = {
-  url: string; 
-  queryKey?: string[]; 
+  url: string;
+  queryKey?: string[];
 };
 
-export const useDeleteRows = ({ url, queryKey = [] }: UseDeleteRowsProps) => {
+export const useDeleteRows = ({
+  url,
+  queryKey = [],
+}: UseDeleteRowsProps) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const res = api.delete(`${ url }/${id}`)
-      if ((await res).status !== 204) {
-        let message = "حذف ناموفق بود";
-        try {
-          const data = res.data;
-          message = data?.message || message;
-        } catch {}
-        throw new Error(message);
-      }
-      return true;
+    mutationFn: async (id: string | number) => {
+      const response = await api.delete(`${url}/${id}`);
+
+      return response.data;
     },
-    onSuccess: () => {
-      toast.success("با موفقیت حذف شد");
-      if (queryKey.length > 0) {
-        queryClient.invalidateQueries({ queryKey });
+
+    onSuccess: (data) => {
+      toast.success(
+        data?.message || "با موفقیت حذف شد"
+      );
+
+      if (queryKey.length) {
+        queryClient.invalidateQueries({
+          queryKey,
+        });
       }
     },
+
     onError: (error: any) => {
-      toast.error(error?.message || "خطا در حذف آیتم");
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        "خطا در حذف آیتم";
+
+      toast.error(message);
     },
   });
 };

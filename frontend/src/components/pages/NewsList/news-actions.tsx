@@ -108,9 +108,9 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
         defaultValues={{
           title: news.title,
 
-          publish_Date: news.startDate,
+          publish_date: news.startDate ? new Date(news.startDate) : undefined,
 
-          end_date: news.endDate,
+          end_date: news.endDate ? new Date(news.endDate) : undefined,
 
           departmentIds: news.departments ?? [],
 
@@ -125,24 +125,21 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
             title: data.title,
 
             content: data.content,
+            startDate: data.publish_date
+              ? new Date(data.publish_date).toISOString()
+              : null,
 
-            startDate:
-              data.publish_date instanceof Date
-                ? data.publish_date.toISOString().slice(0, 19).replace("T", " ")
-                : data.publish_date,
+            endDate: data.end_date
+              ? new Date(data.end_date).toISOString()
+              : null,
 
-            endDate:
-              data.end_date instanceof Date
-                ? data.end_date.toISOString().slice(0, 19).replace("T", " ")
-                : data.end_date,
+            departmentIds: data.departmentIds,
 
-            departmentIds: data.departmentIds.map((x: any) => Number(x.value)),
+            positionIds: data.positionIds,
 
-            positionIds: data.positionIds.map((x: any) => Number(x.value)),
-
-            userIds: data.userIds.map((x: any) => x.value),
+            userIds: data.userIds,
           };
-          console.log(data)
+          console.log(data);
           mutation.mutate(payload);
         }}
         schema={validation}
@@ -161,6 +158,7 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
             path: `/news-list/${news.id}`,
           },
         ]}
+        
       />
     </div>
   );
