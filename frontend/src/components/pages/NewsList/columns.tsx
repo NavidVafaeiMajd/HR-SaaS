@@ -9,6 +9,8 @@ import { useUpdateRows } from "@/hook/useUpdateRows";
 import type { ColumnDef } from "@tanstack/react-table";
 import { LuArrowUpDown } from "react-icons/lu";
 import { z } from "zod";
+import { useUsersQuery } from "./hooks/useUsersQuery";
+import { useEmployees } from "@/hook/useEmployees";
 
 export interface PolicyColumnProps extends Record<string, unknown> {
   id: string;
@@ -45,7 +47,7 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
     },
   },
   {
-    accessorKey: "department",
+    accessorKey: "createdBy",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -55,17 +57,18 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
         واحد سازمانی
       </Button>
     ),
-    cell: ({ row }) => {
-      const { data: departments } = useDepartments();
-      const rowData = row.original;
-      const department = departments?.data?.find(
-        (item) => item?.id === rowData.department?.id
-      );
-      return department ? department.name : "-";
+    cell: ({ row }) => { 
+    const user= row.original.createdBy;
+
+    
+
+      return user
+        ? `${user?.firstName} ${user?.lastName}`
+        : "-";
     },
   },
   {
-    accessorKey: "publish_date",
+    accessorKey: "startDate",
     header: ({ column }) => {
       return (
         <Button
@@ -78,7 +81,7 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
       );
     },
     cell: ({ row }) => {
-      const rawDate = row.getValue("publish_date") as string | null;
+      const rawDate = row.getValue("startDate") as string | null;
 
       if (!rawDate) return "-";
 
@@ -87,7 +90,7 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
     },
   },
   {
-    accessorKey: "end_date",
+    accessorKey: "endDate",
     header: ({ column }) => {
       return (
         <Button
@@ -100,7 +103,7 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
       );
     },
     cell: ({ row }) => {
-      const rawDate = row.getValue("end_date") as string | null;
+      const rawDate = row.getValue("endDate") as string | null;
 
       if (!rawDate) return "-";
 
@@ -122,14 +125,14 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
         `hr-news/${news.id}`,
         ["hr-news"],
         validation,
-        " ابلاغیه "
+        " ابلاغیه ",
       );
-      const { data: departments } = useDepartments();      
+      const { data: departments } = useDepartments();
       const departmentsMapped = departments?.data?.map((item) => ({
         value: String(item.id),
         label: item.name,
       }));
-    
+
       return (
         <div className="flex items-center gap-2">
           <EditDialog

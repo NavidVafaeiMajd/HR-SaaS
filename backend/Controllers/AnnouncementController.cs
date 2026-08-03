@@ -16,6 +16,8 @@ public class CreateAnnouncementDto
     public List<int> PositionIds { get; set; } = [];
 
     public List<string> UserIds { get; set; } = [];
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 }
 
 [ApiController]
@@ -26,7 +28,11 @@ public class AnnouncementController : ControllerBase
     private readonly UserManager<Users> _userManager;
     private readonly IEventPublisher _publisher;
 
-    public AnnouncementController(HRSaaSDbContext db, UserManager<Users> userManager,        IEventPublisher publisher)
+    public AnnouncementController(
+        HRSaaSDbContext db,
+        UserManager<Users> userManager,
+        IEventPublisher publisher
+    )
     {
         _db = db;
         _userManager = userManager;
@@ -56,6 +62,24 @@ public class AnnouncementController : ControllerBase
                 .Include(x => x.Departments)
                 .Include(x => x.Positions)
                 .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.Title,
+                    x.Content,
+                    x.CreatedAt,
+                    x.StartDate,
+                    x.EndDate,
+                    CreatedBy = _db
+                        .Users.Where(u => u.Id == x.CreatedBy)
+                        .Select(u => new
+                        {
+                            u.Id,
+                            u.FirstName,
+                            u.LastName,
+                        })
+                        .FirstOrDefault(),
+                })
                 .ToListAsync();
 
             return Ok(announcements);
@@ -65,6 +89,24 @@ public class AnnouncementController : ControllerBase
             .Announcement.Include(x => x.Users)
             .Where(x => x.Users.Any(u => u.UserId == user.Id))
             .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new
+            {
+                x.Id,
+                x.Title,
+                x.Content,
+                x.CreatedAt,
+                x.StartDate,
+                x.EndDate,
+                CreatedBy = _db
+                    .Users.Where(u => u.Id == x.CreatedBy)
+                    .Select(u => new
+                    {
+                        u.Id,
+                        u.FirstName,
+                        u.LastName,
+                    })
+                    .FirstOrDefault(),
+            })
             .ToListAsync();
 
         return Ok(announcementsForUser);
@@ -96,6 +138,8 @@ public class AnnouncementController : ControllerBase
             Content = dto.Content,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = user.Id,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
         };
 
         announcement.Departments = dto
@@ -117,7 +161,13 @@ public class AnnouncementController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        await _publisher.PublishAsync(new AnnouncementRequestedEvent(announcement.Users.Select(u => u.UserId).ToArray(), announcement.Id, $"{user.FirstName} {user.LastName}"));
+        await _publisher.PublishAsync(
+            new AnnouncementRequestedEvent(
+                announcement.Users.Select(u => u.UserId).ToArray(),
+                announcement.Id,
+                $"{user.FirstName} {user.LastName}"
+            )
+        );
 
         return Ok(announcement.Id);
     }

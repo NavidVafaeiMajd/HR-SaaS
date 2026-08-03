@@ -13,6 +13,9 @@ public class Announcement
 
     public ICollection<AnnouncementUser> Users { get; set; } = new List<AnnouncementUser>();
 
+public DateTime StartDate { get; set; }
+public DateTime EndDate { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public string CreatedBy { get; set; }

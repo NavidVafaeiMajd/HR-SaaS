@@ -132,11 +132,11 @@ const onSubmit = (data: z.infer<typeof validation>) => {
     positionIds: data.positionIds,
     userIds: data.userIds,
 
-    publish_date: data.publish_date
+    startDate: data.publish_date
       ? data.publish_date.toISOString().slice(0, 19)
       : null,
 
-    end_date: data.end_date ? data.end_date.toISOString().slice(0, 19) : null,
+    endDate: data.end_date ? data.end_date.toISOString().slice(0, 19) : null,
   };
 
   console.log(formData);
