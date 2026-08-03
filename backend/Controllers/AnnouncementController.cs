@@ -24,14 +24,16 @@ public class AnnouncementController : ControllerBase
 {
     private readonly HRSaaSDbContext _db;
     private readonly UserManager<Users> _userManager;
+    private readonly IEventPublisher _publisher;
 
-    public AnnouncementController(HRSaaSDbContext db, UserManager<Users> userManager)
+    public AnnouncementController(HRSaaSDbContext db, UserManager<Users> userManager,        IEventPublisher publisher)
     {
         _db = db;
         _userManager = userManager;
+        _publisher = publisher;
     }
 
-    [Permission(Permission.Users_post)]
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -68,6 +70,7 @@ public class AnnouncementController : ControllerBase
         return Ok(announcementsForUser);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(CreateAnnouncementDto dto)
     {
@@ -113,6 +116,8 @@ public class AnnouncementController : ControllerBase
         _db.Announcement.Add(announcement);
 
         await _db.SaveChangesAsync();
+
+        await _publisher.PublishAsync(new AnnouncementRequestedEvent(announcement.Users.Select(u => u.UserId).ToArray(), announcement.Id, $"{user.FirstName} {user.LastName}"));
 
         return Ok(announcement.Id);
     }

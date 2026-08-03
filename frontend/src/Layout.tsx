@@ -29,6 +29,7 @@ import { TeachingRoutes } from "./routes/teaching.routes";
 import { DocumentsRoutes } from "./routes/documents.routes";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
+import { NewsListRoutes } from "./routes/News.routes";
 // Documents components - now lazy loaded
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
@@ -41,7 +42,7 @@ const NotFound = lazy(() => import("./NotFound"));
 
 const NewsListDetailes = lazy(
   () =>
-    import("./components/pages/HumanResourceManagement/NewsList/NewaListDetailes/NewsListDetailes"),
+    import("./components/pages/NewsList/NewaListDetailes/NewsListDetailes"),
 );
 
 const AppLayout = () => {
@@ -153,6 +154,7 @@ const Layout = () => {
                 {TeachingRoutes}
                 {DocumentsRoutes}
                 {RolesRoutes}
+                { NewsListRoutes}
                 {/* Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Route>
