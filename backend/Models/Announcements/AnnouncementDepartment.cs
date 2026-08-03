@@ -4,5 +4,5 @@ public class AnnouncementDepartment
 
     public Guid AnnouncementId { get; set; }
 
-    public string DepartmentId { get; set; }
+    public int DepartmentId { get; set; }
 }

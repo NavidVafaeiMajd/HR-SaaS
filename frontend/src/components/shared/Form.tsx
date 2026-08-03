@@ -417,9 +417,9 @@ function FormImage<T extends FieldValues>({
   );
 }
 
-//---------- MultiSelect ----------
+//---------- SimpleSelect ----------
 
-interface MultiSelectProps<T extends FieldValues> {
+interface SimpleSelectProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   options: { label: string; value: any }[];
@@ -429,7 +429,7 @@ interface MultiSelectProps<T extends FieldValues> {
   disabled?: boolean;
 }
 
-export function MultiSelect<T extends FieldValues>({
+export function SimpleSelect<T extends FieldValues>({
   name,
   label,
   options,
@@ -437,7 +437,7 @@ export function MultiSelect<T extends FieldValues>({
   className,
   placeholder,
   disabled,
-}: MultiSelectProps<T>) {
+}: SimpleSelectProps<T>) {
   const { control } = useFormContextSafe<T>();
   return (
     <FormField
@@ -459,7 +459,7 @@ export function MultiSelect<T extends FieldValues>({
                 value={options.find((opt) => opt.value === field.value) ?? null}
                 onChange={(val) =>
                   field.onChange(
-                    val ? (val as { label: string; value: string }).value : ""
+                    val ? (val as { label: string; value: string }).value : "",
                   )
                 }
                 isDisabled={disabled}
@@ -475,6 +475,66 @@ export function MultiSelect<T extends FieldValues>({
   );
 }
 
+// ---------- MultiSelect ----------
+
+interface MultiSelectProps<T extends FieldValues> {
+  name: Path<T>;
+  label: string;
+  options: { label: string; value: any }[];
+  required?: boolean;
+  className?: string;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+export function MultiSelect<T extends FieldValues>({
+  name,
+  label,
+  options,
+  required,
+  className,
+  placeholder,
+  disabled,
+}: MultiSelectProps<T>) {
+  const { control } = useFormContextSafe<T>();
+
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={`grid gap-0! w-full ${className ?? ""}`}>
+          <FormLabel className="text-md mb-4!">
+            {label} {required && <span className="text-red-500">*</span>}
+          </FormLabel>
+
+          <FormControl>
+            <div className="select-box">
+              <Select<{ label: string; value: any }, true>
+                isRtl
+                isMulti
+                closeMenuOnSelect={false}
+                placeholder={placeholder}
+                options={options}
+                value={options.filter((opt) =>
+                  field.value?.includes(opt.value),
+                )}
+                onChange={(vals) =>
+                  field.onChange(vals.map((item) => item.value))
+                }
+                isDisabled={disabled}
+              />
+            </div>
+          </FormControl>
+
+          <div className="space-y-1 leading-none">
+            <FormMessage />
+          </div>
+        </FormItem>
+      )}
+    />
+  );
+}
 //---------- STAR ----------
 
 interface StarRateProps<T extends FieldValues> {
@@ -493,9 +553,7 @@ export function StarRate<T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem
-          className={`flex flex-col w-full  space-y-0 ${
-            className ?? ""
-          }`}
+          className={`flex flex-col w-full  space-y-0 ${className ?? ""}`}
         >
           <FormControl>
             <StarRating star={field.value} onChange={field.onChange} />
@@ -604,7 +662,10 @@ interface FormHiddenProps<T extends FieldValues> {
   value?: any;
 }
 
-function FormHidden<T extends FieldValues>({ name, value }: FormHiddenProps<T>) {
+function FormHidden<T extends FieldValues>({
+  name,
+  value,
+}: FormHiddenProps<T>) {
   const { control } = useFormContextSafe<T>();
 
   return (
@@ -622,7 +683,6 @@ function FormHidden<T extends FieldValues>({ name, value }: FormHiddenProps<T>) 
     />
   );
 }
-
 
 /////////////////////////////////
 interface FormPriceInputProps<T extends FieldValues> {
@@ -652,7 +712,6 @@ export function FormPriceInput<T extends FieldValues>({
     const numeric = onlyInteger.replace(/\D/g, "");
     return numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }, []);
-
 
   return (
     <FormField
@@ -687,17 +746,15 @@ export function FormPriceInput<T extends FieldValues>({
   );
 }
 
-
 export const Form = Object.assign(FormRoot, {
   Input: FormInput,
-  // Select: FormSelect,
   Date: FormDate,
   RichText: FormRichText,
   Textarea: FormTextarea,
   Image: FormImage,
   Checkbox: FormCheckbox,
-  // SelectItem,
-  Select: MultiSelect,
+  Select: SimpleSelect,
+  MultiSelect: MultiSelect, 
   StarRate: StarRate,
   TimePicker: FormTimePicker,
   Hidden: FormHidden,

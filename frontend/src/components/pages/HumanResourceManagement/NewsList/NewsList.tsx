@@ -6,6 +6,8 @@ import { Form } from "@/components/shared/Form";
 import type z from "zod";
 import { usePostRows } from "@/hook/usePostRows";
 import { useDepartments } from "@/hook/useDepartments";
+import { usePositionQuery } from "./hooks/usePositionQuery";
+import { useUsersQuery } from "./hooks/useUsersQuery";
 
 const NewsList: React.FC = () => {
   const title = " ابلاغیه ";
@@ -13,29 +15,61 @@ const NewsList: React.FC = () => {
     document.title = title;
   }, []);
 
+
   const { data: departments, isPending: departmentsLoading } = useDepartments();
 
-  const defaultValues = {
-    title: "",
-    publish_date: null,
-    end_date: null,
-    department: "",
-    summary: "",
-    content: "",
-  };
+const defaultValues = {
+  title: "",
+  publish_date: null,
+  end_date: null,
+  departmentIds: [],
+  positionIds: [],
+  userIds: [],
+  summary: "",
+  content: "",
+};
   const { mutation, form } = usePostRows(
     "hr-news",
     ["hr-news"],
     defaultValues,
     validation,
     "ابلاغیه",
-    true
+    true,
   );
 
-  const departmentsMapped = departments?.data?.map((item) => ({
-    value: String(item.id),
-    label: item.name,
-  }));
+  const selectedDepartments = form.watch("departmentIds");
+  const selectedPositions = form.watch("positionIds");
+
+    useEffect(() => {
+      form.setValue("positionIds", []);
+      form.setValue("userIds", []);
+    }, [selectedDepartments]);
+
+    useEffect(() => {
+      form.setValue("userIds", []);
+    }, [selectedPositions]);
+  
+  const { data: positions, isPending: positionsLoading } =
+    usePositionQuery(selectedDepartments);
+
+  const { data: users, isPending: usersLoading } = useUsersQuery(selectedPositions);
+  const departmentsMapped =
+    departments?.data?.map((item) => ({
+      value: String(item.id),
+      label: item.name,
+    })) || [];
+
+  const positionsMapped =
+    positions?.map((item) => ({
+      value: item.value,
+      label: item.label,
+    })) || [];
+
+  const usersMapped =
+    users?.map((item) => ({
+      value: item.value,
+      label: item.label,
+    })) || [];
   const formFields = (
     <div className="relative">
       {(mutation.isPending || departmentsLoading) && (
@@ -59,12 +93,24 @@ const NewsList: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-5"></div>
 
       <div className="flex flex-col md:flex-row gap-5">
-        <Form.Select
-          name="department"
+        <Form.MultiSelect
+          name="departmentIds"
           label="واحد سازمانی"
           options={departmentsMapped || []}
           required
           placeholder="انتخاب واحد سازمانی"
+        />
+        <Form.MultiSelect
+          name="positionIds"
+          label="سمت شغلی"
+          options={positionsMapped}
+          disabled={!selectedDepartments?.length}
+        />
+        <Form.MultiSelect
+          name="userIds"
+          label="کارمند"
+          options={usersMapped}
+          disabled={!selectedPositions?.length}
         />
         <Form.Input
           name="summary"
@@ -77,20 +123,26 @@ const NewsList: React.FC = () => {
     </div>
   );
 
-  const onSubmit = (data: z.infer<typeof validation>) => {
-    const formData = {
-      ...data,
-      publish_date: data.publish_date
-        ? data.publish_date.toISOString().slice(0, 19)
-        : null,
-      end_date: data.end_date
-        ? data.end_date.toISOString().slice(0, 19)
-        : null,
-    };
-    
-    console.log(formData)
-    mutation.mutate(formData);
+const onSubmit = (data: z.infer<typeof validation>) => {
+  const formData = {
+    title: data.title,
+    content: data.content,
+
+    departmentIds: data.departmentIds,
+    positionIds: data.positionIds,
+    userIds: data.userIds,
+
+    publish_date: data.publish_date
+      ? data.publish_date.toISOString().slice(0, 19)
+      : null,
+
+    end_date: data.end_date ? data.end_date.toISOString().slice(0, 19) : null,
   };
+
+  console.log(formData);
+
+  mutation.mutate(formData);
+};
 
   return (
     <>

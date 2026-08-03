@@ -59,7 +59,7 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
       const { data: departments } = useDepartments();
       const rowData = row.original;
       const department = departments?.data?.find(
-        (item) => item?.id === rowData.department.id
+        (item) => item?.id === rowData.department?.id
       );
       return department ? department.name : "-";
     },
