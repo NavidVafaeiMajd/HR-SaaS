@@ -294,4 +294,68 @@ public class AnnouncementController : ControllerBase
 
         return Ok(announcement.Id);
     }
+    [HttpGet("{id}")]
+public async Task<IActionResult> GetById(Guid id)
+{
+    var announcement = await _db.Announcement
+        .Where(x => x.Id == id)
+        .Select(x => new
+        {
+            x.Id,
+            x.Title,
+            x.Content,
+            x.CreatedAt,
+            x.StartDate,
+            x.EndDate,
+
+            Departments = x.Departments
+                .Select(d => new
+                {
+                    value = d.DepartmentId,
+                    label = _db.Departments
+                        .Where(dep => dep.Id == d.DepartmentId)
+                        .Select(dep => dep.Name)
+                        .FirstOrDefault()
+                }),
+
+            Positions = x.Positions
+                .Select(p => new
+                {
+                    value = p.PositionId,
+                    label = _db.Positions
+                        .Where(pos => pos.Id == p.PositionId)
+                        .Select(pos => pos.Name)
+                        .FirstOrDefault()
+                }),
+
+            Users = x.Users
+                .Select(u => new
+                {
+                    value = u.UserId,
+                    label = _db.Users
+                        .Where(user => user.Id == u.UserId)
+                        .Select(user => user.FirstName + " " + user.LastName)
+                        .FirstOrDefault()
+                }),
+
+            CreatedBy = _db.Users
+                .Where(u => u.Id == x.CreatedBy)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName
+                })
+                .FirstOrDefault()
+        })
+        .FirstOrDefaultAsync();
+
+    if (announcement == null)
+        return NotFound(new
+        {
+            message = "ابلاغیه یافت نشد"
+        });
+
+    return Ok(announcement);
+}
 }
