@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260803073911_updateAnnouncementsEntityOfAll")]
+    partial class updateAnnouncementsEntityOfAll
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,8 +73,6 @@ namespace HrSaaS.Migrations
 
                     b.HasIndex("AnnouncementId");
 
-                    b.HasIndex("DepartmentId");
-
                     b.ToTable("AnnouncementDepartments");
                 });
 
@@ -91,8 +92,6 @@ namespace HrSaaS.Migrations
 
                     b.HasIndex("AnnouncementId");
 
-                    b.HasIndex("PositionId");
-
                     b.ToTable("AnnouncementPositions");
                 });
 
@@ -107,13 +106,11 @@ namespace HrSaaS.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AnnouncementId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("AnnouncementUsers");
                 });
@@ -653,59 +650,29 @@ namespace HrSaaS.Migrations
 
             modelBuilder.Entity("AnnouncementDepartment", b =>
                 {
-                    b.HasOne("Announcement", "Announcement")
+                    b.HasOne("Announcement", null)
                         .WithMany("Departments")
                         .HasForeignKey("AnnouncementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Departments", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Announcement");
-
-                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("AnnouncementPosition", b =>
                 {
-                    b.HasOne("Announcement", "Announcement")
+                    b.HasOne("Announcement", null)
                         .WithMany("Positions")
                         .HasForeignKey("AnnouncementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Position", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Announcement");
-
-                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("AnnouncementUser", b =>
                 {
-                    b.HasOne("Announcement", "Announcement")
+                    b.HasOne("Announcement", null)
                         .WithMany("Users")
                         .HasForeignKey("AnnouncementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Announcement");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Biography", b =>

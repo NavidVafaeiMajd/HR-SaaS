@@ -1,17 +1,13 @@
+import api from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
-import { useGetRowsToTable } from "./useGetRows";
 
-interface UsersResponse {
-   data: any[];
-}
+export const useEmployees = () => {
+  return useQuery({
+    queryKey: ["users"],
 
-export const   useEmployees = () => {
-   return useQuery<UsersResponse>({
-      queryKey: ["employees"],
-      queryFn: () => useGetRowsToTable("employees"),
-      staleTime: 5 * 60_000,
-      refetchOnWindowFocus: false,
-   });
+    queryFn: async () => {
+      const res = await api.get("/users");
+      return res.data;
+    },
+  });
 };
-
-

@@ -67,6 +67,20 @@ public class PositionsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("by-departments")]
+    public async Task<IActionResult> GetPositions([FromQuery] List<int?> departmentIds)
+    {
+        if (departmentIds == null || departmentIds.Count == 0)
+            return Ok(new List<object>());
+
+        var positions = await _db
+            .Positions.Where(x => departmentIds.Contains(x.DepartmentId))
+            .Select(x => new { value = x.Id.ToString(), label = x.Name })
+            .ToListAsync();
+
+        return Ok(positions);
+    }
+
     [Permission(Permission.Position_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(int id, PositionCreateDTO dto)

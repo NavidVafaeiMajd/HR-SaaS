@@ -245,6 +245,27 @@ public class UserController : ControllerBase
         );
     }
 
+    [HttpGet("by-positions")]
+public async Task<IActionResult> GetUsers(
+    [FromQuery] List<int?> positionIds
+)
+{
+    if (positionIds == null || positionIds.Count == 0)
+        return Ok(new List<object>());
+
+
+    var users = await _db.Users
+        .Where(x => positionIds.Contains(x.PositionId))
+        .Select(x => new
+        {
+            value = x.Id.ToString(),
+            label = x.FirstName+" "+x.LastName
+        })
+        .ToListAsync();
+
+
+    return Ok(users);
+}
     [Permission(Permission.Users_edit)]
     [HttpPost("{userId}/biography")]
     public async Task<IActionResult> UpsertBiography(string userId, BiographyDto dto)

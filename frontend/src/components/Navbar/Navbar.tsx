@@ -93,13 +93,14 @@ const data = {
           title: "سمت سازمانی",
           url: "/hr/designation-list",
         },
-        {
-          title: "ابلاغیه",
-          url: "/hr/news-list",
-        },
       ],
     },
-
+    {
+      title: "ابلاغیه",
+      url: "/news-list",
+      icon: GoClock,
+      items: [],
+    },
     {
       title: "حضور و غیاب",
       url: "/rollcall",

@@ -29,6 +29,7 @@ import { TeachingRoutes } from "./routes/teaching.routes";
 import { DocumentsRoutes } from "./routes/documents.routes";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
+import { NewsListRoutes } from "./routes/News.routes";
 // Documents components - now lazy loaded
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
@@ -41,7 +42,7 @@ const NotFound = lazy(() => import("./NotFound"));
 
 const NewsListDetailes = lazy(
   () =>
-    import("./components/pages/HumanResourceManagement/NewsList/NewaListDetailes/NewsListDetailes"),
+    import("./components/pages/NewsList/NewaListDetailes/NewsListDetailes"),
 );
 
 const AppLayout = () => {
@@ -80,10 +81,16 @@ const AppLayout = () => {
     <>
       <ToastContainer toastClassName="custom-toast-font" position="top-right" />
       <Navbar />
-      <SidebarInset>
-        <main className="p-6 h-full bg-background overflow-hidden! rounded-2xl ">
+      <SidebarInset className="h-[calc(100dvh-15px)]">
+        {" "}
+        <main className="h-full p-6 bg-background rounded-2xl flex flex-col overflow-hidden mb-3">
+          {" "}
           <Header />
-          <Outlet />
+          <div className="flex-1 min-h-0 overflow-scroll scroll-" dir="ltr">
+            <div dir="rtl">
+              <Outlet />
+            </div>
+          </div>
         </main>
       </SidebarInset>
     </>
@@ -153,6 +160,7 @@ const Layout = () => {
                 {TeachingRoutes}
                 {DocumentsRoutes}
                 {RolesRoutes}
+                { NewsListRoutes}
                 {/* Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Route>

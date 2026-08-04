@@ -1,0 +1,36 @@
+public class AnnouncementCreatedNotificationHandler : IEventHandler<AnnouncementRequestedEvent>
+{
+    private readonly INotificationService _notification;
+
+    public AnnouncementCreatedNotificationHandler(INotificationService notification)
+    {
+        _notification = notification;
+    }
+
+    public async Task Handle(AnnouncementRequestedEvent e)
+    {
+
+        if (e.Status == "update")
+        {
+            await _notification.NotifyUsersAsync(
+                e.UserIds,
+                "ابلاغیه به روزرسانی شد",
+                $" ابلاغیه توسط {e.CreateBy} به روزرسانی شد.",
+                            $"/news-list/{e.AnnouncementId}",
+
+                NotificationType.Info
+            );
+        }
+        else
+        {
+                        await _notification.NotifyUsersAsync(
+                e.UserIds,
+                "ابلاغیه جدید",
+                $"یک ابلاغیه جدید توسط {e.CreateBy} منتشر شد.",
+                            $"/news-list/{e.AnnouncementId}",
+
+                NotificationType.Info
+            );
+        }
+    }
+}

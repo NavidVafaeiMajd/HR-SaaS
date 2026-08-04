@@ -26,25 +26,23 @@ const Policies = lazy(
   () => import("@/components/pages/HumanResourceManagement/Policies/Policies"),
 );
 
-const NewsList = lazy(
-  () => import("@/components/pages/HumanResourceManagement/NewsList/NewsList"),
-);
 
 export const HrRoutes = (
-  <Route
-    path="hr"
-    element={
-      <EmployeeProtectRoute>
-        <ProtectedRoute>
-          <LayoutHumanResource />
-        </ProtectedRoute>
-      </EmployeeProtectRoute>
-    }
-  >
-    <Route path="departments-list" element={<OrganizationalUnit />} />
-    <Route path="designation-list" element={<OrganizationalPosition />} />
-    <Route path="office-shifts" element={<OfficeShifts />} />
-    <Route path="policies-list" element={<Policies />} />
-    <Route path="news-list" element={<NewsList />} />
-  </Route>
+  <>
+    <Route
+      path="hr"
+      element={
+        <EmployeeProtectRoute>
+          <ProtectedRoute>
+            <LayoutHumanResource />
+          </ProtectedRoute>
+        </EmployeeProtectRoute>
+      }
+    >
+      <Route path="departments-list" element={<OrganizationalUnit />} />
+      <Route path="designation-list" element={<OrganizationalPosition />} />
+      <Route path="office-shifts" element={<OfficeShifts />} />
+      <Route path="policies-list" element={<Policies />} />
+    </Route>
+  </>
 );

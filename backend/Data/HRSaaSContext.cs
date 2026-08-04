@@ -17,7 +17,10 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<Shift> Shifts { get; set; } = null!;
     public DbSet<ShiftTime> ShiftsTime { get; set; } = null!;
     public DbSet<Notification> Notification { get; set; } = null!;
-
+    public DbSet<Announcement> Announcement { get; set; } = null!;
+    public DbSet<AnnouncementDepartment> AnnouncementDepartments { get; set; } = null!;
+    public DbSet<AnnouncementPosition> AnnouncementPositions { get; set; } = null!;
+    public DbSet<AnnouncementUser> AnnouncementUsers { get; set; } = null!;
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
