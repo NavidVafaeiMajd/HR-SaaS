@@ -148,6 +148,16 @@ const data = {
       title: "درخواست مرخصی",
       url: "/leave/list",
       icon: CiSquarePlus,
+      items: [
+        {
+          title: " لیست مرخصی ",
+          url: "/leave/list",
+        },
+        {
+          title: " نوع مرخصی  ",
+          url: "/leave/type",
+        }
+      ],
     },
 
     {
