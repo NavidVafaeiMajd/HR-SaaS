@@ -11,11 +11,10 @@ import PostLoad from "@/components/ui/postLoad";
 import { useGetData } from "@/hook/useGetData";
 
 const validation = z.object({
-  employee: z.string().min(1, "انتخاب کارمند الزامی است"),
-  leave_type: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
-  start_date: z.date({ error: "تاریخ شروع الزامی است" }),
-  end_date: z.date({ error: "تاریخ پایان الزامی است" }),
-  considerations: z.string().optional(),
+  UserId: z.string().min(1, "انتخاب کارمند الزامی است"),
+  LeaveTypeId: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
+  StartDate: z.date({ error: "تاریخ شروع الزامی است" }),
+  EndDate: z.date({ error: "تاریخ پایان الزامی است" }),
   reason: z.string().min(1, "دلیل مرخصی الزامی است"),
 });
 
@@ -33,16 +32,15 @@ const LeaveList = () => {
   const { stats, isLoading: statsLoading } = useLeaveStats();
   
   const defaultValues = {
-    employee: "",
-    leave_type: "",
-    start_date: new Date(),
-    end_date: new Date(),
-    considerations: "",
+    UserId: "",
+    LeaveTypeId: "",
+    StartDate: new Date(),
+    EndDate: new Date(),
     reason: "",
   };
 
   const { mutation, form } = usePostRows(
-    "leaves",
+    "leave-list",
     ["leaves"],
     defaultValues,
     validation,
@@ -52,25 +50,13 @@ const LeaveList = () => {
 
   const { data: employee, isPending: employeesLoading } = useEmployees();
 
-  const {data : leaveTypes , isPending: leaveTypesLoading} = useGetData<LeaveTypesResponse>("leave-types");
+  const {data : leaveTypes , isPending: leaveTypesLoading} = useGetData<LeaveTypesResponse>("leave-types/options");
   
-  const leaveMapped = leaveTypes?.map((item) => ({
-    value: String(item.id),
-    label: item.type_name, // بستگی به API داره
-  }));
-
-  const mapped = employee?.data?.map((item) => ({
-    value: String(item.id),
-    label: item.firstName +" "+ item.lastName,
-  }));
-
-  console.log(leaveTypes)
-
   const onSubmit = (data: z.infer<typeof validation>) => {
     const formData = {
       ...data,
-      start_date: data.start_date?.toISOString().slice(0, 19),
-      end_date: data.end_date?.toISOString().slice(0, 19),
+      StartDate: data.StartDate?.toISOString().slice(0, 10),
+      EndDate: data.EndDate?.toISOString().slice(0, 10),
     }
     mutation.mutate(formData)
   };
@@ -96,29 +82,26 @@ const LeaveList = () => {
 
               <Form.Select
                 label="کارمند"
-                name="employee"
+                name="UserId"
                 placeholder="انتخاب کارمند"
-                options={mapped || []}
+                options={employee || []}
                 required
               />
 
               {/* نوع مرخصی */}
               <Form.Select
                 label="نوع مرخصی"
-                name="leave_type"
+                name="LeaveTypeId"
                 placeholder="انتخاب نوع مرخصی"
                 required
-                options={leaveMapped || []}
+                options={leaveTypes || []}
               />
 
               {/* تاریخ‌ها */}
               <div className="flex gap-5">
-                <Form.Date label="تاریخ شروع" name="start_date" />
-                <Form.Date label="تاریخ پایان" name="end_date" />
+                <Form.Date label="تاریخ شروع" name="StartDate" />
+                <Form.Date label="تاریخ پایان" name="EndDate" />
               </div>
-
-              {/* ملاحظات */}
-              <Form.Textarea label="ملاحظات" name="considerations" placeholder="..." />
 
               {/* دلیل مرخصی */}
               <Form.Input
@@ -131,7 +114,6 @@ const LeaveList = () => {
           }
         />
       </div>
-
     </div>
   );
 };

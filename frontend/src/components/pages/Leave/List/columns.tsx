@@ -38,7 +38,7 @@ const validation = z.object({
 
 export const leaveColumns: ColumnDef<LeaveRequest>[] = [
   {
-    accessorKey: "employee",
+    accessorKey: "user",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -49,12 +49,12 @@ export const leaveColumns: ColumnDef<LeaveRequest>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const employee = row.getValue("employee") as string;
-      return employee.firstName + " " + employee.lastName;
+      const user = row.getValue("user") as string;
+      return user.firstName + " " + user.lastName;
     },
   },
   {
-    accessorKey: "leave_type",
+    accessorKey: "leaveType",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -65,12 +65,12 @@ export const leaveColumns: ColumnDef<LeaveRequest>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const leave_type = row.getValue("leave_type") as string;
-      return leave_type.type_name;
+      const leaveType = row.getValue("leaveType") as string;
+      return leaveType.name;
     },
   },
   {
-    accessorKey: "start_date",
+    accessorKey: "startDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -81,10 +81,10 @@ export const leaveColumns: ColumnDef<LeaveRequest>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const start = new Date(row.original.start_date).toLocaleDateString(
+      const start = new Date(row.original.startDate).toLocaleDateString(
         "fa-IR",
       );
-      const end = new Date(row.original.end_date).toLocaleDateString("fa-IR");
+      const end = new Date(row.original.endDate).toLocaleDateString("fa-IR");
       return (
         <>
           از {start} تا {end}
@@ -93,7 +93,7 @@ export const leaveColumns: ColumnDef<LeaveRequest>[] = [
     },
   },
   {
-    id: "days",
+    id: "totalDays",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -104,14 +104,9 @@ export const leaveColumns: ColumnDef<LeaveRequest>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const start = new Date(row.original.start_date);
-      const end = new Date(row.original.end_date);
+      const totalDays =row.original.totalDays;
 
-      // اختلاف به روز
-      const diffTime = end.getTime() - start.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 برای احتساب روز شروع
-
-      return <span>{diffDays}</span>;
+      return <span>{totalDays}</span>;
     },
   },
   {

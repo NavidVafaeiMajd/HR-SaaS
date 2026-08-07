@@ -9,19 +9,9 @@ public class LeaveRequest :IAuditable
     public DateOnly StartDate { get; set; }
 
     public DateOnly EndDate { get; set; }
-
-    public TimeOnly? StartTime { get; set; }
-
-    public TimeOnly? EndTime { get; set; }
-
-    public decimal TotalDays { get; set; }
-
-    public string? Description { get; set; }
-
-    public string? Attachment { get; set; }
-
+        public string? Reason { get; set; }
     public LeaveStatus Status { get; set; } = LeaveStatus.Pending;
-
+public decimal TotalDays { get; set; }
     public string? ApprovedById { get; set; }
 
     public string? ApprovalComment { get; set; }

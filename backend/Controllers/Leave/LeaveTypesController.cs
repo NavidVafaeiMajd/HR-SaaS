@@ -54,6 +54,22 @@ public class LeaveTypesController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = leaveType.Id }, leaveType.Id);
     }
 
+    [HttpGet("options")]
+    public async Task<IActionResult> GetOptions()
+    {
+        var leaveTypes = await _db.LeaveTypes
+            .Where(x => x.IsActive )
+            .Select(x => new
+            {
+                value = x.Id.ToString(),
+                label = x.Name
+            })
+            .OrderBy(x => x.label)
+            .ToListAsync();
+
+        return Ok(leaveTypes);
+    }
+
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Put(Guid id, LeaveTypeUpdateDto dto)
     {

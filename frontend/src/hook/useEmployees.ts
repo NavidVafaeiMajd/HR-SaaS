@@ -6,7 +6,7 @@ export const useEmployees = () => {
     queryKey: ["users"],
 
     queryFn: async () => {
-      const res = await api.get("/users");
+      const res = await api.get("/users/options");
       return res.data;
     },
   });
