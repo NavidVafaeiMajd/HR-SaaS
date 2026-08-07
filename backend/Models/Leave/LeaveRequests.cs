@@ -1,4 +1,4 @@
-public class LeaveRequest
+public class LeaveRequest :IAuditable
 {
     public Guid Id { get; set; }
 
@@ -10,6 +10,10 @@ public class LeaveRequest
 
     public DateOnly EndDate { get; set; }
 
+    public TimeOnly? StartTime { get; set; }
+
+    public TimeOnly? EndTime { get; set; }
+
     public decimal TotalDays { get; set; }
 
     public string? Description { get; set; }
@@ -18,13 +22,19 @@ public class LeaveRequest
 
     public LeaveStatus Status { get; set; } = LeaveStatus.Pending;
 
+    public string? ApprovedById { get; set; }
+
+    public string? ApprovalComment { get; set; }
+
+    public DateTime? ApprovedAt { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
 
     public Users User { get; set; } = null!;
 
-    public LeaveType LeaveType { get; set; } = null!;
+    public Users? ApprovedBy { get; set; }
 
-    public ICollection<LeaveApproval> Approvals { get; set; } = [];
+    public LeaveType LeaveType { get; set; } = null!;
 }

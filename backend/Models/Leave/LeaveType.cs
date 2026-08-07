@@ -1,4 +1,4 @@
-public class LeaveType:IAuditable
+public class LeaveType : IAuditable
 {
     public Guid Id { get; set; }
 
@@ -7,11 +7,7 @@ public class LeaveType:IAuditable
     public string? Description { get; set; }
 
     public bool IsPaid { get; set; }
-
-    public bool RequireAttachment { get; set; }
     public decimal AnnualLimit { get; set; }
-
-    public bool IsHourly { get; set; }
 
     public bool IsActive { get; set; } = true;
 
