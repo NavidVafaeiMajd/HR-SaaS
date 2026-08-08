@@ -4,6 +4,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+public class UpdateLeaveRequestDto
+{
+    public Guid LeaveTypeId { get; set; }
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    public string? Reason { get; set; }
+
+    public string? Attachment { get; set; }
+}
+
 [ApiController]
 [Route("api/leave-list")]
 public class LeaveRequestsController : ControllerBase
@@ -82,11 +95,7 @@ public class LeaveRequestsController : ControllerBase
             {
                 x.Id,
 
-                User = new
-                {
-                    x.User.FirstName,
-                    x.User.LastName,
-                },
+                User = new { x.User.FirstName, x.User.LastName },
 
                 LeaveType = new { x.LeaveType.Id, x.LeaveType.Name },
 
@@ -125,6 +134,115 @@ public class LeaveRequestsController : ControllerBase
             .ToListAsync();
 
         return Ok(requests);
+    }
+
+    [Authorize]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, UpdateLeaveRequestDto dto)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+            return Unauthorized();
+
+        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
+            x.Id == id && x.UserId == user.Id
+        );
+
+        if (request is null)
+            return NotFound();
+
+        if (request.Status != LeaveStatus.Pending)
+            return BadRequest("Only pending requests can be edited");
+
+        var leaveType = await _db.LeaveTypes.FirstOrDefaultAsync(x => x.Id == dto.LeaveTypeId);
+
+        if (leaveType is null)
+            return NotFound("Leave type not found");
+
+        var totalDays = dto.EndDate.DayNumber - dto.StartDate.DayNumber + 1;
+
+        request.LeaveTypeId = dto.LeaveTypeId;
+
+        request.StartDate = dto.StartDate;
+
+        request.EndDate = dto.EndDate;
+
+        request.TotalDays = totalDays;
+
+        request.Reason = dto.Reason;
+
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("details/{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var request = await _db
+            .LeaveRequests.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new
+            {
+                x.Id,
+
+                User = new
+                {
+                    x.User.Id,
+                    x.User.UserName,
+                    x.User.Email,
+                },
+
+                LeaveType = new { x.LeaveType.Id, x.LeaveType.Name },
+
+                x.StartDate,
+                x.EndDate,
+                x.TotalDays,
+                x.Reason,
+                x.Status,
+
+                ApprovedBy = x.ApprovedBy == null
+                    ? null
+                    : new { x.ApprovedBy.Id, x.ApprovedBy.UserName },
+
+                x.ApprovalComment,
+                x.ApprovedAt,
+                x.CreatedAt,
+            })
+            .FirstOrDefaultAsync();
+
+        if (request is null)
+            return NotFound();
+
+        return Ok(request);
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+            return Unauthorized();
+
+        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
+            x.Id == id && x.UserId == user.Id
+        );
+
+        if (request is null)
+            return NotFound();
+
+        if (request.Status != LeaveStatus.Pending)
+            return BadRequest("Only pending requests can be deleted");
+
+        _db.LeaveRequests.Remove(request);
+
+        await _db.SaveChangesAsync();
+
+        return NoContent();
     }
 
     [Authorize(Roles = "Admin,Manager")]
