@@ -1,27 +1,38 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
 import api from "@/api/axios";
 
-export const useUpdateRows = (url: string, queryKey: string[], validation: any, message: string) => {
+export const useUpdateRows = (
+  url: string,
+  queryKey: string[],
+  message: string
+) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (data: z.infer<typeof validation> | FormData) => {
-      const res = api.patch(url, data)
-      if ((await res).status !== 200) {
-        toast.error(`ثبت ${message} ناموفق بود`);
-      }
-      return (await res).data;
+    mutationFn: async (data: unknown) => {
+      const response = await api.patch(url, data);
+
+      return response.data;
     },
+
     onSuccess: () => {
-      toast.success(`${message} با موفقیت ثبت شد`);
-      queryClient.invalidateQueries({ queryKey });
+      toast.success(`${message} با موفقیت ویرایش شد`);
+
+      queryClient.invalidateQueries({
+        queryKey,
+      });
     },
-    onError: () => {
-      toast.error("ثبت پرسنل ناموفق بود");
+
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.data ||
+        `ویرایش ${message} ناموفق بود`;
+
+      toast.error(errorMessage);
     },
   });
+
   return { mutation };
 };

@@ -71,7 +71,7 @@ public class LeaveRequestsController : ControllerBase
             EndDate = dto.EndDate,
             Reason = dto.Reason,
 
-            Status = LeaveStatus.Pending,
+            Status = LeaveStatus.Approved,
         };
 
         _db.LeaveRequests.Add(request);
@@ -95,7 +95,7 @@ public class LeaveRequestsController : ControllerBase
             {
                 x.Id,
 
-                User = new { x.User.FirstName, x.User.LastName },
+                User = new { x.User.FirstName, x.User.LastName ,x.User.Id},
 
                 LeaveType = new { x.LeaveType.Id, x.LeaveType.Name },
 
@@ -137,16 +137,11 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateLeaveRequestDto dto)
     {
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user is null)
-            return Unauthorized();
-
         var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
-            x.Id == id && x.UserId == user.Id
+            x.Id == id
         );
 
         if (request is null)
@@ -223,13 +218,9 @@ public class LeaveRequestsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var user = await _userManager.GetUserAsync(User);
-
-        if (user is null)
-            return Unauthorized();
 
         var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
-            x.Id == id && x.UserId == user.Id
+            x.Id == id 
         );
 
         if (request is null)
@@ -246,7 +237,7 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPut("{id}/approve")]
+    [HttpPatch("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id)
     {
         var approver = await _userManager.GetUserAsync(User);
@@ -274,7 +265,7 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPut("{id}/reject")]
+    [HttpPatch("{id}/reject")]
     public async Task<IActionResult> Reject(Guid id, RejectLeaveRequestDto dto)
     {
         var approver = await _userManager.GetUserAsync(User);
@@ -303,9 +294,8 @@ public class LeaveRequestsController : ControllerBase
         return NoContent();
     }
 
-    // لغو درخواست توسط کارمند
     [Authorize]
-    [HttpPut("{id}/cancel")]
+    [HttpPatch("{id}/cancel")]
     public async Task<IActionResult> Cancel(Guid id)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -329,4 +319,36 @@ public class LeaveRequestsController : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Roles = "Admin,Manager")]
+[HttpGet("report")]
+public async Task<IActionResult> GetReport()
+{
+    var totalRequests = await _db.LeaveRequests.CountAsync();
+
+    var pendingRequests = await _db.LeaveRequests
+        .CountAsync(x => x.Status == LeaveStatus.Pending);
+
+    var approvedRequests = await _db.LeaveRequests
+        .CountAsync(x => x.Status == LeaveStatus.Approved);
+
+    var rejectedRequests = await _db.LeaveRequests
+        .CountAsync(x => x.Status == LeaveStatus.Rejected);
+
+    var canceledRequests = await _db.LeaveRequests
+        .CountAsync(x => x.Status == LeaveStatus.Canceled);
+    return Ok(new
+    {
+        total =  totalRequests,
+
+        pending = pendingRequests,
+
+        approved =  approvedRequests,
+        
+
+        rejected = rejectedRequests,
+
+        canceled =  canceledRequests,
+    });
+}
 }

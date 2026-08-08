@@ -1,6 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { LuArrowUpDown } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { EditDialog } from "@/components/shared/EditDialog";
 import { z } from "zod";
@@ -11,258 +10,329 @@ import { useUpdateRows } from "@/hook/useUpdateRows";
 import { useEmployees } from "@/hook/useEmployees";
 import { useGetData } from "@/hook/useGetData";
 
+type LeaveStatus = "Pending" | "Approved" | "Rejected" | "Canceled";
+
 export interface LeaveRequest {
-  id: number;
-  employee_id: string;
-  employee_full_name: string;
-  leave_type_id: string;
-  leaveType: string;
-  start_date: string;
-  end_date: string;
-  reason?: string;
-  considerations?: string;
-  status?: "درحال بررسی" | "تایید شده" | "رد شده" | "";
-  [key: string]: any;
+  id: string;
+
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+
+  leaveType: {
+    id: string;
+    name: string;
+  };
+
+  startDate: string;
+  endDate: string;
+
+  totalDays: number;
+
+  reason?: string | null;
+
+  status: LeaveStatus;
+
+  approvedBy?: {
+    id: string;
+    userName?: string;
+  } | null;
+
+  approvalComment?: string | null;
+
+  approvedAt?: string | null;
+
+  createdAt: string;
+  updatedAt?: string | null;
 }
 
-
 const validation = z.object({
-  employee_id: z.string().min(1, "انتخاب کارمند الزامی است"),
-  leave_type_id: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
-  start_date: z.date({message: "تاریخ شروع الزامی است"}),
-  end_date: z.date({message: "تاریخ پایان الزامی است"}),
+  leaveTypeId: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
+  startDate: z.date({
+    message: "تاریخ شروع الزامی است",
+  }),
+
+  endDate: z.date({
+    message: "تاریخ پایان الزامی است",
+  }),
+
   reason: z.string().optional(),
-  considerations: z.string().optional(),
-  status: z.enum(["درحال بررسی", "تایید شده", "رد شده"]).optional()
-})
+});
+
+const statusMap: Record<
+  LeaveStatus,
+  {
+    label: string;
+    className: string;
+  }
+> = {
+  Pending: {
+    label: "در حال بررسی",
+    className: "bg-yellow-100 text-yellow-800",
+  },
+
+  Approved: {
+    label: "تایید شده",
+    className: "bg-green-100 text-green-800",
+  },
+
+  Rejected: {
+    label: "رد شده",
+    className: "bg-red-100 text-red-800",
+  },
+
+  Canceled: {
+    label: "لغو شده",
+    className: "bg-gray-100 text-gray-800",
+  },
+};
+
+const LeaveActions = ({ row }: { row: LeaveRequest }) => {
+  const { mutation } = useUpdateRows(
+    `leave-list/${row.id}`,
+    ["leaves"],
+    validation,
+    "مرخصی",
+  );
+  const { mutation: UpdateApprove } = useUpdateRows(
+    `leave-list/${row.id}/approve`,
+    ["leaves"],
+    {},
+    "تایید",
+  );
+  const { mutation: UpdateCancel } = useUpdateRows(
+    `leave-list/${row.id}/cancel`,
+    ["leaves"],
+    {},
+    "لغو",
+  );
+  const { mutation: UpdateReject } = useUpdateRows(
+    `leave-list/${row.id}/reject`,
+    ["leaves"],
+    {},
+    "عدم تایید",
+  );
+
+  const deleteRow = useDeleteRows({
+    url: "leave-list",
+    queryKey: ["leaves"],
+  });
+
+  const { data: leaveTypes } = useGetData("leave-types");
+
+  const leaveTypeOptions = Array.isArray(leaveTypes)
+    ? leaveTypes.map((item: any) => ({
+        value: String(item.id),
+        label: item.name,
+      }))
+    : [];
+
+  return (
+    <div className="flex items-center gap-2">
+      <Link to={`/leave/details/${row.id}`}>
+        <Button size="sm">نمایش جزئیات</Button>
+      </Link>
+      <Button
+        onClick={() => {
+          UpdateApprove.mutate({});
+        }}
+      >
+        تایید
+      </Button>
+      <EditDialog
+        btnTitle="عدم تایید"
+        title="فرم عدم تایید"
+      triggerLabel="عدم تایید"
+        fields={
+          <>
+            <Form.Textarea
+              label="دلیل عدم تایید"
+              name="comment"
+              placeholder="دلیل عدم تایید"
+            />
+          </>
+        }
+        defaultValues={{
+          comment: "",
+        }}
+        onSave={(data) => {
+          const formattedData = {
+            comment: data.comment || null,
+          };
+
+          UpdateReject.mutate(formattedData);
+        }}
+        schema={z.object({
+          comment: z.string().optional(),
+        })}
+      />
+      <Button
+        onClick={() => {
+          UpdateCancel.mutate({});
+        }}
+      >
+        لغو کردن
+      </Button>
+
+      <EditDialog
+        fields={
+          <>
+            <Form.Select
+              label="نوع مرخصی"
+              name="leaveTypeId"
+              placeholder="انتخاب نوع مرخصی"
+              options={leaveTypeOptions}
+              required
+            />
+
+            <div className="flex gap-5">
+              <Form.Date label="تاریخ شروع" name="startDate" />
+
+              <Form.Date label="تاریخ پایان" name="endDate" />
+            </div>
+
+            <Form.Textarea
+              label="دلیل مرخصی"
+              name="reason"
+              placeholder="دلیل مرخصی"
+            />
+          </>
+        }
+        defaultValues={{
+          leaveTypeId: String(row.leaveType.id),
+
+          startDate: new Date(row.startDate),
+
+          endDate: new Date(row.endDate),
+
+          reason: row.reason || "",
+        }}
+        onSave={(data) => {
+          const formattedData = {
+            LeaveTypeId: data.leaveTypeId,
+            UserId: data.userId,
+            StartDate: data.startDate.toISOString().slice(0, 10),
+
+            EndDate: data.endDate.toISOString().slice(0, 10),
+
+            Reason: data.reason || null,
+          };
+
+          mutation.mutate(formattedData);
+        }}
+        schema={validation}
+      />
+
+      <DeleteDialog
+        onConfirm={() => {
+          deleteRow.mutate(row.id);
+        }}
+      />
+    </div>
+  );
+};
 
 export const leaveColumns: ColumnDef<LeaveRequest>[] = [
   {
     accessorKey: "user",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        کارمند
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const user = row.getValue("user") as string;
-      return user.firstName + " " + user.lastName;
-    },
-  },
-  {
-    accessorKey: "leaveType",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        نوع مرخصی
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const leaveType = row.getValue("leaveType") as string;
-      return leaveType.name;
-    },
-  },
-  {
-    accessorKey: "startDate",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        مدت زمان مرخصی
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const start = new Date(row.original.startDate).toLocaleDateString(
-        "fa-IR",
-      );
-      const end = new Date(row.original.endDate).toLocaleDateString("fa-IR");
-      return (
-        <>
-          از {start} تا {end}
-        </>
-      );
-    },
-  },
-  {
-    id: "totalDays",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        روزها
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const totalDays =row.original.totalDays;
 
-      return <span>{totalDays}</span>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        وضعیت
-      </Button>
-    ),
+    header: "کارمند",
+
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const user = row.original.user;
+
       return (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            status === "تایید شده"
-              ? "bg-green-100 text-green-800"
-              : status === "رد شده"
-                ? "bg-red-100 text-red-800"
-                : "bg-yellow-100 text-yellow-800"
-          }`}
-        >
-          {status === "تایید شده"
-            ? "تایید شده"
-            : status === "رد شده"
-              ? "رد شده"
-              : "در حال بررسی"}
+        <span>
+          {user?.firstName} {user?.lastName}
         </span>
       );
     },
   },
-  {
-    id: "actions",
-    header: "عملیات",
-    cell: ({ row }) => {
-      const r = row.original;
-      const query = new URLSearchParams({
-        employee: String(r.employee),
-        leaveType: String(r.leaveType),
-        duration: String(r.duration),
-        days: String(r.days),
-        requestDate: String(new Date(r.requestDate).getTime()),
-        status: String(r.status),
-      }).toString();
 
-      const { mutation } = useUpdateRows(
-        `leaves/${r.id}`,
-        ["leaves"],
-        validation,
-        "مرخصی",
+  {
+    accessorKey: "leaveType",
+
+    header: "نوع مرخصی",
+
+    cell: ({ row }) => {
+      return <span>{row.original.leaveType?.name || "—"}</span>;
+    },
+  },
+
+  {
+    id: "duration",
+
+    header: "مدت زمان مرخصی",
+
+    cell: ({ row }) => {
+      const start = new Date(row.original.startDate).toLocaleDateString(
+        "fa-IR",
       );
 
-      const deleteRow = useDeleteRows({
-        url: "leaves",
-        queryKey: ["leaves"],
-      });
-
-      // Get employees and leave types data
-      const { data: employee } = useEmployees();
-      const { data: leaveTypes } = useGetData("leave-types");
-
-      const mapped = employee?.data?.map((item) => ({
-        value: String(item.id),
-        label: item.fullName,
-      }));
-
-      const leaveMapped = Array.isArray(leaveTypes)
-        ? leaveTypes.map((item) => ({
-            value: String(item.id),
-            label: item.type_name,
-          }))
-        : [];
+      const end = new Date(row.original.endDate).toLocaleDateString("fa-IR");
 
       return (
-        <div className="flex items-center gap-2">
-          <Link to={`/leave/details/${r.id}?${query}`}>
-            <Button size="sm">نمایش جزییات</Button>
-          </Link>
-          <EditDialog
-            fields={
-              <>
-                <Form.Select
-                  label="کارمند"
-                  name="employee_id"
-                  placeholder="انتخاب کارمند"
-                  options={mapped || []}
-                  required
-                />
-
-                <Form.Select
-                  label="نوع مرخصی"
-                  name="leave_type_id"
-                  placeholder="انتخاب نوع مرخصی"
-                  required
-                  options={leaveMapped || []}
-                />
-
-                <div className="flex gap-5">
-                  <Form.Date label="تاریخ شروع" name="start_date" />
-                  <Form.Date label="تاریخ پایان" name="end_date" />
-                </div>
-
-                <Form.Textarea
-                  label="ملاحظات"
-                  name="considerations"
-                  placeholder="..."
-                />
-
-                <Form.Input
-                  label="دلیل مرخصی"
-                  name="reason"
-                  placeholder="دلیل مرخصی"
-                  required
-                />
-
-                <Form.Select
-                  label="وضعیت"
-                  name="status"
-                  options={[
-                    { label: "درحال بررسی", value: "درحال بررسی" },
-                    { label: "تایید شده", value: "تایید شده" },
-                    { label: "رد شده", value: "رد شده" },
-                  ]}
-                />
-              </>
-            }
-            defaultValues={{
-              employee_id: String(r.employee_id || ""),
-              leave_type_id: String(r.leave_type_id || ""),
-              start_date: new Date(r.start_date),
-              end_date: new Date(r.end_date),
-              considerations: r.considerations || "",
-              reason: r.reason || "",
-              status: r.status || "درحال بررسی",
-            }}
-            onSave={(data) => {
-              const formattedData = {
-                ...data,
-                start_date: data.start_date.toISOString().slice(0, 19),
-                end_date: data.end_date.toISOString().slice(0, 19),
-              };
-              console.log(formattedData);
-              mutation.mutate(formattedData);
-            }}
-            schema={validation}
-          />
-          <DeleteDialog
-            onConfirm={() => {
-              deleteRow.mutate(r.id);
-            }}
-          />
-        </div>
+        <span>
+          از {start} تا {end}
+        </span>
       );
+    },
+  },
+
+  {
+    accessorKey: "totalDays",
+
+    header: "روزها",
+
+    cell: ({ row }) => {
+      return <span>{row.original.totalDays} روز</span>;
+    },
+  },
+
+  {
+    accessorKey: "status",
+
+    header: "وضعیت",
+
+    cell: ({ row }) => {
+      const status = row.original.status;
+
+      const statusInfo = statusMap[status] || {
+        label: "نامشخص",
+        className: "bg-gray-100 text-gray-800",
+      };
+
+      return (
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${statusInfo.className}`}
+        >
+          {statusInfo.label}
+        </span>
+      );
+    },
+  },
+
+  {
+    accessorKey: "createdAt",
+
+    header: "تاریخ درخواست",
+
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+
+      return <span>{date.toLocaleDateString("fa-IR")}</span>;
+    },
+  },
+
+  {
+    id: "actions",
+
+    header: "عملیات",
+
+    cell: ({ row }) => {
+      return <LeaveActions row={row.original} />;
     },
   },
 ];
