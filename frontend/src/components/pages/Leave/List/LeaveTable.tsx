@@ -4,7 +4,8 @@ import { useGetRowsToTable } from "@/hook/useGetRows";
 
 const LeaveTable: React.FC = () => {
 
-   const fetchLeaves = () => useGetRowsToTable("leaves");
+   const fetchLeaves = () =>
+     useGetRowsToTable("leave-list");
 
    return (
       <DataTable<LeaveRequest, unknown>

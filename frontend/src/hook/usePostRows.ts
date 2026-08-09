@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/api/axios";
 
-export const usePostRows = (
+export const  usePostRows = (
   url: string,
   queryKey: string[],
   defaultValues: any,

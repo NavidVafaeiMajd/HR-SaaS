@@ -9,75 +9,94 @@ import { useGetRowsToTable } from "@/hook/useGetRows";
 import { usePostRows } from "@/hook/usePostRows";
 
 const LeaveType = () => {
-   useEffect(() => {
-      document.title = "نوع مرخصی";
-   }, []);
-   
-   const defaultValues= {
-    type_name: "",
-    days_per_year: "",
-    requires_approval:"",
-  }
+  useEffect(() => {
+    document.title = "نوع مرخصی";
+  }, []);
+
+const defaultValues = {
+  Name: "",
+  AnnualLimit: 0,
+  IsActive: true,
+  IsPaid: true,
+  Description: "",
+};
+
   const { mutation, form } = usePostRows(
     "leave-types",
     ["leave-types"],
     defaultValues,
     validation,
     "مرخصی",
-    true
+    true,
   );
 
-   const fetchLeavesType = () => useGetRowsToTable("leave-types");
+  const fetchLeavesType = () => useGetRowsToTable("leave-types");
   const onSubmit = (data: z.infer<typeof validation>) => {
-    const formData = {
-      ...data, 
-      days_per_year: Number(data.days_per_year),
-    }
-
-    mutation.mutate(formData)
+    mutation.mutate(data);
   };
-   return (
-      <div>
-       <SectionCol
-         form={form}
-          defaultValues={defaultValues}
-          table={            <DataTable
+  return (
+    <div>
+      <SectionCol
+        form={form}
+        defaultValues={defaultValues}
+        table={
+          <DataTable
             columns={columns}
             queryKey={["leave-types"]}
             queryFn={fetchLeavesType}
             searchableKeys={["type_name"]}
-         />}
-          onSubmit={(onSubmit)}
-          FirstTitle=" ثبت جدید نوع مرخصی "
-          SecoundTitle="  لیست همه انواع مرخصی ها "
-          schema={validation}
-          formFields={
-             <>
-              <Form.Input
-                label="نوع مرخصی"
-                name="type_name"
-                placeholder="نوع مرخصی"
-                required
-                />
-              <Form.Input
-                label="روزها در سال"
-                name="days_per_year"
-                placeholder="روزها در سال"
-                required
-              />
-              <Form.Select
-                label="وضعیت"
-                name="requires_approval"
-                placeholder="انتخاب وضعیت"
-                options={[{label : "اضافه بر سازمان" , value : "اضافه بر سازمان"} , {label : "مرخصی سازمانی" , value : "سازمانی"}]}
-                required
-              />
+          />
+        }
+        onSubmit={onSubmit}
+        FirstTitle=" ثبت جدید نوع مرخصی "
+        SecoundTitle="  لیست همه انواع مرخصی ها "
+        schema={validation}
+        formFields={
+          <>
+            <Form.Input
+              label="نوع مرخصی"
+              name="Name"
+              placeholder="نوع مرخصی"
+              required
+            />
 
-            </>
-          }
-         />
-      </div>
-   );
+            <Form.Input
+              label="روزها در سال"
+              name="AnnualLimit"
+              placeholder="روزها در سال"
+              required
+            />
+            <Form.Select
+              label="وضعیت"
+              name="IsActive"
+              placeholder="انتخاب وضعیت"
+              options={[
+                { label: "فعال", value: true },
+                { label: "غیرفعال", value: false },
+              ]}
+              required
+            />
+            <Form.Select
+              label=" وضعیت حقوق"
+              name="IsPaid"
+              placeholder="انتخاب وضعیت"
+              options={[
+                { label: "با حقوق", value: true },
+                { label: "بدون حقوق", value: false },
+              ]}
+              required
+            />
+            <Form.Textarea
+              label=" توضیحات "
+              name="Description"
+              placeholder="توضیحات "
+              required
+            />
+          </>
+        }
+      />
+    </div>
+  );
 };
 
 export default LeaveType;

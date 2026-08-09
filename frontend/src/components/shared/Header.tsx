@@ -20,7 +20,7 @@ const Header: React.FC<ChildProps> = ({ headerMenu }) => {
     <>
       <div
         className={cn(
-          "bg-[#7c8cbc]/10 mt-2 px-5 text-black h-[50px] fixed! top-0 left-2  z-50 transition-all duration-200 right-0  backdrop-blur-sm border border-white/20  rounded-full",
+          "print:hidden bg-[#7c8cbc]/10 mt-2 px-5 text-black h-[50px] fixed! top-0 left-2  z-50 transition-all duration-200 right-0  backdrop-blur-sm border border-white/20  rounded-full",
           state === "expanded" ? "lg:right-[16.5rem]" : "lg:right-[4.5rem]",
         )}
       >

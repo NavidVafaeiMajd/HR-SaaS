@@ -14,7 +14,7 @@ interface Props {
 
 const StatBox = ({ data }: Props) => {
    return (
-      <div className="md:grid  md:grid-cols-2 lg:grid-cols-4  flex flex-col justify-center items-stretch! w-full gap-5">
+      <div className="flex flex-col md:flex-row justify-center items-stretch! w-full gap-5">
          {data.map((data) => {
             const Icon = data.icon;
             return (

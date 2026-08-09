@@ -29,6 +29,28 @@ public class UserController : ControllerBase
         _publisher = publisher;
     }
 
+[HttpGet("options")]
+public async Task<IActionResult> GetOptions()
+{
+    var adminRole = await _roleManager.FindByNameAsync("Admin");
+
+    var adminIds = await _db.UserRoles
+        .Where(x => x.RoleId == adminRole!.Id)
+        .Select(x => x.UserId)
+        .ToListAsync();
+
+    var users = await _userManager.Users
+        .Where(x => !adminIds.Contains(x.Id))
+        .Select(x => new
+        {
+            value = x.Id,
+            label = x.FirstName + " " + x.LastName
+        })
+        .ToListAsync();
+
+    return Ok(users);
+}
+
     [Permission(Permission.Users_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()

@@ -11,12 +11,12 @@ interface LeaveReport {
   approved: number;
   rejected: number;
   pending: number;
+  canceled: number;
 }
 
 export const useLeaveStats = () => {
-  const { data: reportData, isLoading } = useGetData<LeaveReport>("leave-types/report");
+  const { data: reportData, isLoading } = useGetData<LeaveReport>("leave-list/report");
   
-  console.log(reportData)
 
   const stats = [
     {
@@ -42,6 +42,13 @@ export const useLeaveStats = () => {
     },
     {
       id: 3,
+      title: " لغو شده ",
+      count: parseInt(reportData?.canceled.toString() || "0"),
+      color: "#f3c156",
+      icon: ClipboardCheck,
+    },
+        {
+      id: 4,
       title: "درحال بررسی",
       count: parseInt(reportData?.pending.toString() || "0"),
       color: "#f3c156",

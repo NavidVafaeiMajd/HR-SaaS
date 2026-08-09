@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260807123212_AddLeaveEntity")]
+    partial class AddLeaveEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,20 +301,29 @@ namespace HrSaaS.Migrations
                     b.Property<string>("ApprovedById")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Attachment")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasColumnType("time");
+
                     b.Property<Guid>("LeaveTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("StartTime")
+                        .HasColumnType("time");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

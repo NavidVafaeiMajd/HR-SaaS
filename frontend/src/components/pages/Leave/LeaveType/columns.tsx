@@ -23,72 +23,89 @@ const ActionsCell = React.memo(({ row }: { row: any }) => {
     queryKey: ["leave-types"],
   });
   
-  const { mutation } = useUpdateRows(
-    `leave-types/${row.original.id}`,
-    ["leave-types"],
-    z.object({
-      type_name: z.string().min(1, "نوع مرخصی الزامی است"),
-      days_per_year: z.string().min(1, "روزها در سال الزامی است"),
-      requires_approval: z.string().min(1, "وضعیت الزامی است"),
-    }),
-    "نوع مرخصی"
-  );
+const { mutation } = useUpdateRows(
+  `leave-types/${row.original.id}`,
+  ["leave-types"],
+  z.object({
+    Name: z.string().min(1, "نوع مرخصی الزامی است"),
+    AnnualLimit: z.coerce.number().min(1, "روزها در سال الزامی است"),
+    IsActive: z.boolean(),
+    Description: z.string().optional(),
+  }),
+  "نوع مرخصی",
+);
 
-  const leaveType = row.original;
-  
-  return (
-    <div className="flex items-center gap-2">
-      <EditDialog
-        onSave={(data) => {
-          console.log(data)
-          mutation.mutate(data);
-        }}
-        fields={
-          <>
-              <Form.Input
-                label="نوع مرخصی"
-                name="type_name"
-                placeholder="نوع مرخصی"
-                required
-                />
-              <Form.Input
-                label="روزها در سال"
-                name="days_per_year"
-                placeholder="روزها در سال"
-                required
-              />
-              <Form.Select
-                label="وضعیت"
-                name="requires_approval"
-                placeholder="انتخاب وضعیت"
-                options={[{label : "اضافه بر سازمان" , value : "اضافه بر سازمان"} , {label : "مرخصی سازمانی" , value : "سازمانی"}]}
-                required
-              />
-          </>
-        }
-        defaultValues={{
-          type_name: leaveType.type_name || "",
-          days_per_year: String(leaveType.days_per_year || ""),
-          requires_approval: leaveType.requires_approval || "",
-        }}
-        schema={z.object({
-          type_name: z.string().min(1, "نوع مرخصی الزامی است"),
-          days_per_year: z.string().min(1, "روزها در سال الزامی است"),
-          requires_approval: z.string().min(1, "وضعیت الزامی است"),
-        })}
-      />
-      <DeleteDialog
-        onConfirm={() => {
-          deleteRow.mutate(Number(leaveType.id));
-        }}
-      />
-    </div>
-  );
+const leaveType = row.original;
+
+return (
+  <div className="flex gap-2">
+    <EditDialog
+      onSave={(data) => {
+        mutation.mutate(data);
+      }}
+      fields={
+        <>
+          <Form.Input
+            label="نوع مرخصی"
+            name="Name"
+            placeholder="نوع مرخصی"
+            required
+          />
+
+          <Form.Input
+            label="روزها در سال"
+            name="AnnualLimit"
+            placeholder="روزها در سال"
+            required
+          />
+
+          <Form.Select
+            label="وضعیت"
+            name="IsActive"
+            placeholder="انتخاب وضعیت"
+            options={[
+              { label: "فعال", value: true },
+              { label: "غیرفعال", value: false },
+            ]}
+            required
+          />
+
+          <Form.Textarea
+            label="توضیحات"
+            name="Description"
+            placeholder="توضیحات"
+          />
+        </>
+      }
+      defaultValues={{
+        Name: leaveType.name || "",
+        AnnualLimit: leaveType.annualLimit ?? 0,
+        IsActive: leaveType.isActive ?? true,
+        Description: leaveType.description || "",
+      }}
+      schema={z.object({
+        Name: z.string().min(1, "نوع مرخصی الزامی است"),
+
+        AnnualLimit: z.coerce.number().min(1, "روزها در سال الزامی است"),
+
+        IsActive: z.boolean(),
+
+        Description: z.string().optional(),
+      })}
+    />
+
+    <DeleteDialog
+      onConfirm={() => {
+        deleteRow.mutate(leaveType.id);
+      }}
+    />
+  </div>
+);
 });
 
 export const columns: ColumnDef<leaveTypeColumnProps>[] = [
   {
-    accessorKey: "type_name",
+    accessorKey: "name",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -100,7 +117,7 @@ export const columns: ColumnDef<leaveTypeColumnProps>[] = [
     ),
   },
   {
-    accessorKey: "days_per_year",
+    accessorKey: "annualLimit",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -112,7 +129,7 @@ export const columns: ColumnDef<leaveTypeColumnProps>[] = [
     ),
   },
   {
-    accessorKey: "requires_approval",
+    accessorKey: "isActive",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -122,6 +139,26 @@ export const columns: ColumnDef<leaveTypeColumnProps>[] = [
         وضعیت
       </Button>
     ),
+    cell: ({ row }) => {
+      const isActive = row.getValue("isActive");
+      return isActive ? "فعال" : "غیرفعال";
+    },
+  },
+  {
+    accessorKey: "isPaid",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        <LuArrowUpDown className="ml-2 h-4 w-4" />
+        وضعبت حقوق
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const isPaid = row.getValue("isPaid");
+      return isPaid ? "با حقوق" : "بدون حقوق";
+    },
   },
   {
     accessorKey: "id",

@@ -21,6 +21,10 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<AnnouncementDepartment> AnnouncementDepartments { get; set; } = null!;
     public DbSet<AnnouncementPosition> AnnouncementPositions { get; set; } = null!;
     public DbSet<AnnouncementUser> AnnouncementUsers { get; set; } = null!;
+    public DbSet<LeaveType> LeaveTypes { get; set; } = null!;
+    public DbSet<LeaveRequest> LeaveRequests { get; set; } = null!;
+
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
