@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import UserLeaveDetailsPage from "@/components/pages/Leave/UaerLeaveDetailsPage";
+import UserLeaveDetailsPage from "@/components/pages/Leave/UserLeaveDetailsPage/UaerLeaveDetailsPage";
 
 
 const LayoutLeave = lazy(() => import("@/components/pages/Leave/Layout"));

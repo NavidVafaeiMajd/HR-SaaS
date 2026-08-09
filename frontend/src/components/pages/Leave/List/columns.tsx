@@ -129,47 +129,44 @@ const LeaveActions = ({ row }: { row: LeaveRequest }) => {
       <Link to={`/leave/details/${row.id}`}>
         <Button size="sm">نمایش جزئیات</Button>
       </Link>
-      <Button
-        onClick={() => {
-          UpdateApprove.mutate({});
-        }}
-      >
-        تایید
-      </Button>
-      <EditDialog
-        btnTitle="عدم تایید"
-        title="فرم عدم تایید"
-      triggerLabel="عدم تایید"
-        fields={
-          <>
-            <Form.Textarea
-              label="دلیل عدم تایید"
-              name="comment"
-              placeholder="دلیل عدم تایید"
-            />
-          </>
-        }
-        defaultValues={{
-          comment: "",
-        }}
-        onSave={(data) => {
-          const formattedData = {
-            comment: data.comment || null,
-          };
+      {row.status === "Pending" && (
+        <div className="flex gap-2">
+          <Button
+            onClick={() => {
+              UpdateApprove.mutate({});
+            }}
+          >
+            تایید
+          </Button>
+          <EditDialog
+            btnTitle="عدم تایید"
+            title="فرم عدم تایید"
+            triggerLabel="عدم تایید"
+            fields={
+              <>
+                <Form.Textarea
+                  label="دلیل عدم تایید"
+                  name="comment"
+                  placeholder="دلیل عدم تایید"
+                />
+              </>
+            }
+            defaultValues={{
+              comment: "",
+            }}
+            onSave={(data) => {
+              const formattedData = {
+                comment: data.comment || null,
+              };
 
-          UpdateReject.mutate(formattedData);
-        }}
-        schema={z.object({
-          comment: z.string().optional(),
-        })}
-      />
-      <Button
-        onClick={() => {
-          UpdateCancel.mutate({});
-        }}
-      >
-        لغو کردن
-      </Button>
+              UpdateReject.mutate(formattedData);
+            }}
+            schema={z.object({
+              comment: z.string().optional(),
+            })}
+          />
+        </div>
+      )}
 
       <EditDialog
         fields={
