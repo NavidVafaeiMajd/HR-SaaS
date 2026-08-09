@@ -9,35 +9,38 @@ interface DatePickerProps {
    placeholder?: string;
    onlyMonthPicker ?: boolean
 }
-
 const CuDatePicker: React.FC<DatePickerProps> = ({
-   value,
-   onChange,
-   placeholder = "تاریخ",
-   onlyMonthPicker = false
+  value,
+  onChange,
+  placeholder = "تاریخ",
+  onlyMonthPicker = false,
 }) => {
-   return (
-      <DatePicker
-         value={value ? new Date(value) : ""}
-         onChange={(date: any) =>
-            onChange(date?.isValid ? date.toDate() : null)
-         }
-         onlyMonthPicker ={onlyMonthPicker}
-         format="YYYY/MM/DD"
-         calendar={persian}
-         locale={persian_fa}
-         calendarPosition="bottom-right"
-         placeholder={placeholder}
-         render={(value, openCalendar) => (
-            <Input
-               value={value}
-               onClick={openCalendar}
-               className="cursor-pointer min-h-12"
-               readOnly
-            />
-         )}
-      />
-   );
-};
+  return (
+    <DatePicker
+      value={value ? new Date(value) : ""}
+      onChange={(date: any) => {
+        if (!date?.isValid) {
+          onChange(null);
+          return;
+        }
 
+        onChange(date.toDate());
+      }}
+      onlyMonthPicker={onlyMonthPicker}
+      format={onlyMonthPicker ? "MMMM YYYY" : "YYYY/MM/DD"}
+      calendar={persian}
+      locale={persian_fa}
+      calendarPosition="bottom-right"
+      placeholder={placeholder}
+      render={(value, openCalendar) => (
+        <Input
+          value={value}
+          onClick={openCalendar}
+          className="min-h-12 cursor-pointer"
+          readOnly
+        />
+      )}
+    />
+  );
+};
 export default CuDatePicker;

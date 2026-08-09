@@ -71,6 +71,9 @@ importers:
       framer-motion:
         specifier: ^12.23.12
         version: 12.23.12(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
+      jalaali-js:
+        specifier: ^2.0.0
+        version: 2.0.0
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
@@ -3395,6 +3398,10 @@ packages:
     resolution: {integrity: sha512-KLViCmWx94zOvpLwSlsx6yOCeMhZYaxrJV87Po5k/FoZzcPSahvK5qJ7fYhS61sZi5ikmh2S3Hz55A2l3U69ng==}
     peerDependencies:
       react: ^19.0.0
+
+  jalaali-js@2.0.0:
+    resolution: {integrity: sha512-HkWlwO3KxuYwERP1jsn+5M+QA+EKpIJ+zGesLee5VJNn2d2Melue0uQIvd9C/0QYFR7XVWvfF/uiNEz9Jbr9Hw==}
+    engines: {node: '>=20'}
 
   jest-environment-node@29.7.0:
     resolution: {integrity: sha512-DOSwCRqXirTOyheM+4d5YZOrWcdu0LNZ87ewUoywbcb2XR4wKgqiG8vNeYwhjFMbEkfju7wx2GYH0P2gevGvFw==}
@@ -8372,6 +8379,8 @@ snapshots:
       react: 18.0.0
     transitivePeerDependencies:
       - '@types/react'
+
+  jalaali-js@2.0.0: {}
 
   jest-environment-node@29.7.0:
     dependencies:

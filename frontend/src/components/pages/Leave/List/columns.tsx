@@ -102,12 +102,7 @@ const LeaveActions = ({ row }: { row: LeaveRequest }) => {
     {},
     "تایید",
   );
-  const { mutation: UpdateCancel } = useUpdateRows(
-    `leave-list/${row.id}/cancel`,
-    ["leaves"],
-    {},
-    "لغو",
-  );
+
   const { mutation: UpdateReject } = useUpdateRows(
     `leave-list/${row.id}/reject`,
     ["leaves"],

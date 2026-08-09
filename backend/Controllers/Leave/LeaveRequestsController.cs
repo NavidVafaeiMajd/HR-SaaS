@@ -18,6 +18,17 @@ public class UpdateLeaveRequestDto
     public string? Attachment { get; set; }
 }
 
+public class CreateMyLeaveRequestDto
+{
+    public Guid LeaveTypeId { get; set; }
+
+    public DateOnly StartDate { get; set; }
+
+    public DateOnly EndDate { get; set; }
+
+    public string? Reason { get; set; }
+}
+
 [ApiController]
 [Route("api/leave-list")]
 public class LeaveRequestsController : ControllerBase
@@ -71,7 +82,7 @@ public class LeaveRequestsController : ControllerBase
 
             EndDate = dto.EndDate,
             Reason = dto.Reason,
-TotalDays = TotalDays,
+            TotalDays = TotalDays,
             Status = LeaveStatus.Approved,
         };
 
@@ -211,7 +222,7 @@ TotalDays = TotalDays,
     }
 
     [Authorize]
-    [HttpGet("user/monthly")]
+    [HttpGet("my/monthly")]
     public async Task<IActionResult> GetUserMonthlyReport(int year, int month)
     {
         if (month < 1 || month > 12)
@@ -239,7 +250,6 @@ TotalDays = TotalDays,
             .Include(x => x.LeaveType)
             .Where(x =>
                 x.UserId == user.Id
-                && x.Status == LeaveStatus.Approved
                 && x.StartDate <= end
                 && x.EndDate >= start
             )
@@ -261,12 +271,16 @@ TotalDays = TotalDays,
                     LeaveTypeName = x.LeaveType.Name,
                     StartDate = effectiveStart,
                     EndDate = effectiveEnd,
+                    Status = x.Status,
                     TotalDays = days,
                 };
             })
             .ToList();
+                var approvedReport = report
+        .Where(x => x.Status == LeaveStatus.Approved)
+        .ToList();
 
-        var byLeaveType = report
+        var byLeaveType = approvedReport
             .GroupBy(x => new { x.LeaveTypeId, x.LeaveTypeName })
             .Select(g => new
             {
@@ -286,8 +300,8 @@ TotalDays = TotalDays,
 
                 summary = new
                 {
-                    totalRequests = report.Count,
-                    totalDays = report.Sum(x => x.TotalDays),
+                    totalRequests = approvedReport.Count,
+                    totalDays = approvedReport.Sum(x => x.TotalDays),
                 },
 
                 byLeaveType,
@@ -295,6 +309,104 @@ TotalDays = TotalDays,
                 requests = report,
             }
         );
+    }
+
+    [Authorize]
+    [HttpPost("my")]
+    public async Task<IActionResult> CreateMyLeaveRequest(
+        CreateMyLeaveRequestDto dto
+    )
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+            return Unauthorized();
+
+        if (dto.EndDate < dto.StartDate)
+            return BadRequest("تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد.");
+
+        var leaveType = await _db.LeaveTypes
+            .FirstOrDefaultAsync(x => x.Id == dto.LeaveTypeId);
+
+        if (leaveType is null)
+            return NotFound("نوع مرخصی پیدا نشد.");
+
+        // محاسبه تعداد روزها
+        var totalDays =
+            dto.EndDate.DayNumber -
+            dto.StartDate.DayNumber +
+            1;
+
+        if (totalDays <= 0)
+            return BadRequest("بازه تاریخ نامعتبر است.");
+
+        // سال مرخصی
+        var year = dto.StartDate.Year;
+
+        // مرخصی‌های تایید شده کارمند در همان سال و همان نوع
+        var usedDays = await _db.LeaveRequests
+            .Where(x =>
+                x.UserId == user.Id &&
+                x.LeaveTypeId == dto.LeaveTypeId &&
+                x.Status == LeaveStatus.Approved &&
+                x.StartDate.Year == year
+            )
+            .SumAsync(x => x.TotalDays);
+
+        var remainingDays =
+            Math.Max(0, leaveType.AnnualLimit - usedDays);
+
+        if (totalDays > remainingDays)
+        {
+            return BadRequest(
+                $"تعداد روزهای باقی‌مانده مرخصی شما {remainingDays} روز است."
+            );
+        }
+
+        // جلوگیری از درخواست هم‌پوشان
+        var hasOverlap = await _db.LeaveRequests.AnyAsync(x =>
+            x.UserId == user.Id &&
+            (x.Status == LeaveStatus.Pending ||
+             x.Status == LeaveStatus.Approved) &&
+            x.StartDate <= dto.EndDate &&
+            x.EndDate >= dto.StartDate
+        );
+
+        if (hasOverlap)
+        {
+            return BadRequest(
+                "در این بازه زمانی یک درخواست مرخصی دیگر دارید."
+            );
+        }
+
+        var request = new LeaveRequest
+        {
+            UserId = user.Id,
+
+            LeaveTypeId = dto.LeaveTypeId,
+
+            StartDate = dto.StartDate,
+
+            EndDate = dto.EndDate,
+
+            TotalDays = totalDays,
+
+            Reason = dto.Reason,
+
+            Status = LeaveStatus.Pending
+        };
+
+        _db.LeaveRequests.Add(request);
+
+        await _db.SaveChangesAsync();
+
+        return Ok(new
+        {
+            id = request.Id,
+            message = "درخواست مرخصی با موفقیت ثبت شد.",
+            totalDays,
+            remainingDays
+        });
     }
 
     [Authorize]
