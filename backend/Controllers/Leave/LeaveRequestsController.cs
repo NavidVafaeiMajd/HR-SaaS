@@ -1,3 +1,4 @@
+using System.Globalization;
 using HrSaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -70,7 +71,7 @@ public class LeaveRequestsController : ControllerBase
 
             EndDate = dto.EndDate,
             Reason = dto.Reason,
-
+TotalDays = TotalDays,
             Status = LeaveStatus.Approved,
         };
 
@@ -95,7 +96,12 @@ public class LeaveRequestsController : ControllerBase
             {
                 x.Id,
 
-                User = new { x.User.FirstName, x.User.LastName ,x.User.Id},
+                User = new
+                {
+                    x.User.FirstName,
+                    x.User.LastName,
+                    x.User.Id,
+                },
 
                 LeaveType = new { x.LeaveType.Id, x.LeaveType.Name },
 
@@ -119,30 +125,183 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("my")]
-    public async Task<IActionResult> MyRequests()
+    [HttpGet("my/report")]
+    public async Task<IActionResult> MyLeaveReport()
     {
         var user = await _userManager.GetUserAsync(User);
 
         if (user is null)
             return Unauthorized();
 
-        var requests = await _db
-            .LeaveRequests.Include(x => x.LeaveType)
-            .Where(x => x.UserId == user.Id)
-            .OrderByDescending(x => x.CreatedAt)
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var year = today.Year;
+
+        var activeLeave = await _db
+            .LeaveRequests.AsNoTracking()
+            .Where(x =>
+                x.UserId == user.Id
+                && x.Status == LeaveStatus.Approved
+                && x.StartDate <= today
+                && x.EndDate >= today
+            )
+            .OrderBy(x => x.EndDate)
+            .Select(x => new
+            {
+                x.Id,
+
+                LeaveType = new { x.LeaveType.Id, x.LeaveType.Name },
+
+                x.StartDate,
+                x.EndDate,
+                x.TotalDays,
+
+                RemainingDays = x.EndDate.DayNumber - today.DayNumber + 1,
+            })
+            .FirstOrDefaultAsync();
+
+        var leaveTypes = await _db
+            .LeaveTypes.AsNoTracking()
+            .Select(x => new
+            {
+                x.Id,
+                x.Name,
+                x.AnnualLimit,
+            })
             .ToListAsync();
 
-        return Ok(requests);
+        var usedLeaves = await _db
+            .LeaveRequests.AsNoTracking()
+            .Where(x =>
+                x.UserId == user.Id && x.Status == LeaveStatus.Approved && x.StartDate.Year == year
+            )
+            .GroupBy(x => x.LeaveTypeId)
+            .Select(g => new { LeaveTypeId = g.Key, UsedDays = g.Sum(x => x.TotalDays) })
+            .ToListAsync();
+
+        var remainingLeaves = leaveTypes
+            .Select(type =>
+            {
+                var used = usedLeaves.FirstOrDefault(x => x.LeaveTypeId == type.Id);
+
+                var usedDays = used?.UsedDays ?? 0;
+
+                return new
+                {
+                    LeaveTypeId = type.Id,
+
+                    LeaveTypeName = type.Name,
+
+                    AnnualLimit = type.AnnualLimit,
+
+                    UsedDays = usedDays,
+
+                    RemainingDays = Math.Max(0, type.AnnualLimit - usedDays),
+                };
+            })
+            .ToList();
+
+        return Ok(
+            new
+            {
+                ActiveLeave = activeLeave,
+
+                RemainingLeaves = remainingLeaves,
+            }
+        );
+    }
+
+    [Authorize]
+    [HttpGet("user/monthly")]
+    public async Task<IActionResult> GetUserMonthlyReport(int year, int month)
+    {
+        if (month < 1 || month > 12)
+            return BadRequest("ماه نامعتبر است.");
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+            return Unauthorized();
+
+        var pc = new PersianCalendar();
+
+        var startDate = pc.ToDateTime(year, month, 1, 0, 0, 0, 0);
+
+        var endDate =
+            month == 12
+                ? pc.ToDateTime(year + 1, 1, 1, 0, 0, 0, 0).AddDays(-1)
+                : pc.ToDateTime(year, month + 1, 1, 0, 0, 0, 0).AddDays(-1);
+
+        var start = DateOnly.FromDateTime(startDate);
+        var end = DateOnly.FromDateTime(endDate);
+
+        var requests = await _db
+            .LeaveRequests.AsNoTracking()
+            .Include(x => x.LeaveType)
+            .Where(x =>
+                x.UserId == user.Id
+                && x.Status == LeaveStatus.Approved
+                && x.StartDate <= end
+                && x.EndDate >= start
+            )
+            .ToListAsync();
+
+        var report = requests
+            .Select(x =>
+            {
+                var effectiveStart = x.StartDate > start ? x.StartDate : start;
+
+                var effectiveEnd = x.EndDate < end ? x.EndDate : end;
+
+                var days = effectiveEnd.DayNumber - effectiveStart.DayNumber + 1;
+
+                return new
+                {
+                    x.Id,
+                    LeaveTypeId = x.LeaveTypeId,
+                    LeaveTypeName = x.LeaveType.Name,
+                    StartDate = effectiveStart,
+                    EndDate = effectiveEnd,
+                    TotalDays = days,
+                };
+            })
+            .ToList();
+
+        var byLeaveType = report
+            .GroupBy(x => new { x.LeaveTypeId, x.LeaveTypeName })
+            .Select(g => new
+            {
+                leaveTypeId = g.Key.LeaveTypeId,
+                leaveTypeName = g.Key.LeaveTypeName,
+                requestCount = g.Count(),
+                totalDays = g.Sum(x => x.TotalDays),
+            })
+            .ToList();
+
+        return Ok(
+            new
+            {
+                user = new { id = user.Id, name = $"{user.FirstName} {user.LastName}" },
+
+                month = new { year, month },
+
+                summary = new
+                {
+                    totalRequests = report.Count,
+                    totalDays = report.Sum(x => x.TotalDays),
+                },
+
+                byLeaveType,
+
+                requests = report,
+            }
+        );
     }
 
     [Authorize]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateLeaveRequestDto dto)
     {
-        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
-            x.Id == id
-        );
+        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x => x.Id == id);
 
         if (request is null)
             return NotFound();
@@ -218,10 +377,7 @@ public class LeaveRequestsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-
-        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x =>
-            x.Id == id 
-        );
+        var request = await _db.LeaveRequests.FirstOrDefaultAsync(x => x.Id == id);
 
         if (request is null)
             return NotFound();
@@ -321,34 +477,39 @@ public class LeaveRequestsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,Manager")]
-[HttpGet("report")]
-public async Task<IActionResult> GetReport()
-{
-    var totalRequests = await _db.LeaveRequests.CountAsync();
-
-    var pendingRequests = await _db.LeaveRequests
-        .CountAsync(x => x.Status == LeaveStatus.Pending);
-
-    var approvedRequests = await _db.LeaveRequests
-        .CountAsync(x => x.Status == LeaveStatus.Approved);
-
-    var rejectedRequests = await _db.LeaveRequests
-        .CountAsync(x => x.Status == LeaveStatus.Rejected);
-
-    var canceledRequests = await _db.LeaveRequests
-        .CountAsync(x => x.Status == LeaveStatus.Canceled);
-    return Ok(new
+    [HttpGet("report")]
+    public async Task<IActionResult> GetReport()
     {
-        total =  totalRequests,
+        var totalRequests = await _db.LeaveRequests.CountAsync();
 
-        pending = pendingRequests,
+        var pendingRequests = await _db.LeaveRequests.CountAsync(x =>
+            x.Status == LeaveStatus.Pending
+        );
 
-        approved =  approvedRequests,
-        
+        var approvedRequests = await _db.LeaveRequests.CountAsync(x =>
+            x.Status == LeaveStatus.Approved
+        );
 
-        rejected = rejectedRequests,
+        var rejectedRequests = await _db.LeaveRequests.CountAsync(x =>
+            x.Status == LeaveStatus.Rejected
+        );
 
-        canceled =  canceledRequests,
-    });
-}
+        var canceledRequests = await _db.LeaveRequests.CountAsync(x =>
+            x.Status == LeaveStatus.Canceled
+        );
+        return Ok(
+            new
+            {
+                total = totalRequests,
+
+                pending = pendingRequests,
+
+                approved = approvedRequests,
+
+                rejected = rejectedRequests,
+
+                canceled = canceledRequests,
+            }
+        );
+    }
 }

@@ -143,9 +143,16 @@ const data = {
         },
       ],
     },
-
     {
       title: "درخواست مرخصی",
+      url: "/user-leave",
+      icon: CiSquarePlus,
+      authorize: ["employee"],
+
+      items: [],
+    },
+    {
+      title: "مرخصی",
       url: "/leave/list",
       icon: CiSquarePlus,
       items: [
@@ -156,7 +163,7 @@ const data = {
         {
           title: " نوع مرخصی  ",
           url: "/leave/type",
-        }
+        },
       ],
     },
 

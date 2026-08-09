@@ -46,7 +46,7 @@ export function NavMain({
           .filter((item) => {
             if (!item.authorize || user?.roles =="Admin") return true;
 
-            return item.authorize.includes(user?.dashboardType);
+            return item?.authorize?.includes(user?.dashboardType);
           })
           .map((item) => {
    
