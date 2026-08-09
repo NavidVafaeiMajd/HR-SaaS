@@ -20,4 +20,8 @@ public enum Permission
     Shift_post,
     Shift_edit,
     Shift_delete,
+    Leave_view,
+    Leave_post,
+    Leave_edit,
+    Leave_delete,
 }

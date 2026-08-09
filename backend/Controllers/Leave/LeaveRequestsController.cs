@@ -5,41 +5,23 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class UpdateLeaveRequestDto
-{
-    public Guid LeaveTypeId { get; set; }
-
-    public DateOnly StartDate { get; set; }
-
-    public DateOnly EndDate { get; set; }
-
-    public string? Reason { get; set; }
-
-    public string? Attachment { get; set; }
-}
-
-public class CreateMyLeaveRequestDto
-{
-    public Guid LeaveTypeId { get; set; }
-
-    public DateOnly StartDate { get; set; }
-
-    public DateOnly EndDate { get; set; }
-
-    public string? Reason { get; set; }
-}
-
 [ApiController]
 [Route("api/leave-list")]
 public class LeaveRequestsController : ControllerBase
 {
     private readonly HRSaaSDbContext _db;
     private readonly UserManager<Users> _userManager;
+    private readonly IEventPublisher _publisher;
 
-    public LeaveRequestsController(HRSaaSDbContext db, UserManager<Users> userManager)
+    public LeaveRequestsController(
+        HRSaaSDbContext db,
+        UserManager<Users> userManager,
+        IEventPublisher publisher
+    )
     {
         _db = db;
         _userManager = userManager;
+        _publisher = publisher;
     }
 
     [Authorize]
@@ -89,6 +71,21 @@ public class LeaveRequestsController : ControllerBase
         _db.LeaveRequests.Add(request);
 
         await _db.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(dto.UserId);
+        var createBy = await _userManager.GetUserAsync(User);
+
+        await _publisher.PublishAsync(
+            new LeaveRequestedEvent(
+                dto.UserId,
+                request.Id,
+                new[] { Permission.Leave_post },
+                $"{user.FirstName} {user.LastName}",
+                new[] { "Admin" },
+                $"{createBy.FirstName} {createBy.LastName}",
+                request.Status
+            )
+        );
 
         return Ok(request.Id);
     }
@@ -248,11 +245,7 @@ public class LeaveRequestsController : ControllerBase
         var requests = await _db
             .LeaveRequests.AsNoTracking()
             .Include(x => x.LeaveType)
-            .Where(x =>
-                x.UserId == user.Id
-                && x.StartDate <= end
-                && x.EndDate >= start
-            )
+            .Where(x => x.UserId == user.Id && x.StartDate <= end && x.EndDate >= start)
             .ToListAsync();
 
         var report = requests
@@ -276,9 +269,7 @@ public class LeaveRequestsController : ControllerBase
                 };
             })
             .ToList();
-                var approvedReport = report
-        .Where(x => x.Status == LeaveStatus.Approved)
-        .ToList();
+        var approvedReport = report.Where(x => x.Status == LeaveStatus.Approved).ToList();
 
         var byLeaveType = approvedReport
             .GroupBy(x => new { x.LeaveTypeId, x.LeaveTypeName })
@@ -313,9 +304,7 @@ public class LeaveRequestsController : ControllerBase
 
     [Authorize]
     [HttpPost("my")]
-    public async Task<IActionResult> CreateMyLeaveRequest(
-        CreateMyLeaveRequestDto dto
-    )
+    public async Task<IActionResult> CreateMyLeaveRequest(CreateMyLeaveRequestDto dto)
     {
         var user = await _userManager.GetUserAsync(User);
 
@@ -325,17 +314,13 @@ public class LeaveRequestsController : ControllerBase
         if (dto.EndDate < dto.StartDate)
             return BadRequest("تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد.");
 
-        var leaveType = await _db.LeaveTypes
-            .FirstOrDefaultAsync(x => x.Id == dto.LeaveTypeId);
+        var leaveType = await _db.LeaveTypes.FirstOrDefaultAsync(x => x.Id == dto.LeaveTypeId);
 
         if (leaveType is null)
             return NotFound("نوع مرخصی پیدا نشد.");
 
         // محاسبه تعداد روزها
-        var totalDays =
-            dto.EndDate.DayNumber -
-            dto.StartDate.DayNumber +
-            1;
+        var totalDays = dto.EndDate.DayNumber - dto.StartDate.DayNumber + 1;
 
         if (totalDays <= 0)
             return BadRequest("بازه تاریخ نامعتبر است.");
@@ -344,39 +329,33 @@ public class LeaveRequestsController : ControllerBase
         var year = dto.StartDate.Year;
 
         // مرخصی‌های تایید شده کارمند در همان سال و همان نوع
-        var usedDays = await _db.LeaveRequests
-            .Where(x =>
-                x.UserId == user.Id &&
-                x.LeaveTypeId == dto.LeaveTypeId &&
-                x.Status == LeaveStatus.Approved &&
-                x.StartDate.Year == year
+        var usedDays = await _db
+            .LeaveRequests.Where(x =>
+                x.UserId == user.Id
+                && x.LeaveTypeId == dto.LeaveTypeId
+                && x.Status == LeaveStatus.Approved
+                && x.StartDate.Year == year
             )
             .SumAsync(x => x.TotalDays);
 
-        var remainingDays =
-            Math.Max(0, leaveType.AnnualLimit - usedDays);
+        var remainingDays = Math.Max(0, leaveType.AnnualLimit - usedDays);
 
         if (totalDays > remainingDays)
         {
-            return BadRequest(
-                $"تعداد روزهای باقی‌مانده مرخصی شما {remainingDays} روز است."
-            );
+            return BadRequest($"تعداد روزهای باقی‌مانده مرخصی شما {remainingDays} روز است.");
         }
 
         // جلوگیری از درخواست هم‌پوشان
         var hasOverlap = await _db.LeaveRequests.AnyAsync(x =>
-            x.UserId == user.Id &&
-            (x.Status == LeaveStatus.Pending ||
-             x.Status == LeaveStatus.Approved) &&
-            x.StartDate <= dto.EndDate &&
-            x.EndDate >= dto.StartDate
+            x.UserId == user.Id
+            && (x.Status == LeaveStatus.Pending || x.Status == LeaveStatus.Approved)
+            && x.StartDate <= dto.EndDate
+            && x.EndDate >= dto.StartDate
         );
 
         if (hasOverlap)
         {
-            return BadRequest(
-                "در این بازه زمانی یک درخواست مرخصی دیگر دارید."
-            );
+            return BadRequest("در این بازه زمانی یک درخواست مرخصی دیگر دارید.");
         }
 
         var request = new LeaveRequest
@@ -393,20 +372,34 @@ public class LeaveRequestsController : ControllerBase
 
             Reason = dto.Reason,
 
-            Status = LeaveStatus.Pending
+            Status = LeaveStatus.Pending,
         };
 
         _db.LeaveRequests.Add(request);
 
         await _db.SaveChangesAsync();
 
-        return Ok(new
-        {
-            id = request.Id,
-            message = "درخواست مرخصی با موفقیت ثبت شد.",
-            totalDays,
-            remainingDays
-        });
+
+        await _publisher.PublishAsync(
+            new LeaveRequestedEvent(
+                user.Id,
+                request.Id,
+                new[] { Permission.Leave_post },
+                $"{user.FirstName} {user.LastName}",
+                new[] { "Admin" },
+                $"{user.FirstName} {user.LastName}",
+                request.Status
+            )
+        );
+        return Ok(
+            new
+            {
+                id = request.Id,
+                message = "درخواست مرخصی با موفقیت ثبت شد.",
+                totalDays,
+                remainingDays,
+            }
+        );
     }
 
     [Authorize]
@@ -529,6 +522,19 @@ public class LeaveRequestsController : ControllerBase
 
         await _db.SaveChangesAsync();
 
+        var user = await _userManager.FindByIdAsync(request.UserId);
+
+        await _publisher.PublishAsync(
+            new LeaveRequestedEvent(
+                request.UserId,
+                request.Id,
+                new[] { Permission.Leave_post },
+                $"{user.FirstName} {user.LastName}",
+                new[] { "Admin" },
+                $"{approver.FirstName} {approver.LastName}",
+                request.Status
+            )
+        );
         return NoContent();
     }
 
@@ -559,6 +565,19 @@ public class LeaveRequestsController : ControllerBase
 
         await _db.SaveChangesAsync();
 
+        var user = await _userManager.FindByIdAsync(request.UserId);
+
+        await _publisher.PublishAsync(
+            new LeaveRequestedEvent(
+                request.UserId,
+                request.Id,
+                new[] { Permission.Leave_post },
+                $"{user.FirstName} {user.LastName}",
+                new[] { "Admin" },
+                $"{approver.FirstName} {approver.LastName}",
+                request.Status
+            )
+        );
         return NoContent();
     }
 
@@ -585,6 +604,18 @@ public class LeaveRequestsController : ControllerBase
 
         await _db.SaveChangesAsync();
 
+
+        await _publisher.PublishAsync(
+            new LeaveRequestedEvent(
+                request.UserId,
+                request.Id,
+                new[] { Permission.Leave_post },
+                $"{user.FirstName} {user.LastName}",
+                new[] { "Admin" },
+                $"{user.FirstName} {user.LastName}",
+                request.Status
+            )
+        );
         return NoContent();
     }
 

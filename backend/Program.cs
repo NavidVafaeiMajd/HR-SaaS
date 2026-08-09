@@ -94,6 +94,8 @@ builder.Services.AddScoped<IEventPublisher, EventPublisher>();
 /// add each handler
 builder.Services.AddScoped<IEventHandler<UserRequestedEvent>, UserRequestedNotificationHandler>();
 builder.Services.AddScoped<IEventHandler<AnnouncementRequestedEvent>, AnnouncementCreatedNotificationHandler>();
+builder.Services.AddScoped<IEventHandler<LeaveRequestedEvent>, LeaveCreatedNotificationHandler>();
+
 
 ///
 /////add cookies config
