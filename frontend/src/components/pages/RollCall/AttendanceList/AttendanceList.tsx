@@ -10,7 +10,7 @@ const AttendanceList = () => {
    });
 
    const fetchAttendances = () =>
-     useGetRowsToTable("attendance?date=2026-08-10");
+     useGetRowsToTable("attendance");
 
    return (
       <div>

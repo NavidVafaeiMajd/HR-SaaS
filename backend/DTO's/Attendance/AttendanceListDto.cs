@@ -6,7 +6,7 @@ public class AttendanceListDto
     public string LastName { get; set; } = "";
 
     public Guid? AttendanceId { get; set; }
-
+public ShiftTime? TodayShiftTime  { get; set; }
     public AttendanceStatus? Status { get; set; }
 
     public TimeOnly? CheckIn { get; set; }

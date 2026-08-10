@@ -1,6 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { LuArrowUpDown } from "react-icons/lu";
+import { Form } from "@/components/shared/Form";
+import { EditDialog } from "@/components/shared/EditDialog";
+import { z } from "zod";
+import { Link } from "radix-ui/toolbar";
+import { useUpdateRows } from "@/hook/useUpdateRows";
 
 export interface AttendanceListColumnProps extends Record<string, unknown> {
   userId: string;
@@ -61,6 +66,216 @@ const formatMinutes = (minutes: number | null) => {
   }
 
   return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+};
+
+const validation = z.object({
+  leaveTypeId: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
+  startDate: z.date({
+    message: "تاریخ شروع الزامی است",
+  }),
+
+  endDate: z.date({
+    message: "تاریخ پایان الزامی است",
+  }),
+
+  reason: z.string().optional(),
+});
+const AttendanceActions = ({ row }: { row: any }) => {
+  const { mutation } = useUpdateRows(
+    `leave-list/${row.id}`,
+    ["leaves"],
+    validation,
+    "مرخصی",
+  );
+  const { mutation: UpdatePresent } = useUpdateRows(
+    `attendance/${row.userId}/present`,
+    ["attendances"],
+    {},
+    "حاضر",
+  );
+
+    const { mutation: UpdateAbsent } = useUpdateRows(
+      `attendance/${row.userId}/absent`,
+      ["attendances"],
+      {},
+      "غیبت",
+    );
+
+  const { mutation: UpdateReject } = useUpdateRows(
+    `leave-list/${row.id}/reject`,
+    ["leaves"],
+    {},
+    "عدم تایید",
+  );
+
+  switch (row.status) {
+    case "OutOfShift":
+      return <> </>;
+      break;
+    case "Leave":
+      return <> </>;
+      break;
+    case "Present":
+      return (
+        <div className="flex gap-3">
+          <EditDialog
+            btnTitle="تغییر ساعت ورود و خروج"
+            title="فرم تغییر ساعت ورود و خروج"
+            triggerLabel="تغییر ساعت ورود و خروج"
+            variant="outline"
+            fields={
+              <>
+                <Form.TimePicker
+                  label=" ساعت ورود "
+                  name="checkIn"
+                  placeholder=" ساعت ورود "
+                />
+                <Form.TimePicker
+                  label=" ساعت خروج "
+                  name="checkOut"
+                  placeholder=" ساعت خروج "
+                />
+              </>
+            }
+            defaultValues={{
+              checkIn: row.checkIn,
+              checkOut: row.checkOut,
+            }}
+            onSave={(data) => {
+              UpdateReject.mutate(data);
+            }}
+            schema={z.object({
+              checkIn: z.string().optional(),
+              checkOut: z.string().optional(),
+            })}
+          />
+          <EditDialog
+            btnTitle="تغییر وضعیت فعلی "
+            title="فرم تغییر وضعیت فعلی"
+            triggerLabel="تغییر وضعیت فعلی   "
+            variant="outline"
+            fields={
+              <>
+                <Form.Select
+                  label=" وضعیت فعلی را تغییر دهید "
+                  options={[
+                    { label: "حاضر", value: "Present" },
+                    { label: "عایب", value: "Absent" },
+                  ]}
+                  name="status"
+                  placeholder=" انتخاب وضعیت بعدی "
+                />
+              </>
+            }
+            defaultValues={{
+              status: row.status,
+            }}
+            onSave={(data) => {
+              UpdateReject.mutate(data);
+            }}
+            schema={z.object({
+              status: z.string().optional(),
+            })}
+          />
+        </div>
+      );
+      break;
+    case "Absent":
+      return (
+        <EditDialog
+          btnTitle="تغییر وضعیت فعلی "
+          title="فرم تغییر وضعیت فعلی"
+          triggerLabel="تغییر وضعیت فعلی   "
+          variant="outline"
+          fields={
+            <>
+              <Form.Select
+                label=" وضعیت فعلی را تغییر دهید "
+                options={[
+                  { label: "حاضر", value: "Present" },
+                  { label: "عایب", value: "Absent" },
+                ]}
+                name="status"
+                placeholder=" انتخاب وضعیت بعدی "
+              />
+            </>
+          }
+          defaultValues={{
+            status: row.status,
+          }}
+          onSave={(data) => {
+            UpdateReject.mutate(data);
+          }}
+          schema={z.object({
+            status: z.string().optional(),
+          })}
+        />
+      )
+      break;
+    default:
+      console.log(`Sorry, we are out .`);
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex gap-2">
+        <EditDialog
+          btnTitle="ثبت غایب"
+          title="غایب"
+          triggerLabel="غایب"
+          variant="outline"
+          fields={
+            <>
+              <Form.Textarea
+                label=" توضیحات  "
+                name="description"
+                placeholder=" دلیل غیبت ....  "
+              />
+            </>
+          }
+          defaultValues={{
+            description: "",
+          }}
+          onSave={(data) => {
+            UpdateAbsent.mutate(data);
+          }}
+          schema={z.object({
+            description: z.string().min(1,"نوشتن توضیحات لازم است."),
+          })}
+        />
+        <EditDialog
+          btnTitle="تغییر ساعت ورود و خروج"
+          title="حاضر"
+          triggerLabel="حاضر"
+          variant="outline"
+          fields={
+            <>
+              <Form.TimePicker
+                label=" ساعت ورود "
+                name="checkIn"
+                placeholder=" ساعت ورود "
+              />
+              <Form.TimePicker
+                label=" ساعت خروج "
+                name="checkOut"
+                placeholder=" ساعت خروج "
+              />
+            </>
+          }
+          defaultValues={{
+            checkIn: row.checkIn,
+            checkOut: row.checkOut,
+          }}
+          onSave={(data) => {
+            UpdatePresent.mutate(data);
+          }}
+          schema={z.object({
+            checkIn: z.string().optional(),
+            checkOut: z.string().optional(),
+          })}
+        />
+      </div>
+    </div>
+  );
 };
 
 export const columns: ColumnDef<AttendanceListColumnProps>[] = [
@@ -212,6 +427,15 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
     ),
     cell: ({ row }) => {
       return formatMinutes(row.original.overtimeMinutes);
+    },
+  },
+  {
+    id: "actions",
+
+    header: "عملیات",
+
+    cell: ({ row }) => {
+      return <AttendanceActions row={row.original} />;
     },
   },
 ];

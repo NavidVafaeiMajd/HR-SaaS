@@ -21,37 +21,78 @@ public class AttendanceController : ControllerBase
     }
 
 
-    // GET: api/attendance?date=2026-08-10
     [HttpGet]
-    public async Task<IActionResult> Get(DateOnly date)
+    public async Task<IActionResult> Get()
     {
         var manager = await _userManager.GetUserAsync(User);
 
         if (manager is null)
             return Unauthorized();
 
+        var date = DateOnly.FromDateTime(DateTime.Now);
+
+        var weekDay = (WeekDay)(((int)date.DayOfWeek + 1) % 7);
 
         var employees = await _db.Users
+            .Include(x => x.Shift)
+            .ThenInclude(x => x.ShiftTimes)
             .Select(x => new
             {
                 x.Id,
                 x.FirstName,
-                x.LastName
+                x.LastName,
+                Shift = x.Shift
             })
             .ToListAsync();
 
+        var userIds = employees
+            .Select(x => x.Id)
+            .ToList();
 
         var attendances = await _db.Attendances
             .Where(x =>
                 x.Date == date &&
-                employees.Select(e => e.Id).Contains(x.UserId))
+                userIds.Contains(x.UserId))
             .ToListAsync();
 
+        var leaves = await _db.LeaveRequests
+            .Where(x =>
+                userIds.Contains(x.UserId) &&
+                x.StartDate <= date &&
+                x.EndDate >= date &&
+                x.Status == LeaveStatus.Approved)
+            .ToListAsync();
 
         var result = employees.Select(employee =>
         {
             var attendance = attendances
                 .FirstOrDefault(x => x.UserId == employee.Id);
+
+            var leave = leaves
+                .FirstOrDefault(x => x.UserId == employee.Id);
+
+            var todayShiftTime = employee.Shift?.ShiftTimes
+                .FirstOrDefault(x => x.DayOfWeek == weekDay);
+
+            var isOutOfShift =
+                todayShiftTime is null ||
+                todayShiftTime.StartTime is null ||
+                todayShiftTime.EndTime is null;
+
+            AttendanceStatus? status;
+
+            if (isOutOfShift)
+            {
+                status = AttendanceStatus.OutOfShift;
+            }
+            else if (leave is not null)
+            {
+                status = AttendanceStatus.Leave;
+            }
+            else
+            {
+                status = attendance?.Status;
+            }
 
             return new AttendanceListDto
             {
@@ -62,7 +103,7 @@ public class AttendanceController : ControllerBase
 
                 AttendanceId = attendance?.Id,
 
-                Status = attendance?.Status,
+                Status = status,
 
                 CheckIn = attendance?.CheckIn,
                 CheckOut = attendance?.CheckOut,
@@ -76,76 +117,160 @@ public class AttendanceController : ControllerBase
             };
         }).ToList();
 
-
         return Ok(result);
     }
 
+[HttpPatch("{UserId}/present")]
+public async Task<IActionResult> SetPresent(string UserId,
+    AttendancePresentDto dto)
+{
+    var manager = await _userManager.GetUserAsync(User);
 
-    // POST: api/attendance
-    [HttpPost]
-    public async Task<IActionResult> Create(
-        AttendanceCreateDto dto)
+    if (manager is null)
+        return Unauthorized();
+
+    var date = DateOnly.FromDateTime(DateTime.Now);
+
+    // بررسی اینکه کارمند وجود دارد
+    var employee = await _db.Users
+        .FirstOrDefaultAsync(x => x.Id == UserId);
+
+    if (employee is null)
+        return NotFound("Employee not found.");
+
+    // // اگر سیستم ManagerId دارد
+    // if (employee.ManagerId != manager.Id)
+    //     return Forbid();
+
+    // پیدا کردن Attendance امروز
+    var attendance = await _db.Attendances
+        .FirstOrDefaultAsync(x =>
+            x.UserId == UserId &&
+            x.Date == date);
+
+    if (attendance is null)
     {
-        var manager = await _userManager.GetUserAsync(User);
-
-        if (manager is null)
-            return Unauthorized();
-
-
-        var employee = await _db.Users
-            .FirstOrDefaultAsync(x =>
-                x.Id == dto.UserId );
-
-        if (employee is null)
-            return Forbid();
-
-
-        var exists = await _db.Attendances
-            .AnyAsync(x =>
-                x.UserId == dto.UserId &&
-                x.Date == dto.Date);
-
-        if (exists)
+        // رکورد وجود ندارد → ایجاد کن
+        attendance = new Attendance
         {
-            return Conflict(new
-            {
-                message = "Attendance already exists for this employee and date."
-            });
-        }
+            UserId = UserId,
+            Date = date,
 
-
-        var attendance = new Attendance
-        {
-            UserId = dto.UserId,
-            Date = dto.Date,
-
-            Status = dto.Status,
+            Status = AttendanceStatus.Present,
 
             CheckIn = dto.CheckIn,
             CheckOut = dto.CheckOut,
+
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.Attendances.Add(attendance);
+    }
+    else
+    {
+        // رکورد وجود دارد → آپدیت کن
+        attendance.Status = AttendanceStatus.Present;
+
+        attendance.CheckIn = dto.CheckIn;
+        attendance.CheckOut = dto.CheckOut;
+
+        attendance.UpdatedAt = DateTime.UtcNow;
+    }
+
+    await _db.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Attendance marked as present.",
+        attendanceId = attendance.Id,
+        userId = attendance.UserId,
+        date = attendance.Date,
+        status = attendance.Status,
+        checkIn = attendance.CheckIn,
+        checkOut = attendance.CheckOut
+    });
+}
+
+[HttpPatch("{UserId}/absent")]
+public async Task<IActionResult> SetAbsent(
+    string UserId,
+    AttendanceAbsentDto dto)
+{
+    var manager = await _userManager.GetUserAsync(User);
+
+    if (manager is null)
+        return Unauthorized();
+
+    var date = DateOnly.FromDateTime(DateTime.Now);
+
+    // بررسی وجود کارمند
+    var employee = await _db.Users
+        .FirstOrDefaultAsync(x => x.Id == UserId);
+
+    if (employee is null)
+        return NotFound("Employee not found.");
+
+    // اگر سیستم ManagerId دارد
+    // if (employee.ManagerId != manager.Id)
+    //     return Forbid();
+
+    // پیدا کردن Attendance امروز
+    var attendance = await _db.Attendances
+        .FirstOrDefaultAsync(x =>
+            x.UserId == UserId &&
+            x.Date == date);
+
+    if (attendance is null)
+    {
+        // رکورد وجود ندارد → ایجاد کن
+        attendance = new Attendance
+        {
+            UserId = UserId,
+            Date = date,
+
+            Status = AttendanceStatus.Absent,
+
+            CheckIn = null,
+            CheckOut = null,
 
             Description = dto.Description,
 
             CreatedAt = DateTime.UtcNow
         };
 
-
-        // محاسبات فعلاً بعداً اضافه می‌شوند
-        CalculateAttendance(attendance);
-
-
         _db.Attendances.Add(attendance);
+    }
+    else
+    {
+        // رکورد وجود دارد → آپدیت کن
+        attendance.Status = AttendanceStatus.Absent;
 
-        await _db.SaveChangesAsync();
+        attendance.CheckIn = null;
+        attendance.CheckOut = null;
 
+        attendance.WorkedMinutes = 0;
+        attendance.LateMinutes = 0;
+        attendance.EarlyLeaveMinutes = 0;
+        attendance.OvertimeMinutes = 0;
 
-        return Ok(new
-        {
-            message = "Attendance created successfully.",
-            id = attendance.Id
-        });
+        attendance.Description = dto.Description;
+
+        attendance.UpdatedAt = DateTime.UtcNow;
     }
 
+    await _db.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Attendance marked as absent.",
+        attendanceId = attendance.Id,
+        userId = attendance.UserId,
+        date = attendance.Date,
+        status = attendance.Status,
+        checkIn = attendance.CheckIn,
+        checkOut = attendance.CheckOut
+    });
+}
 
     // PUT: api/attendance/{id}
     [HttpPut("{id:int}")]
