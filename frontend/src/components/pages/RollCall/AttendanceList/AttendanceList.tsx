@@ -9,7 +9,8 @@ const AttendanceList = () => {
       document.title = "لیست حضور و غیاب";
    });
 
-   const fetchAttendances = () => useGetRowsToTable("attendances/list");
+   const fetchAttendances = () =>
+     useGetRowsToTable("attendance?date=2026-08-10");
 
    return (
       <div>

@@ -3,20 +3,69 @@ import { Button } from "@/components/ui/button";
 import { LuArrowUpDown } from "react-icons/lu";
 
 export interface AttendanceListColumnProps extends Record<string, unknown> {
-   id: number;
-   employee: string;
-   date: Date;
-   status: string;
-   entryTime: string;
-   exitTime: string;
-   tardiness: string;
-   earlyLeave: string;
-   totalHours: string;
+  userId: string;
+
+  firstName: string;
+  lastName: string;
+
+  attendanceId: number | null;
+
+  date: string;
+
+  status:
+    | "Present"
+    | "Absent"
+    | "Leave"
+    | "Mission"
+    | "Remote"
+    | "SickLeave"
+    | null;
+
+  checkIn: string | null;
+  checkOut: string | null;
+
+  workedMinutes: number | null;
+  lateMinutes: number | null;
+  earlyLeaveMinutes: number | null;
+  overtimeMinutes: number | null;
+
+  description: string | null;
 }
+
+const statusLabels: Record<
+  NonNullable<AttendanceListColumnProps["status"]>,
+  string
+> = {
+  Present: "حاضر",
+  Absent: "غایب",
+  Leave: "مرخصی",
+  Mission: "ماموریت",
+  Remote: "دورکاری",
+  SickLeave: "مرخصی استعلاجی",
+};
+
+const formatMinutes = (minutes: number | null) => {
+  if (minutes === null || minutes === undefined) {
+    return "—";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours === 0) {
+    return `${remainingMinutes} دقیقه`;
+  }
+
+  if (remainingMinutes === 0) {
+    return `${hours} ساعت`;
+  }
+
+  return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+};
 
 export const columns: ColumnDef<AttendanceListColumnProps>[] = [
   {
-    accessorKey: "employee",
+    accessorKey: "firstName",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -27,10 +76,13 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const employee = row.getValue("employee");
-      return employee.firstName ? employee.firstName + employee.lastName : "—";
+      const firstName = row.original.firstName;
+      const lastName = row.original.lastName;
+
+      return `${firstName} ${lastName}`;
     },
   },
+
   {
     accessorKey: "date",
     header: ({ column }) => (
@@ -43,10 +95,12 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const date = new Date(row.getValue("date"));
+      const date = new Date(row.original.date);
+
       return date.toLocaleDateString("fa-IR");
     },
   },
+
   {
     accessorKey: "status",
     header: ({ column }) => (
@@ -58,9 +112,15 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
         وضعیت
       </Button>
     ),
+    cell: ({ row }) => {
+      const status = row.original.status;
+
+      return status ? statusLabels[status] : "ثبت نشده";
+    },
   },
+
   {
-    accessorKey: "check_in",
+    accessorKey: "checkIn",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -71,12 +131,12 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const shiftStart = row.getValue("check_in");
-      return shiftStart ? shiftStart : "—";
+      return row.original.checkIn ?? "—";
     },
   },
+
   {
-    accessorKey: "check_out",
+    accessorKey: "checkOut",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -87,12 +147,12 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const checkOut = row.getValue("check_out");
-      return checkOut ? checkOut : "—";
+      return row.original.checkOut ?? "—";
     },
   },
+
   {
-    accessorKey: "late",
+    accessorKey: "lateMinutes",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -103,12 +163,12 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const late = row.getValue("late");
-      return late ? late : "—";
+      return formatMinutes(row.original.lateMinutes);
     },
   },
+
   {
-    accessorKey: "early_leave",
+    accessorKey: "earlyLeaveMinutes",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -119,12 +179,12 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const earlyLeave = row.getValue("early_leave");
-      return earlyLeave ? earlyLeave : "—";
+      return formatMinutes(row.original.earlyLeaveMinutes);
     },
   },
+
   {
-    accessorKey: "total_work",
+    accessorKey: "workedMinutes",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -135,11 +195,23 @@ export const columns: ColumnDef<AttendanceListColumnProps>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const check_out = row.getValue("check_out");
-      const check_in = row.getValue("check_in");
-      return check_out
-        ? parseInt(check_out) - parseInt(check_in) + " ساعت  "
-        : "—";
+      return formatMinutes(row.original.workedMinutes);
+    },
+  },
+
+  {
+    accessorKey: "overtimeMinutes",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        <LuArrowUpDown className="ml-2 h-4 w-4" />
+        اضافه کاری
+      </Button>
+    ),
+    cell: ({ row }) => {
+      return formatMinutes(row.original.overtimeMinutes);
     },
   },
 ];
