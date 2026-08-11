@@ -12,8 +12,6 @@ import { z } from "zod";
 import persian from "react-date-object/calendars/persian";
 import { DateObject } from "react-multi-date-picker";
 import { EditDialog } from "@/components/shared/EditDialog";
-import LeaveTypeMontly from "../charts/LeaveTypeMontly";
-import RemainingLeaveChart from "../charts/RemainingLeaveChart";
 import { useCreateLeave } from "./hooks/useCreateLeave";
 import { useMonthlyLeave } from "./hooks/useMonthlyLeave";
 import { createLeaveValidation, validation } from "./validation";
@@ -21,6 +19,7 @@ import { monthlyColumns } from "./column";
 import type { MonthlyReport } from "./LeaveInterface";
 import { useParams } from "react-router-dom";
 import TodayTable from "./components/TodayTable";
+import AttendanceCharts from "../charts/AttendanceCharts";
 
 const UserAttendanceDetailsPage = () => {
   const { id } = useParams();
@@ -118,15 +117,15 @@ const UserAttendanceDetailsPage = () => {
         </div>
         <div>
           <h3 className="flex gap-3 items-center mr-2 pb-5 text-xl py-2 ">
-            وضعیت مرخصی های باقیمانده
+            وضعیت کل حضور و غیاب ها تا به اینجا 
           </h3>
           <div className="flex flex-col gap-5">
-            {attendanceData?.remainingLeaves == null ? (
+            {attendanceData?.summary == null ? (
               <>
-                <p>مرخصی در سیستم وجود ندارد!!</p>
+                <p>گزارشی در سیستم وجود ندارد!!</p>
               </>
             ) : (
-              <RemainingLeaveChart data={attendanceData?.remainingLeaves} />
+              <AttendanceCharts summary={attendanceData.summary} />
             )}
           </div>
         </div>
