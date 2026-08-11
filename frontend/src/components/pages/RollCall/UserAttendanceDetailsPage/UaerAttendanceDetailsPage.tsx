@@ -20,7 +20,7 @@ import { createLeaveValidation, validation } from "./validation";
 import { monthlyColumns } from "./column";
 import type { MonthlyReport } from "./LeaveInterface";
 
-const UserLeaveDetailsPage = () => {
+const UserAttendanceDetailsPage = () => {
   const {
     data: leaveData,
     isLoading,
@@ -91,7 +91,7 @@ const UserLeaveDetailsPage = () => {
 
   return (
     <div className="" dir="rtl">
-      <h2 className="text-2xl font-bold pb-5">مرخصی من</h2>
+      <h2 className="text-2xl font-bold pb-5">وضعیت حضور و غیاب </h2>
       <div className="grid md:grid-cols-2 gap-5">
         <div>
           <h3 className="flex gap-3 items-center mr-2 text-xl py-2 ">
@@ -291,4 +291,4 @@ const UserLeaveDetailsPage = () => {
   );
 };
 
-export default UserLeaveDetailsPage;
+export default UserAttendanceDetailsPage;

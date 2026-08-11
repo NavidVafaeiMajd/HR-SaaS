@@ -4,7 +4,6 @@ import { LuArrowUpDown } from "react-icons/lu";
 import { Form } from "@/components/shared/Form";
 import { EditDialog } from "@/components/shared/EditDialog";
 import { z } from "zod";
-import { Link } from "radix-ui/toolbar";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 
 export interface AttendanceListColumnProps extends Record<string, unknown> {
@@ -68,25 +67,13 @@ const formatMinutes = (minutes: number | null) => {
   return `${hours} ساعت و ${remainingMinutes} دقیقه`;
 };
 
-const validation = z.object({
-  leaveTypeId: z.string().min(1, "انتخاب نوع مرخصی الزامی است"),
-  startDate: z.date({
-    message: "تاریخ شروع الزامی است",
-  }),
+const normalizeTime = (time: string | null | undefined) => {
+  if (!time) return null;
 
-  endDate: z.date({
-    message: "تاریخ پایان الزامی است",
-  }),
+  return time.slice(0, 5);
+};
 
-  reason: z.string().optional(),
-});
 const AttendanceActions = ({ row }: { row: any }) => {
-  const { mutation } = useUpdateRows(
-    `leave-list/${row.id}`,
-    ["leaves"],
-    validation,
-    "مرخصی",
-  );
   const { mutation: UpdatePresent } = useUpdateRows(
     `attendance/${row.userId}/present`,
     ["attendances"],
@@ -94,18 +81,17 @@ const AttendanceActions = ({ row }: { row: any }) => {
     "حاضر",
   );
 
-    const { mutation: UpdateAbsent } = useUpdateRows(
-      `attendance/${row.userId}/absent`,
-      ["attendances"],
-      {},
-      "غیبت",
-    );
-
-  const { mutation: UpdateReject } = useUpdateRows(
-    `leave-list/${row.id}/reject`,
-    ["leaves"],
+  const { mutation: UpdateAbsent } = useUpdateRows(
+    `attendance/${row.userId}/absent`,
+    ["attendances"],
     {},
-    "عدم تایید",
+    "غیبت",
+  );
+  const { mutation: UpdateStatus } = useUpdateRows(
+    `attendance/${row.userId}/status`,
+    ["attendances"],
+    {},
+    "وضعیت حال حاضر",
   );
 
   switch (row.status) {
@@ -138,11 +124,15 @@ const AttendanceActions = ({ row }: { row: any }) => {
               </>
             }
             defaultValues={{
-              checkIn: row.checkIn,
-              checkOut: row.checkOut,
+              checkIn: normalizeTime(row.checkIn),
+              checkOut: normalizeTime(row.checkOut),
             }}
             onSave={(data) => {
-              UpdateReject.mutate(data);
+              const payload = {
+                checkIn: normalizeTime(data.checkIn),
+                checkOut: normalizeTime(data.checkOut),
+              };
+              UpdatePresent.mutate(payload);
             }}
             schema={z.object({
               checkIn: z.string().optional(),
@@ -165,16 +155,23 @@ const AttendanceActions = ({ row }: { row: any }) => {
                   name="status"
                   placeholder=" انتخاب وضعیت بعدی "
                 />
+                <Form.Textarea
+                  label=" توضیحات  "
+                  name="description"
+                  placeholder=" دلیل غیبت ....  "
+                />
               </>
             }
             defaultValues={{
               status: row.status,
+              description: row.description,
             }}
             onSave={(data) => {
-              UpdateReject.mutate(data);
+              UpdateStatus.mutate(data);
             }}
             schema={z.object({
               status: z.string().optional(),
+              description: z.string().optional(),
             })}
           />
         </div>
@@ -198,19 +195,26 @@ const AttendanceActions = ({ row }: { row: any }) => {
                 name="status"
                 placeholder=" انتخاب وضعیت بعدی "
               />
+              <Form.Textarea
+                label=" توضیحات  "
+                name="description"
+                placeholder=" دلیل غیبت ....  "
+              />
             </>
           }
           defaultValues={{
             status: row.status,
+            description: row.description,
           }}
           onSave={(data) => {
-            UpdateReject.mutate(data);
+            UpdateStatus.mutate(data);
           }}
           schema={z.object({
             status: z.string().optional(),
+            description: z.string().optional(),
           })}
         />
-      )
+      );
       break;
     default:
       console.log(`Sorry, we are out .`);
@@ -239,7 +243,7 @@ const AttendanceActions = ({ row }: { row: any }) => {
             UpdateAbsent.mutate(data);
           }}
           schema={z.object({
-            description: z.string().min(1,"نوشتن توضیحات لازم است."),
+            description: z.string().min(1, "نوشتن توضیحات لازم است."),
           })}
         />
         <EditDialog
@@ -266,7 +270,11 @@ const AttendanceActions = ({ row }: { row: any }) => {
             checkOut: row.checkOut,
           }}
           onSave={(data) => {
-            UpdatePresent.mutate(data);
+            const payload = {
+              checkIn: normalizeTime(data.checkIn),
+              checkOut: normalizeTime(data.checkOut),
+            };
+            UpdatePresent.mutate(payload);
           }}
           schema={z.object({
             checkIn: z.string().optional(),

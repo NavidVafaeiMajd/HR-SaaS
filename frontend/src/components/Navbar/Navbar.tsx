@@ -101,6 +101,13 @@ const data = {
       icon: GoClock,
       items: [],
     },
+
+    {
+      title: " جزییات حضور و غیاب",
+      url: "/user-attendance",
+      icon: GoClock,
+      items: [],
+    },
     {
       title: "حضور و غیاب",
       url: "/rollcall",

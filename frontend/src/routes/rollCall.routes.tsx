@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
+import UserAttendanceDetailsPage from "@/components/pages/RollCall/UserAttendanceDetailsPage/UaerAttendanceDetailsPage";
 
 const LayoutRollCall = lazy(() => import("@/components/pages/RollCall/Layout"));
 const AttendanceList = lazy(
@@ -9,9 +10,6 @@ const AttendanceList = lazy(
 const MonthlyAttendance = lazy(
   () =>
     import("@/components/pages/RollCall/MonthlyAttendance/MonthlyAttendance"),
-);
-const ManualAttendance = lazy(
-  () => import("@/components/pages/RollCall/ManualAttendance/ManualAttendance"),
 );
 const PayrollListDetails = lazy(
   () =>
@@ -49,16 +47,16 @@ export const RollCallRoutes = (
           </ProtectedRoute>
         }
       />
-      <Route
-        path="manual-attendance"
-        element={
-          <ProtectedRoute>
-            <ManualAttendance />
-          </ProtectedRoute>
-        }
-      />
     </Route>
 
+    <Route
+      path="user-attendance"
+      element={
+        <ProtectedRoute>
+          <UserAttendanceDetailsPage />
+        </ProtectedRoute>
+      }
+    />
     <Route
       path="payroll/payroll-list-details/:id"
       element={<PayrollListDetails />}
