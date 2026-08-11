@@ -4,39 +4,57 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 import { Link } from "react-router-dom";
-  const getStatusInfo = (status: LeaveStatus) => {
-    switch (status) {
-      case "Pending":
-        return {
-          label: "در حال بررسی",
-          className: "bg-yellow-100 text-yellow-800",
-        };
+export const getAttendanceStatusInfo = (status: AttendanceStatus) => {
+  switch (status) {
+    case "Present":
+      return {
+        label: "حاضر",
+        className: "bg-green-100 text-green-800",
+      };
 
-      case "Approved":
-        return {
-          label: "تایید شده",
-          className: "bg-green-100 text-green-800",
-        };
+    case "Absent":
+      return {
+        label: "غایب",
+        className: "bg-red-100 text-red-800",
+      };
 
-      case "Rejected":
-        return {
-          label: "رد شده",
-          className: "bg-red-100 text-red-800",
-        };
+    case "Leave":
+      return {
+        label: "مرخصی",
+        className: "bg-blue-100 text-blue-800",
+      };
 
-      case "Canceled":
-        return {
-          label: "لغو شده",
-          className: "bg-gray-100 text-gray-800",
-        };
+    case "Late":
+      return {
+        label: "با تأخیر",
+        className: "bg-yellow-100 text-yellow-800",
+      };
 
-      default:
-        return {
-          label: "نامشخص",
-          className: "bg-gray-100 text-gray-800",
-        };
-    }
-  };
+    case "EarlyLeave":
+      return {
+        label: "ترک زودهنگام",
+        className: "bg-orange-100 text-orange-800",
+      };
+
+    case "OutOfShift":
+      return {
+        label: "خارج از شیفت",
+        className: "bg-purple-100 text-purple-800",
+      };
+
+    case "Unknown":
+      return {
+        label: "نامشخص",
+        className: "bg-gray-100 text-gray-800",
+      };
+
+    default:
+      return {
+        label: "نامشخص",
+        className: "bg-gray-100 text-gray-800",
+      };
+  }
+};
 
   export const monthlyColumns: ColumnDef<MonthlyLeave>[] =  [
       {
@@ -80,7 +98,7 @@ import { Link } from "react-router-dom";
         header: "وضعیت",
 
         cell: ({ row }) => {
-          const status = getStatusInfo(row.original.status);
+          const status = getAttendanceStatusInfo(row.original.status);
 
           return (
             <span

@@ -36,7 +36,7 @@ export interface AttendanceListColumnProps extends Record<string, unknown> {
   description: string | null;
 }
 
-const statusLabels: Record<
+export const statusLabels: Record<
   NonNullable<AttendanceListColumnProps["status"]>,
   string
 > = {
@@ -48,7 +48,7 @@ const statusLabels: Record<
   SickLeave: "مرخصی استعلاجی",
 };
 
-const formatMinutes = (minutes: number | null) => {
+export const formatMinutes = (minutes: number | null) => {
   if (minutes === null || minutes === undefined) {
     return "—";
   }

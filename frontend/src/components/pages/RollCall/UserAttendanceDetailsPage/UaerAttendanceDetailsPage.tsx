@@ -19,13 +19,16 @@ import { useMonthlyLeave } from "./hooks/useMonthlyLeave";
 import { createLeaveValidation, validation } from "./validation";
 import { monthlyColumns } from "./column";
 import type { MonthlyReport } from "./LeaveInterface";
+import { useParams } from "react-router-dom";
+import TodayTable from "./components/TodayTable";
 
 const UserAttendanceDetailsPage = () => {
+  const { id } = useParams();
   const {
-    data: leaveData,
+    data: attendanceData,
     isLoading,
     isError,
-  } = useGetData<LeaveDetails>(`leave-list/my/report`);
+  } = useGetData<LeaveDetails>(`user-attendance/${id}`);
 
   useEffect(() => {
     const today = new DateObject({
@@ -77,7 +80,7 @@ const UserAttendanceDetailsPage = () => {
     );
   }
 
-  if (isError || !leaveData) {
+  if (isError || !attendanceData) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="rounded-md border p-6 text-center">
@@ -99,119 +102,17 @@ const UserAttendanceDetailsPage = () => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
             </span>
-           وضعیت حضور و غیاب امروز شما
+            وضعیت حضور و غیاب امروز شما
           </h3>
-          {leaveData?.activeLeave == null ? (
+          {attendanceData?.today == null ? (
             <div className="flex flex-col justify-center items-center gap-3 h-full!">
               <p className="text-red-500">
-                هیچ مرخصی فعالی برای شما وجود ندارد!!!
+                هیچ وضعیت فعالی برای شما وجود ندارد!!!
               </p>
-              <EditDialog
-                btnTitle="درخواست مرخصی جدید"
-                variant="default"
-                title="فرم درخواست مرخصی جدید"
-                triggerLabel="درخواست مرخصی جدید"
-                fields={
-                  <>
-                    <Form.Select
-                      label="نوع مرخصی"
-                      name="leaveTypeId"
-                      placeholder="نوع مرخصی را انتخاب کنید"
-                      required
-                      options={
-                        leaveData?.remainingLeaves?.map((item) => ({
-                          value: String(item.leaveTypeId),
-                          label: `${item.leaveTypeName} - ${item.remainingDays} روز باقی‌مانده`,
-                        })) ?? []
-                      }
-                    />
-
-                    <div className="flex gap-5">
-                      <Form.Date label="تاریخ شروع" name="startDate" />
-
-                      <Form.Date label="تاریخ پایان" name="endDate" />
-                    </div>
-
-                    <Form.Textarea
-                      label="دلیل درخواست"
-                      name="reason"
-                      required
-                      placeholder="دلیل درخواست مرخصی را وارد کنید"
-                    />
-                  </>
-                }
-                defaultValues={{
-                  leaveTypeId: "",
-                  startDate: new Date(),
-                  endDate: new Date(),
-                  reason: "",
-                }}
-                onSave={(data) => {
-                  const payload = {
-                    leaveTypeId: data.leaveTypeId,
-
-                    // DateOnly در ASP.NET
-                    startDate: data.startDate.toISOString().slice(0, 10),
-
-                    endDate: data.endDate.toISOString().slice(0, 10),
-
-                    reason: data.reason || null,
-                  };
-
-                  console.log("CREATE LEAVE:", payload);
-
-                  postReqNewLeave.mutate(payload);
-                }}
-                schema={createLeaveValidation}
-              />
             </div>
           ) : (
             <div className="mt-5 overflow-x-scroll! rounded-xl border bg-white">
-              <table className="w-full text-right text-sm ">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">نوع مرخصی</th>
-                    <th className="px-4 py-3 font-semibold">تاریخ شروع</th>
-                    <th className="px-4 py-3 font-semibold">تاریخ پایان</th>
-                    <th className="px-4 py-3 font-semibold">مجموع روزها</th>
-                    <th className="px-4 py-3 font-semibold">
-                      روزهای باقی‌مانده
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr className="border-t">
-                    <td className="px-4 py-4">
-                      {leaveData?.activeLeave?.leaveType?.name || "—"}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {leaveData?.activeLeave?.startDate
-                        ? new Date(
-                            leaveData.activeLeave.startDate,
-                          ).toLocaleDateString("fa-IR")
-                        : "—"}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      {leaveData?.activeLeave?.endDate
-                        ? new Date(
-                            leaveData.activeLeave.endDate,
-                          ).toLocaleDateString("fa-IR")
-                        : "—"}
-                    </td>
-
-                    <td className="px-4 py-4 font-semibold">
-                      {leaveData?.activeLeave?.totalDays ?? 0} روز
-                    </td>
-
-                    <td className="px-4 py-4 font-semibold text-green-600">
-                      {leaveData?.activeLeave?.remainingDays ?? 0} روز
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <TodayTable attendanceData={attendanceData} />
             </div>
           )}
         </div>
@@ -220,12 +121,12 @@ const UserAttendanceDetailsPage = () => {
             وضعیت مرخصی های باقیمانده
           </h3>
           <div className="flex flex-col gap-5">
-            {leaveData?.remainingLeaves == null ? (
+            {attendanceData?.remainingLeaves == null ? (
               <>
                 <p>مرخصی در سیستم وجود ندارد!!</p>
               </>
             ) : (
-              <RemainingLeaveChart data={leaveData?.remainingLeaves} />
+              <RemainingLeaveChart data={attendanceData?.remainingLeaves} />
             )}
           </div>
         </div>
@@ -276,7 +177,7 @@ const UserAttendanceDetailsPage = () => {
               </span>
             </div>
             <div className="w-full flex justify-center  ">
-              {leaveData?.remainingLeaves == null ? (
+              {attendanceData?.remainingLeaves == null ? (
                 <>
                   <p>مرخصی در این ماه وجود ندارد!!</p>
                 </>
