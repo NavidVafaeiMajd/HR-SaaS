@@ -11,15 +11,6 @@ const MonthlyAttendance = lazy(
   () =>
     import("@/components/pages/RollCall/MonthlyAttendance/MonthlyAttendance"),
 );
-const PayrollListDetails = lazy(
-  () =>
-    import(
-      "@/components/pages/Payroll/PayrollList/PayrollListDetails/PayrollListDetails"
-    )
-);
-const PayslipDetailsPage = lazy(
-  () => import("@/components/pages/Payroll/PayslipHistory/PayslipDetailsPage"),
-);
 
 export const RollCallRoutes = (
   <>
@@ -54,18 +45,6 @@ export const RollCallRoutes = (
       element={
         <ProtectedRoute>
           <UserAttendanceDetailsPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="payroll/payroll-list-details/:id"
-      element={<PayrollListDetails />}
-    />
-    <Route
-      path="payslip-history/:id"
-      element={
-        <ProtectedRoute>
-          <PayslipDetailsPage />
         </ProtectedRoute>
       }
     />
