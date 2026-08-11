@@ -82,7 +82,7 @@ const UserAttendanceDetailsPage = () => {
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="rounded-md border p-6 text-center">
           <p className="text-sm text-red-600">
-            اطلاعات درخواست مرخصی پیدا نشد.
+            اطلاعات حضور و غیاب شما پیدا نشد.
           </p>
         </div>
       </div>
@@ -99,7 +99,7 @@ const UserAttendanceDetailsPage = () => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
             </span>
-            مرخصی در حال استفاده اکنون تو شما
+           وضعیت حضور و غیاب امروز شما
           </h3>
           {leaveData?.activeLeave == null ? (
             <div className="flex flex-col justify-center items-center gap-3 h-full!">

@@ -50,7 +50,7 @@ export const RollCallRoutes = (
     </Route>
 
     <Route
-      path="user-attendance"
+      path="user-attendance/:id"
       element={
         <ProtectedRoute>
           <UserAttendanceDetailsPage />

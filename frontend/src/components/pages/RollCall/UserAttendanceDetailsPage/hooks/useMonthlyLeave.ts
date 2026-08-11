@@ -1,6 +1,7 @@
 import api from "@/api/axios";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import type { MonthlyReport } from "../LeaveInterface";
 export const useMonthlyLeave = ({ setMonthlyRows}) => {
 return useMutation({
     mutationFn: async ({ year, month }: { year: number; month: number }) => {

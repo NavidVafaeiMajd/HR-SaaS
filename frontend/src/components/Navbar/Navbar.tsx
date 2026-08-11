@@ -2,16 +2,9 @@
 
 import * as React from "react";
 import {
-  BookOpen,
-  Bot,
   Command,
-  Frame,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
-  Settings2,
-  SquareTerminal,
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
@@ -36,6 +29,9 @@ import { MdOutlineRadar } from "react-icons/md";
 import { BsExclamationCircle } from "react-icons/bs";
 import { useAuthContext } from "@/Context/AuthContext";
 
+
+export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuthContext();
 const data = {
   user: {
     name: "shadcn",
@@ -103,14 +99,14 @@ const data = {
     },
 
     {
-      title: " جزییات حضور و غیاب",
-      url: "/user-attendance",
+      title: ` جزییات حضور و غیاب `,
+      url: `/user-attendance/${user?.id}`,
       icon: GoClock,
       items: [],
     },
     {
       title: "حضور و غیاب",
-      url: "/rollcall",
+      url: "/rollcall/attendance-list",
       icon: GoClock,
       items: [
         {
@@ -118,11 +114,7 @@ const data = {
           url: "/rollcall/attendance-list",
         },
         {
-          title: "ثبت تردد دستی پرسنل",
-          url: "/rollcall/manual-attendance",
-        },
-        {
-          title: "گزارش کارکرد ماهانه",
+          title: "گزارش کارکرد کاربران",
           url: "/rollcall/monthly-attendance",
         },
       ],
@@ -198,7 +190,7 @@ const data = {
     { title: "Feedback", url: "#", icon: Send },
   ],
 };
-export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
   return (
     <Sidebar
       variant="inset"
