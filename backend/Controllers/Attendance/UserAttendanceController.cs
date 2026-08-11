@@ -1,3 +1,4 @@
+using System.Globalization;
 using HrSaaS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -241,6 +242,151 @@ public async Task<IActionResult> GetUserAttendanceReport(string userId)
     {
         Today = todayDto,
         Summary = summary
+    });
+}
+[HttpGet("{userId}/monthly")]
+public async Task<IActionResult> GetUserMonthlyAttendance(
+    string userId,
+    int year,
+    int month)
+{
+    var manager = await _userManager.GetUserAsync(User);
+
+    if (manager is null)
+        return Unauthorized();
+
+    if (month < 1 || month > 12)
+        return BadRequest("Invalid Persian month.");
+
+    var user = await _db.Users
+        .FirstOrDefaultAsync(x => x.Id == userId);
+
+    if (user is null)
+        return NotFound("User not found.");
+
+
+
+    var persianCalendar = new PersianCalendar();
+
+    DateTime startGregorian =
+        persianCalendar.ToDateTime(
+            year,
+            month,
+            1,
+            0,
+            0,
+            0,
+            0
+        );
+
+    int daysInMonth =
+        persianCalendar.GetDaysInMonth(year, month);
+
+    DateTime endGregorian =
+        persianCalendar.ToDateTime(
+            year,
+            month,
+            daysInMonth,
+            23,
+            59,
+            59,
+            999
+        );
+
+    var startDate = DateOnly.FromDateTime(startGregorian);
+    var endDate = DateOnly.FromDateTime(endGregorian);
+
+
+    var attendances = await _db.Attendances
+        .Where(x =>
+            x.UserId == userId &&
+            x.Date >= startDate &&
+            x.Date <= endDate)
+        .OrderBy(x => x.Date)
+        .ToListAsync();
+
+
+
+    var summary = new
+    {
+        totalDays = attendances.Count,
+
+        presentDays = attendances.Count(x =>
+            x.Status == AttendanceStatus.Present),
+
+        absentDays = attendances.Count(x =>
+            x.Status == AttendanceStatus.Absent),
+
+        leaveDays = attendances.Count(x =>
+            x.Status == AttendanceStatus.Leave),
+
+        unknownDays = attendances.Count(x =>
+            x.Status == AttendanceStatus.unknown),
+
+        outOfShiftDays = attendances.Count(x =>
+            x.Status == AttendanceStatus.OutOfShift),
+
+        totalWorkedMinutes = attendances.Sum(x =>
+            x.WorkedMinutes),
+
+        totalLateMinutes = attendances.Sum(x =>
+            x.LateMinutes),
+
+        totalEarlyLeaveMinutes = attendances.Sum(x =>
+            x.EarlyLeaveMinutes),
+
+        totalOvertimeMinutes = attendances.Sum(x =>
+            x.OvertimeMinutes)
+    };
+
+    var requests = attendances
+        .Select(x => new
+        {
+            id = x.Id,
+
+            date = x.Date,
+
+            status = x.Status,
+
+            checkIn = x.CheckIn,
+
+            checkOut = x.CheckOut,
+
+            workedMinutes = x.WorkedMinutes,
+
+            lateMinutes = x.LateMinutes,
+
+            earlyLeaveMinutes = x.EarlyLeaveMinutes,
+
+            overtimeMinutes = x.OvertimeMinutes,
+
+            description = x.Description,
+
+            createdAt = x.CreatedAt,
+
+            updatedAt = x.UpdatedAt
+        })
+        .ToList();
+
+
+    return Ok(new
+    {
+        user = new
+        {
+            id = user.Id,
+            name = $"{user.FirstName} {user.LastName}"
+        },
+
+        month = new
+        {
+            year,
+            month
+        },
+
+        summary,
+
+
+        requests
     });
 }
 }

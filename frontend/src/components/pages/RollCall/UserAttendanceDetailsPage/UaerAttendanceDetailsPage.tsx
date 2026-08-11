@@ -13,10 +13,10 @@ import persian from "react-date-object/calendars/persian";
 import { DateObject } from "react-multi-date-picker";
 import { EditDialog } from "@/components/shared/EditDialog";
 import { useCreateLeave } from "./hooks/useCreateLeave";
-import { useMonthlyLeave } from "./hooks/useMonthlyLeave";
+import { useMonthlyAttendance } from "./hooks/useMonthlyAttendance";
 import { createLeaveValidation, validation } from "./validation";
 import { monthlyColumns } from "./column";
-import type { MonthlyReport } from "./LeaveInterface";
+import type { MonthlyReport } from "./AttendanceInterface";
 import { useParams } from "react-router-dom";
 import TodayTable from "./components/TodayTable";
 import AttendanceCharts from "../charts/AttendanceCharts";
@@ -55,7 +55,7 @@ const UserAttendanceDetailsPage = () => {
 
   const [monthlyRows, setMonthlyRows] = useState<MonthlyReport | null>(null);
 
-  const monthlyMutation = useMonthlyLeave({ setMonthlyRows });
+  const monthlyMutation = useMonthlyAttendance({ setMonthlyRows , id });
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     const date = new DateObject(data.date).convert(persian);
@@ -65,11 +65,8 @@ const UserAttendanceDetailsPage = () => {
       month: date.month.number,
     };
 
-    console.log(payload);
-
     monthlyMutation.mutate(payload);
   };
-  const postReqNewLeave = useCreateLeave();
 
   if (isLoading) {
     return (
@@ -117,7 +114,7 @@ const UserAttendanceDetailsPage = () => {
         </div>
         <div>
           <h3 className="flex gap-3 items-center mr-2 pb-5 text-xl py-2 ">
-            وضعیت کل حضور و غیاب ها تا به اینجا 
+            وضعیت کل حضور و غیاب ها تا به اینجا
           </h3>
           <div className="flex flex-col gap-5">
             {attendanceData?.summary == null ? (
@@ -134,7 +131,18 @@ const UserAttendanceDetailsPage = () => {
         <h3 className="flex gap-3 items-center mr-2 pb-5 text-xl py-2 ">
           وضعیت مرخصی در هر ماه
         </h3>
-        <div className="flex flex-col md:flex-row mt-3 ">
+        <div className="grid grid-cols-2 items-center">
+          <div className="w-full">
+            <div className="w-full  ">
+              {monthlyRows?.summary == null ? (
+                <>
+                  <p>مرخصی در این ماه وجود ندارد!!</p>
+                </>
+              ) : (
+                <AttendanceCharts summary={monthlyRows?.summary} />
+              )}
+            </div>
+          </div>
           <div>
             <Form formProp={form} onSubmit={onSubmit}>
               <div className="grid grid-cols-2 bg-white items-end gap-5 p-5  rounded-t-md">
@@ -165,25 +173,6 @@ const UserAttendanceDetailsPage = () => {
               }
               Title="لیست گزارش"
             />
-          </div>
-          <div className="w-full">
-            <div className="flex justify-around">
-              <span className="flex flex-col items-center  font-bold border rounded-full p-2 ">
-                <h2>مجموع کل مرخصی</h2> {monthlyRows?.summary?.totalRequests}
-              </span>
-              <span className="flex flex-col items-center  font-bold border rounded-full p-2 ">
-                <h2>مجموع کل روزها</h2> {monthlyRows?.summary?.totalDays}
-              </span>
-            </div>
-            <div className="w-full flex justify-center  ">
-              {attendanceData?.remainingLeaves == null ? (
-                <>
-                  <p>مرخصی در این ماه وجود ندارد!!</p>
-                </>
-              ) : (
-                <LeaveTypeMontly data={monthlyRows?.byLeaveType ?? []} />
-              )}
-            </div>
           </div>
         </div>
       </div>

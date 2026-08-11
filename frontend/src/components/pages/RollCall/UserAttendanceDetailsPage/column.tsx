@@ -1,9 +1,9 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { MonthlyLeave } from "./LeaveInterface";
-import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { useUpdateRows } from "@/hook/useUpdateRows";
-import { Link } from "react-router-dom";
+import type {
+  MonthlyAttendance,
+  AttendanceStatus,
+} from "./AttendanceInterface";
+
 export const getAttendanceStatusInfo = (status: AttendanceStatus) => {
   switch (status) {
     case "Present":
@@ -43,11 +43,6 @@ export const getAttendanceStatusInfo = (status: AttendanceStatus) => {
       };
 
     case "Unknown":
-      return {
-        label: "نامشخص",
-        className: "bg-gray-100 text-gray-800",
-      };
-
     default:
       return {
         label: "نامشخص",
@@ -56,98 +51,110 @@ export const getAttendanceStatusInfo = (status: AttendanceStatus) => {
   }
 };
 
-  export const monthlyColumns: ColumnDef<MonthlyLeave>[] =  [
-      {
-        accessorKey: "leaveType",
-        header: "نوع مرخصی",
+const formatMinutes = (minutes: number) => {
+  if (!minutes) return "—";
 
-        cell: ({ row }) => {
-          return <span>{row.original.leaveType?.name || "—"}</span>;
-        },
-      },
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
 
-      {
-        accessorKey: "startDate",
-        header: "تاریخ شروع",
+  if (!hours) {
+    return `${remainingMinutes} دقیقه`;
+  }
 
-        cell: ({ row }) => {
-          return new Date(row.original.startDate).toLocaleDateString("fa-IR");
-        },
-      },
+  if (!remainingMinutes) {
+    return `${hours} ساعت`;
+  }
 
-      {
-        accessorKey: "endDate",
-        header: "تاریخ پایان",
+  return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+};
 
-        cell: ({ row }) => {
-          return new Date(row.original.endDate).toLocaleDateString("fa-IR");
-        },
-      },
+export const monthlyColumns: ColumnDef<MonthlyAttendance>[] = [
+  {
+    accessorKey: "date",
+    header: "تاریخ",
 
-      {
-        accessorKey: "totalDays",
-        header: "تعداد روز",
+    cell: ({ row }) => {
+      return new Date(row.original.date).toLocaleDateString("fa-IR");
+    },
+  },
 
-        cell: ({ row }) => {
-          return <span>{row.original.totalDays} روز</span>;
-        },
-      },
+  {
+    accessorKey: "status",
+    header: "وضعیت",
 
-      {
-        accessorKey: "status",
-        header: "وضعیت",
+    cell: ({ row }) => {
+      const status = getAttendanceStatusInfo(row.original.status);
 
-        cell: ({ row }) => {
-          const status = getAttendanceStatusInfo(row.original.status);
+      return (
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${status.className}`}
+        >
+          {status.label}
+        </span>
+      );
+    },
+  },
 
-          return (
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-medium ${status.className}`}
-            >
-              {status.label}
-            </span>
-          );
-        },
-      },
+  {
+    accessorKey: "checkIn",
+    header: "ساعت ورود",
 
-      {
-        accessorKey: "createdAt",
-        header: "تاریخ درخواست",
+    cell: ({ row }) => {
+      return row.original.checkIn || "—";
+    },
+  },
 
-        cell: ({ row }) => {
-          return new Date(row.original.createdAt).toLocaleDateString("fa-IR");
-        },
-      },
+  {
+    accessorKey: "checkOut",
+    header: "ساعت خروج",
 
-      {
-        id: "actions",
+    cell: ({ row }) => {
+      return row.original.checkOut || "—";
+    },
+  },
 
-        header: "عملیات",
+  {
+    accessorKey: "workedMinutes",
+    header: "مدت کارکرد",
 
-        cell: ({ row }) => {
-          const { mutation: UpdateCancel } = useUpdateRows(
-            `leave-list/${row.original.id}/cancel`,
-            ["leaves"],
-            {},
-            "لغو",
-          );
-          return (
-            <div className="flex gap-3 items-center">
-              <Link to={`/leave/details/${row.original.id}`}>
-                <Button size="sm">نمایش جزئیات</Button>
-              </Link>
-              {row?.original.status === "Pending" && (
-                <Button
-                  onClick={() => {
-                    UpdateCancel.mutate({});
-                  }}
-                  variant={"destructive"}
-                >
-                  لغو کردن
-                </Button>
-              )}
-            </div>
-          );
-        },
-      },
-    ]
+    cell: ({ row }) => {
+      return formatMinutes(row.original.workedMinutes);
+    },
+  },
+
+  {
+    accessorKey: "lateMinutes",
+    header: "تأخیر",
+
+    cell: ({ row }) => {
+      return formatMinutes(row.original.lateMinutes);
+    },
+  },
+
+  {
+    accessorKey: "earlyLeaveMinutes",
+    header: "ترک زودهنگام",
+
+    cell: ({ row }) => {
+      return formatMinutes(row.original.earlyLeaveMinutes);
+    },
+  },
+
+  {
+    accessorKey: "overtimeMinutes",
+    header: "اضافه‌کاری",
+
+    cell: ({ row }) => {
+      return formatMinutes(row.original.overtimeMinutes);
+    },
+  },
+
+  {
+    accessorKey: "description",
+    header: "توضیحات",
+
+    cell: ({ row }) => {
+      return row.original.description || "—";
+    },
+  },
+];
