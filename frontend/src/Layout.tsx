@@ -81,12 +81,12 @@ const AppLayout = () => {
     <>
       <ToastContainer toastClassName="custom-toast-font" position="top-right" />
       <Navbar />
-      <SidebarInset className="h-[calc(100dvh-15px)]">
+      <SidebarInset className="h-[calc(100dvh-15px)] max-w-full! overflow-auto">
         {" "}
-        <main className="h-full p-6 bg-background rounded-2xl flex flex-col overflow-hidden mb-3">
+        <main className="h-full p-6 bg-background rounded-2xl flex flex-col overflow-hidden mb-3 ">
           {" "}
           <Header />
-          <div className="flex-1 min-h-0 overflow-scroll scroll-" dir="ltr">
+          <div className="flex-1 min-h-0 overflow-scroll " dir="ltr">
             <div dir="rtl">
               <Outlet />
             </div>

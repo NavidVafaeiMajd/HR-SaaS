@@ -23,6 +23,8 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<AnnouncementUser> AnnouncementUsers { get; set; } = null!;
     public DbSet<LeaveType> LeaveTypes { get; set; } = null!;
     public DbSet<LeaveRequest> LeaveRequests { get; set; } = null!;
+    public DbSet<Attendance> Attendances { get; set; } = null!;
+
 
 
 

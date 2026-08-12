@@ -1,134 +1,202 @@
-import { Form } from "@/components/shared/Form";
-import { useForm } from "react-hook-form";
-import { validation } from "./validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type z from "zod";
-import { Button } from "@/components/ui/button";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import Table from "@/components/shared/section/Table";
-import { useEmployees } from "@/hook/useEmployees";
 import { JsonTable } from "@/components/shared/json-table";
-import { useMutation } from "@tanstack/react-query";
-import Cookies from "js-cookie";
-import PostLoad from "@/components/ui/postLoad";
+import { useGetRowsToTable } from "@/hook/useGetRows";
+import { useGetSingleTable } from "@/hook/useGetSingleTable";
+import { Button } from "@/components/ui/button";
+import { LuArrowUpDown } from "react-icons/lu";
+import { Link } from "react-router-dom";
+
+interface UserAttendanceSummary {
+  userId: string;
+  name: string;
+
+  totalWorkedMinutes: number;
+  totalLateMinutes: number;
+  totalEarlyLeaveMinutes: number;
+  totalOvertimeMinutes: number;
+
+  presentDays: number;
+  absentDays: number;
+  leaveDays: number;
+}
 
 const MonthlyAttendance = () => {
-  const form = useForm<z.infer<typeof validation>>({
-    resolver: zodResolver(validation),
-    defaultValues: {
-      employee_id: "",
-      date: new Date(),
-    },
-  });
+  const { data } = useGetSingleTable("user-attendance");
 
-  const [rows, setRows] = useState<any[]>([]);
-
-  const mutation = useMutation({
-    mutationFn: async (form: { employee_id: string; year: number; month: number }) => {
-      const token = Cookies.get("token");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      if (token) headers.Authorization = `Bearer ${token}`;
-  
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/attendances/monthly-report`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(form),
-      });
-  
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "Request failed");
-      }
-      return res.json();
-    },
-    onSuccess: (data: any) => {
-      setRows(Array.isArray(data) ? data : (Array.isArray(data?.days) ? data.days : []));
-    },
-  });
-  
-
-  const onSubmit = (data: z.infer<typeof validation>) => {
-    const dateObj = new Date(data.date);
-  
-    // تبدیل به سال و ماه
-    const payload = {
-      employee_id: data.employee_id,
-      year: dateObj.getFullYear(),
-      month: dateObj.getMonth() + 1, // چون ماه از 0 شروع میشه
-    };
-  
-    console.log(payload)
-    mutation.mutate(payload);
-  };
-  console.log(rows)
-
-  const columns: ColumnDef<any>[] = useMemo(
+  const columns: ColumnDef<UserAttendanceSummary>[] = useMemo(
     () => [
       {
-        accessorKey: "date",
-        header: "تاریخ",
+        accessorKey: "name",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            کارمند
+          </Button>
+        ),
+      },
+
+      {
+        accessorKey: "totalWorkedMinutes",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            مجموع کارکرد
+          </Button>
+        ),
         cell: ({ row }) => {
-          const date = new Date(row.getValue("date"));
-          return date.toLocaleDateString("fa-IR");
+          const minutes = row.original.totalWorkedMinutes;
+
+          if (!minutes) return "-";
+
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+
+          return `${hours} ساعت و ${remainingMinutes} دقیقه`;
         },
       },
+
       {
-        accessorKey: "check_in",
-        header: "ساعت ورود",
-        cell: ({ row }) => row.getValue("check_in") || "-",
+        accessorKey: "presentDays",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            روز های حضور
+          </Button>
+        ),
+        cell: ({ row }) => `${row.original.presentDays} روز`,
       },
+
       {
-        accessorKey: "check_out",
-        header: "ساعت خروج",
-        cell: ({ row }) => row.getValue("check_out") || "-",
+        accessorKey: "absentDays",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            روز های غیبت
+          </Button>
+        ),
+        cell: ({ row }) => `${row.original.absentDays} روز`,
       },
+
       {
-        accessorKey: "work_time",
-        header: "مدت کارکرد",
-        cell: ({ row }) => row.getValue("work_time") || "-",
+        accessorKey: "leaveDays",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            روز های مرخصی
+          </Button>
+        ),
+        cell: ({ row }) => `${row.original.leaveDays} روز`,
+      },
+
+      {
+        accessorKey: "totalLateMinutes",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            مجموع تاخیر
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const minutes = row.original.totalLateMinutes;
+
+          if (!minutes) return "-";
+
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+
+          return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+        },
+      },
+
+      {
+        accessorKey: "totalEarlyLeaveMinutes",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            ترک زودهنگام
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const minutes = row.original.totalEarlyLeaveMinutes;
+
+          if (!minutes) return "-";
+
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+
+          return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+        },
+      },
+
+      {
+        accessorKey: "totalOvertimeMinutes",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <LuArrowUpDown className="ml-2 h-4 w-4" />
+            مجموع اضافه کاری
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const minutes = row.original.totalOvertimeMinutes;
+
+          if (!minutes) return "-";
+
+          const hours = Math.floor(minutes / 60);
+          const remainingMinutes = minutes % 60;
+
+          return `${hours} ساعت و ${remainingMinutes} دقیقه`;
+        },
+      },
+
+      {
+        id: "actions",
+        header: "عملیات",
+
+        cell: ({ row }) => (
+          <>
+            <Link to={`/user-attendance/${row.original.userId}`}>
+              <Button>جزئیات </Button>
+            </Link>
+          </>
+        ),
       },
     ],
-    []
+    [],
   );
 
-  const { data: employee, isPending: employeesLoading } = useEmployees();
-
-  const mapped = employee?.data?.map((item) => ({
-    value: String(item.id),
-    label: item.firstName + " " + item.lastName,
-  }));
+  console.log("data", data);
   return (
-    <>
-      <Form formProp={form} onSubmit={onSubmit}>
-        <div className="flex bg-white items-end gap-5 p-5 mb-5 rounded-sm">
-          {(mutation.isPending || employeesLoading )&& <PostLoad />}
-          <Form.Select
-            label="کارمند"
-            name="employee_id"
-            placeholder="انتخاب کارمند"
-            options={mapped || []}
-            required
-          />
-          <Form.Date label="ماه" name="date" onlyMonthPicker />
-          <Button type="submit" className="py-6!" disabled={mutation.isPending ? true : false} >{mutation.isPending ?"در حال جست و جو ...." : " جست و جو"} </Button>
-        </div>
-      </Form>
-
-      <Table
-        table={
-          <JsonTable
-            columns={columns}
-            data={rows}
-          />
-        }
-        Title="لیست گزارش"
-      />
-    </>
+    <Table
+      table={<JsonTable columns={columns} data={data || []} />}
+      Title="لیست گزارش حضور و غیاب کاربران"
+    />
   );
 };
+
 export default MonthlyAttendance;
