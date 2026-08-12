@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type {
   MonthlyAttendance,
   AttendanceStatus,
-} from "./payRollPeriodInterface";
+} from "./PayRollInterface";
 
 export const getAttendanceStatusInfo = (status: AttendanceStatus) => {
   switch (status) {
