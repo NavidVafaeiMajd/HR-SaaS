@@ -2,6 +2,11 @@ using HrSaaS.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+public class UpdatePayrollPaymentStatusDto
+{
+    public string Status { get; set; } = string.Empty;
+}
+
 [ApiController]
 [Route("api/payroll-payment")]
 public class PayrollPaymentController : ControllerBase
@@ -13,7 +18,6 @@ public class PayrollPaymentController : ControllerBase
         _context = context;
     }
 
-
     // ==========================================
     // GET
     // List of completed payments
@@ -22,9 +26,7 @@ public class PayrollPaymentController : ControllerBase
     // GET:
     // api/payroll-payment?year=1405&month=5
     [HttpGet]
-    public async Task<IActionResult> GetPayments(
-        [FromQuery] int year,
-        [FromQuery] int month)
+    public async Task<IActionResult> GetPayments([FromQuery] int year, [FromQuery] int month)
     {
         if (year <= 0)
             return BadRequest("سال نامعتبر است.");
@@ -32,14 +34,10 @@ public class PayrollPaymentController : ControllerBase
         if (month < 1 || month > 12)
             return BadRequest("ماه باید بین 1 تا 12 باشد.");
 
-
-        var payments = await _context.PayrollPayments
-            .AsNoTracking()
+        var payments = await _context
+            .PayrollPayments.AsNoTracking()
             .Include(x => x.User)
-            .Where(x =>
-                x.Year == year &&
-                x.Month == month
-            )
+            .Where(x => x.Year == year && x.Month == month)
             .OrderBy(x => x.User.FirstName)
             .Select(x => new
             {
@@ -50,75 +48,92 @@ public class PayrollPaymentController : ControllerBase
                 firstName = x.User.FirstName,
                 lastName = x.User.LastName,
 
-                personnelCode =
-                    x.User.PersonnelCode,
+                personnelCode = x.User.PersonnelCode,
 
                 year = x.Year,
                 month = x.Month,
 
                 baseSalary = x.BaseSalary,
 
-                housingAllowance =
-                    x.HousingAllowance,
+                housingAllowance = x.HousingAllowance,
 
-                foodAllowance =
-                    x.FoodAllowance,
+                foodAllowance = x.FoodAllowance,
 
-                transportationAllowance =
-                    x.TransportationAllowance,
+                transportationAllowance = x.TransportationAllowance,
 
-                childAllowance =
-                    x.ChildAllowance,
+                childAllowance = x.ChildAllowance,
 
-                seniorityAllowance =
-                    x.SeniorityAllowance,
+                seniorityAllowance = x.SeniorityAllowance,
 
-                totalAllowances =
-                    x.TotalAllowances,
+                totalAllowances = x.TotalAllowances,
 
+                overtimeAmount = x.OvertimeAmount,
 
-                overtimeAmount =
-                    x.OvertimeAmount,
+                lateDeduction = x.LateDeduction,
 
+                absentDeduction = x.AbsentDeduction,
 
-                lateDeduction =
-                    x.LateDeduction,
-
-
-                absentDeduction =
-                    x.AbsentDeduction,
-
-
-                leaveDeduction =
-                    x.LeaveDeduction,
+                leaveDeduction = x.LeaveDeduction,
 
                 tax = x.Tax,
 
                 insurance = x.Insurance,
 
-                totalDeductions =
-                    x.TotalDeductions,
+                totalDeductions = x.TotalDeductions,
 
+                Status = x.Status,
 
-                netSalary =
-                    x.NetSalary,
+                netSalary = x.NetSalary,
 
-                paidAt = x.PaidAt
+                paidAt = x.PaidAt,
             })
             .ToListAsync();
 
+        return Ok(
+            new
+            {
+                year,
+                month,
 
-        return Ok(new
-        {
-            year,
-            month,
+                count = payments.Count,
 
-            count = payments.Count,
-
-            items = payments
-        });
+                items = payments,
+            }
+        );
     }
 
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(
+        Guid id,
+        [FromBody] UpdatePayrollPaymentStatusDto dto
+    )
+    {
+        var payment = await _context.PayrollPayments.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (payment == null)
+        {
+            return NotFound("رکورد پرداخت پیدا نشد.");
+        }
+
+        if (!Enum.TryParse<PayrollPaymentStatus>(dto.Status, true, out var status))
+        {
+            return BadRequest("وضعیت نامعتبر است. وضعیت باید Pending، IsPaid یا Canceled باشد.");
+        }
+
+        payment.Status = status;
+        payment.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(
+            new
+            {
+                message = "وضعیت پرداخت با موفقیت تغییر کرد.",
+                id = payment.Id,
+                status = payment.Status.ToString(),
+            }
+        );
+    }
 
     // ==========================================
     // GET BY ID
@@ -129,87 +144,64 @@ public class PayrollPaymentController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPayment(Guid id)
     {
-        var payment = await _context.PayrollPayments
-            .AsNoTracking()
+        var payment = await _context
+            .PayrollPayments.AsNoTracking()
             .Include(x => x.User)
             .FirstOrDefaultAsync(x => x.Id == id);
-
 
         if (payment == null)
             return NotFound("پرداخت حقوق پیدا نشد.");
 
+        return Ok(
+            new
+            {
+                id = payment.Id,
 
-        return Ok(new
-        {
-            id = payment.Id,
+                userId = payment.UserId,
 
-            userId = payment.UserId,
+                firstName = payment.User.FirstName,
 
-            firstName =
-                payment.User.FirstName,
+                lastName = payment.User.LastName,
 
-            lastName =
-                payment.User.LastName,
+                personnelCode = payment.User.PersonnelCode,
 
-            personnelCode =
-                payment.User.PersonnelCode,
+                year = payment.Year,
+                month = payment.Month,
 
-            year = payment.Year,
-            month = payment.Month,
+                baseSalary = payment.BaseSalary,
 
-            baseSalary =
-                payment.BaseSalary,
+                housingAllowance = payment.HousingAllowance,
 
-            housingAllowance =
-                payment.HousingAllowance,
+                foodAllowance = payment.FoodAllowance,
 
-            foodAllowance =
-                payment.FoodAllowance,
+                transportationAllowance = payment.TransportationAllowance,
 
-            transportationAllowance =
-                payment.TransportationAllowance,
+                childAllowance = payment.ChildAllowance,
 
-            childAllowance =
-                payment.ChildAllowance,
+                seniorityAllowance = payment.SeniorityAllowance,
 
-            seniorityAllowance =
-                payment.SeniorityAllowance,
+                totalAllowances = payment.TotalAllowances,
 
-            totalAllowances =
-                payment.TotalAllowances,
+                overtimeAmount = payment.OvertimeAmount,
 
-            overtimeAmount =
-                payment.OvertimeAmount,
+                lateDeduction = payment.LateDeduction,
 
-            lateDeduction =
-                payment.LateDeduction,
+                absentDeduction = payment.AbsentDeduction,
 
+                leaveDeduction = payment.LeaveDeduction,
 
-            absentDeduction =
-                payment.AbsentDeduction,
+                tax = payment.Tax,
 
+                insurance = payment.Insurance,
 
-            leaveDeduction =
-                payment.LeaveDeduction,
+                totalDeductions = payment.TotalDeductions,
 
-            tax =
-                payment.Tax,
+                netSalary = payment.NetSalary,
 
-            insurance =
-                payment.Insurance,
-
-            totalDeductions =
-                payment.TotalDeductions,
-
-
-            netSalary =
-                payment.NetSalary,
-
-            paidAt =
-                payment.PaidAt
-        });
+                paidAt = payment.PaidAt,
+            }
+        );
     }
-
 
     // ==========================================
     // POST
@@ -219,8 +211,7 @@ public class PayrollPaymentController : ControllerBase
     // POST:
     // api/payroll-payment
     [HttpPost]
-    public async Task<IActionResult> CreatePayment(
-        [FromBody] CreatePayrollPaymentDto dto)
+    public async Task<IActionResult> CreatePayment([FromBody] CreatePayrollPaymentDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.UserId))
             return BadRequest("کارمند مشخص نشده است.");
@@ -231,36 +222,27 @@ public class PayrollPaymentController : ControllerBase
         if (dto.Month < 1 || dto.Month > 12)
             return BadRequest("ماه نامعتبر است.");
 
-
         // ==========================================
         // Check employee
         // ==========================================
 
-        var user = await _context.Users
-            .FirstOrDefaultAsync(x => x.Id == dto.UserId);
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == dto.UserId);
 
         if (user == null)
             return NotFound("کارمند پیدا نشد.");
-
 
         // ==========================================
         // Prevent duplicate payment
         // ==========================================
 
-        var alreadyPaid = await _context.PayrollPayments
-            .AnyAsync(x =>
-                x.UserId == dto.UserId &&
-                x.Year == dto.Year &&
-                x.Month == dto.Month
-            );
+        var alreadyPaid = await _context.PayrollPayments.AnyAsync(x =>
+            x.UserId == dto.UserId && x.Year == dto.Year && x.Month == dto.Month
+        );
 
         if (alreadyPaid)
         {
-            return Conflict(
-                "حقوق این کارمند برای این ماه قبلاً پرداخت شده است."
-            );
+            return Conflict("حقوق این کارمند برای این ماه قبلاً پرداخت شده است.");
         }
-
 
         // ==========================================
         // Create payment snapshot
@@ -277,71 +259,46 @@ public class PayrollPaymentController : ControllerBase
 
             BaseSalary = dto.BaseSalary,
 
-            HousingAllowance =
-                dto.HousingAllowance,
+            HousingAllowance = dto.HousingAllowance,
 
-            FoodAllowance =
-                dto.FoodAllowance,
+            FoodAllowance = dto.FoodAllowance,
 
-            TransportationAllowance =
-                dto.TransportationAllowance,
+            TransportationAllowance = dto.TransportationAllowance,
 
-            ChildAllowance =
-                dto.ChildAllowance,
+            ChildAllowance = dto.ChildAllowance,
 
-            SeniorityAllowance =
-                dto.SeniorityAllowance,
+            SeniorityAllowance = dto.SeniorityAllowance,
 
-            TotalAllowances =
-                dto.TotalAllowances,
+            TotalAllowances = dto.TotalAllowances,
 
+            OvertimeAmount = dto.OvertimeAmount,
 
-            OvertimeAmount =
-                dto.OvertimeAmount,
+            LateDeduction = dto.LateDeduction,
 
-            LateDeduction =
-                dto.LateDeduction,
+            AbsentDeduction = dto.AbsentDeduction,
 
+            LeaveDeduction = dto.LeaveDeduction,
 
-            AbsentDeduction =
-                dto.AbsentDeduction,
+            Tax = dto.Tax,
 
+            Insurance = dto.Insurance,
 
-            LeaveDeduction =
-                dto.LeaveDeduction,
+            TotalDeductions = dto.TotalDeductions,
 
-
-            Tax =
-                dto.Tax,
-
-            Insurance =
-                dto.Insurance,
-
-
-            TotalDeductions =
-                dto.TotalDeductions,
-
-
-            NetSalary =
-                dto.NetSalary,
+            NetSalary = dto.NetSalary,
 
             Status = PayrollPaymentStatus.Pending,
 
-            PaidAt = null
+            PaidAt = null,
         };
-
 
         _context.PayrollPayments.Add(payment);
 
         await _context.SaveChangesAsync();
 
-
         return CreatedAtAction(
             nameof(GetPayment),
-            new
-            {
-                id = payment.Id
-            },
+            new { id = payment.Id },
             new
             {
                 message = "پرداخت حقوق با موفقیت ثبت شد.",
@@ -353,11 +310,9 @@ public class PayrollPaymentController : ControllerBase
                 year = payment.Year,
                 month = payment.Month,
 
-                netSalary =
-                    payment.NetSalary,
+                netSalary = payment.NetSalary,
 
-                paidAt =
-                    payment.PaidAt
+                paidAt = payment.PaidAt,
             }
         );
     }

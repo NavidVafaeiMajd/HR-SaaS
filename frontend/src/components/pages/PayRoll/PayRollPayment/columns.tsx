@@ -1,54 +1,74 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { LuArrowUpDown } from "react-icons/lu";
-import { Form } from "@/components/shared/Form";
+import ActionsCell from "@/components/shared/ActionsCell";
 import { EditDialog } from "@/components/shared/EditDialog";
-import { z } from "zod";
+import { Form } from "@/components/shared/Form";
 import { useUpdateRows } from "@/hook/useUpdateRows";
+import { z } from "zod";
 
 export interface PayRollPaymentListColumnProps extends Record<string, unknown> {
+  id: string;
+
   userId: string;
 
   firstName: string;
   lastName: string;
 
-  attendanceId: number | null;
+  personnelCode: string | null;
 
-  date: string;
+  year: number;
+  month: number;
 
-  status:
-    | "Present"
-    | "Absent"
-    | "Leave"
-    | "Mission"
-    | "Remote"
-    | "SickLeave"
-    | null;
+  baseSalary: number;
 
-  checkIn: string | null;
-  checkOut: string | null;
+  totalAllowances: number;
 
-  workedMinutes: number | null;
-  lateMinutes: number | null;
-  earlyLeaveMinutes: number | null;
-  overtimeMinutes: number | null;
+  overtimeAmount: number;
 
-  description: string | null;
+  lateDeduction: number;
+  leaveDeduction: number;
+  absentDeduction: number;
+
+  tax: number;
+  insurance: number;
+
+  totalDeductions: number;
+
+  netSalary: number;
+
+  status: "Pending" | "IsPaid" | "Canceled";
 }
 
-export const statusLabels: Record<
-  NonNullable<PayRollPaymentListColumnProps["status"]>,
+export const paymentStatusLabels: Record<
+  PayRollPaymentListColumnProps["status"],
   string
 > = {
-  Present: "حاضر",
-  Absent: "غایب",
-  Leave: "مرخصی",
-  Mission: "ماموریت",
-  Remote: "دورکاری",
-  SickLeave: "مرخصی استعلاجی",
+  Pending: "در انتظار پرداخت",
+  IsPaid: "پرداخت شده",
+  Canceled: "لغو شده",
 };
 
-export const formatMinutes = (minutes: number | null) => {
+/* =========================================================
+   HELPERS
+========================================================= */
+
+export const monthLabels: Record<number, string> = {
+  1: "فروردین",
+  2: "اردیبهشت",
+  3: "خرداد",
+  4: "تیر",
+  5: "مرداد",
+  6: "شهریور",
+  7: "مهر",
+  8: "آبان",
+  9: "آذر",
+  10: "دی",
+  11: "بهمن",
+  12: "اسفند",
+};
+
+export const formatMinutes = (minutes: number | null | undefined) => {
   if (minutes === null || minutes === undefined) {
     return "—";
   }
@@ -67,228 +87,101 @@ export const formatMinutes = (minutes: number | null) => {
   return `${hours} ساعت و ${remainingMinutes} دقیقه`;
 };
 
-const normalizeTime = (time: string | null | undefined) => {
-  if (!time) return null;
+export const formatPrice = (value: number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return "—";
+  }
 
-  return time.slice(0, 5);
+  return new Intl.NumberFormat("fa-IR").format(value);
 };
 
-const PayRollPaymentActions = ({ row }: { row: any }) => {
-  const { mutation: UpdatePresent } = useUpdateRows(
-    `attendance/${row.userId}/present`,
-    ["attendances"],
-    {},
-    "حاضر",
-  );
-
-  const { mutation: UpdateAbsent } = useUpdateRows(
-    `attendance/${row.userId}/absent`,
-    ["attendances"],
-    {},
-    "غیبت",
-  );
-  const { mutation: UpdateStatus } = useUpdateRows(
-    `attendance/${row.userId}/status`,
-    ["attendances"],
-    {},
-    "وضعیت حال حاضر",
-  );
-
-  switch (row.status) {
-    case "OutOfShift":
-      return <> </>;
-      break;
-    case "Leave":
-      return <> </>;
-      break;
-    case "Present":
-      return (
-        <div className="flex gap-3">
-          <EditDialog
-            btnTitle="تغییر ساعت ورود و خروج"
-            title="فرم تغییر ساعت ورود و خروج"
-            triggerLabel="تغییر ساعت ورود و خروج"
-            variant="outline"
-            fields={
-              <>
-                <Form.TimePicker
-                  label=" ساعت ورود "
-                  name="checkIn"
-                  placeholder=" ساعت ورود "
-                />
-                <Form.TimePicker
-                  label=" ساعت خروج "
-                  name="checkOut"
-                  placeholder=" ساعت خروج "
-                />
-              </>
-            }
-            defaultValues={{
-              checkIn: normalizeTime(row.checkIn),
-              checkOut: normalizeTime(row.checkOut),
-            }}
-            onSave={(data) => {
-              const payload = {
-                checkIn: normalizeTime(data.checkIn),
-                checkOut: normalizeTime(data.checkOut),
-              };
-              UpdatePresent.mutate(payload);
-            }}
-            schema={z.object({
-              checkIn: z.string().optional(),
-              checkOut: z.string().optional(),
-            })}
-          />
-          <EditDialog
-            btnTitle="تغییر وضعیت فعلی "
-            title="فرم تغییر وضعیت فعلی"
-            triggerLabel="تغییر وضعیت فعلی   "
-            variant="outline"
-            fields={
-              <>
-                <Form.Select
-                  label=" وضعیت فعلی را تغییر دهید "
-                  options={[
-                    { label: "حاضر", value: "Present" },
-                    { label: "عایب", value: "Absent" },
-                  ]}
-                  name="status"
-                  placeholder=" انتخاب وضعیت بعدی "
-                />
-                <Form.Textarea
-                  label=" توضیحات  "
-                  name="description"
-                  placeholder=" دلیل غیبت ....  "
-                />
-              </>
-            }
-            defaultValues={{
-              status: row.status,
-              description: row.description,
-            }}
-            onSave={(data) => {
-              UpdateStatus.mutate(data);
-            }}
-            schema={z.object({
-              status: z.string().optional(),
-              description: z.string().optional(),
-            })}
-          />
-        </div>
-      );
-      break;
-    case "Absent":
-      return (
-        <EditDialog
-          btnTitle="تغییر وضعیت فعلی "
-          title="فرم تغییر وضعیت فعلی"
-          triggerLabel="تغییر وضعیت فعلی   "
-          variant="outline"
-          fields={
-            <>
-              <Form.Select
-                label=" وضعیت فعلی را تغییر دهید "
-                options={[
-                  { label: "حاضر", value: "Present" },
-                  { label: "عایب", value: "Absent" },
-                ]}
-                name="status"
-                placeholder=" انتخاب وضعیت بعدی "
-              />
-              <Form.Textarea
-                label=" توضیحات  "
-                name="description"
-                placeholder=" دلیل غیبت ....  "
-              />
-            </>
-          }
-          defaultValues={{
-            status: row.status,
-            description: row.description,
-          }}
-          onSave={(data) => {
-            UpdateStatus.mutate(data);
-          }}
-          schema={z.object({
-            status: z.string().optional(),
-            description: z.string().optional(),
-          })}
-        />
-      );
-      break;
-    default:
-      console.log(`Sorry, we are out .`);
+export const formatDate = (value: string | null | undefined) => {
+  if (!value) {
+    return "—";
   }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleDateString("fa-IR");
+};
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+const PayRollPaymentActions = ({
+  row,
+}: {
+  row: PayRollPaymentListColumnProps;
+}) => {
+  const { mutation } = useUpdateRows(
+    `payroll-payment/${row.id}/status`,
+    ["payroll-payment"],
+    z.object({
+      status: z.enum(["Pending", "IsPaid", "Canceled"]),
+    }),
+    "وضعیت پرداخت",
+  );
+
   return (
     <div className="flex items-center gap-2">
-      <div className="flex gap-2">
-        <EditDialog
-          btnTitle="ثبت غایب"
-          title="غایب"
-          triggerLabel="غایب"
-          variant="outline"
-          fields={
-            <>
-              <Form.Textarea
-                label=" توضیحات  "
-                name="description"
-                placeholder=" دلیل غیبت ....  "
-              />
-            </>
-          }
-          defaultValues={{
-            description: "",
-          }}
-          onSave={(data) => {
-            UpdateAbsent.mutate(data);
-          }}
-          schema={z.object({
-            description: z.string().min(1, "نوشتن توضیحات لازم است."),
-          })}
-        />
-        <EditDialog
-          btnTitle="تغییر ساعت ورود و خروج"
-          title="حاضر"
-          triggerLabel="حاضر"
-          variant="outline"
-          fields={
-            <>
-              <Form.TimePicker
-                label=" ساعت ورود "
-                name="checkIn"
-                placeholder=" ساعت ورود "
-              />
-              <Form.TimePicker
-                label=" ساعت خروج "
-                name="checkOut"
-                placeholder=" ساعت خروج "
-              />
-            </>
-          }
-          defaultValues={{
-            checkIn: row.checkIn,
-            checkOut: row.checkOut,
-          }}
-          onSave={(data) => {
-            const payload = {
-              checkIn: normalizeTime(data.checkIn),
-              checkOut: normalizeTime(data.checkOut),
-            };
-            UpdatePresent.mutate(payload);
-          }}
-          schema={z.object({
-            checkIn: z.string().optional(),
-            checkOut: z.string().optional(),
-          })}
-        />
-      </div>
+      <EditDialog
+        btnTitle="تغییر وضعیت"
+        title="تغییر وضعیت پرداخت"
+        triggerLabel="تغییر وضعیت"
+        variant="outline"
+        fields={
+          <Form.Select
+            name="status"
+            label="وضعیت پرداخت"
+            required
+            options={[
+              {
+                value: "Pending",
+                label: "در انتظار پرداخت",
+              },
+              {
+                value: "IsPaid",
+                label: "پرداخت شده",
+              },
+              {
+                value: "Canceled",
+                label: "لغو شده",
+              },
+            ]}
+            placeholder="انتخاب وضعیت"
+          />
+        }
+        defaultValues={{
+          status: row.status,
+        }}
+        onSave={(data) => {
+          mutation.mutate(data);
+        }}
+        schema={z.object({
+          status: z.enum(["Pending", "IsPaid", "Canceled"]),
+        })}
+      />
     </div>
   );
 };
 
+/* =========================================================
+   COLUMNS
+========================================================= */
+
 export const columns: ColumnDef<PayRollPaymentListColumnProps>[] = [
+  /* -------------------------------------------------------
+     Employee
+  ------------------------------------------------------- */
+
   {
     accessorKey: "firstName",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -298,145 +191,276 @@ export const columns: ColumnDef<PayRollPaymentListColumnProps>[] = [
         کارمند
       </Button>
     ),
+
     cell: ({ row }) => {
-      const firstName = row.original.firstName;
-      const lastName = row.original.lastName;
+      const { firstName, lastName } = row.original;
 
       return `${firstName} ${lastName}`;
     },
   },
 
+  /* -------------------------------------------------------
+     Personnel Code
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "date",
+    accessorKey: "personnelCode",
+
+    header: "کد پرسنلی",
+
+    cell: ({ row }) => {
+      return row.original.personnelCode ?? "—";
+    },
+  },
+
+  /* -------------------------------------------------------
+     Salary Month
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "month",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        تاریخ
+        ماه حقوق
       </Button>
     ),
-    cell: ({ row }) => {
-      const date = new Date(row.original.date);
 
-      return date.toLocaleDateString("fa-IR");
+    cell: ({ row }) => {
+      const { year, month } = row.original;
+
+      return `${monthLabels[month]} ${year}`;
     },
   },
 
+  /* -------------------------------------------------------
+     Base Salary
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "status",
+    accessorKey: "baseSalary",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        وضعیت
+        حقوق پایه
       </Button>
     ),
-    cell: ({ row }) => {
-      const status = row.original.status;
 
-      return status ? statusLabels[status] : "ثبت نشده";
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.baseSalary)} تومان`;
     },
   },
 
+  /* -------------------------------------------------------
+     Allowances
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "checkIn",
+    accessorKey: "totalAllowances",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        زمان ورود
+        مجموع مزایا
       </Button>
     ),
+
     cell: ({ row }) => {
-      return row.original.checkIn ?? "—";
+      return `${formatPrice(row.original.totalAllowances)} تومان`;
     },
   },
 
+  /* -------------------------------------------------------
+     Overtime
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "checkOut",
+    accessorKey: "overtimeAmount",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        زمان خروج
+        اضافه‌کاری
       </Button>
     ),
+
     cell: ({ row }) => {
-      return row.original.checkOut ?? "—";
+      return `${formatPrice(row.original.overtimeAmount)} تومان`;
     },
   },
 
+  /* -------------------------------------------------------
+     Late Deduction
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "lateMinutes",
+    accessorKey: "lateDeduction",
+
+    header: "کسری تأخیر",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.lateDeduction)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Leave Deduction
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "leaveDeduction",
+
+    header: "کسری مرخصی",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.leaveDeduction)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Absent Deduction
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "absentDeduction",
+
+    header: "کسری غیبت",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.absentDeduction)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Tax
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "tax",
+
+    header: "مالیات",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.tax)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Insurance
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "insurance",
+
+    header: "بیمه",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.insurance)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Total Deductions
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "totalDeductions",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        تاخیر
+        مجموع کسورات
       </Button>
     ),
+
     cell: ({ row }) => {
-      return formatMinutes(row.original.lateMinutes);
+      return `${formatPrice(row.original.totalDeductions)} تومان`;
     },
   },
 
+  /* -------------------------------------------------------
+     Gross Salary
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "earlyLeaveMinutes",
+    accessorKey: "grossSalary",
+
+    header: "حقوق ناخالص",
+
+    cell: ({ row }) => {
+      return `${formatPrice(row.original.grossSalary)} تومان`;
+    },
+  },
+
+  /* -------------------------------------------------------
+     Net Salary
+  ------------------------------------------------------- */
+
+  {
+    accessorKey: "netSalary",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        ترک زودهنگام
+        خالص پرداختی
       </Button>
     ),
+
     cell: ({ row }) => {
-      return formatMinutes(row.original.earlyLeaveMinutes);
+      return (
+        <span className="font-semibold">
+          {formatPrice(row.original.netSalary)} تومان
+        </span>
+      );
     },
   },
 
+  /* -------------------------------------------------------
+     Paid At
+  ------------------------------------------------------- */
+
   {
-    accessorKey: "workedMinutes",
+    accessorKey: "paidAt",
+
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         <LuArrowUpDown className="ml-2 h-4 w-4" />
-        مجموع کار
+        تاریخ پرداخت
       </Button>
     ),
+
     cell: ({ row }) => {
-      return formatMinutes(row.original.workedMinutes);
+      return formatDate(row.original.paidAt);
     },
   },
 
-  {
-    accessorKey: "overtimeMinutes",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        اضافه کاری
-      </Button>
-    ),
-    cell: ({ row }) => {
-      return formatMinutes(row.original.overtimeMinutes);
-    },
-  },
+  /* -------------------------------------------------------
+     Actions
+  ------------------------------------------------------- */
+
   {
     id: "actions",
 

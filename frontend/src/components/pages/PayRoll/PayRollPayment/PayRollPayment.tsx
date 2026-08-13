@@ -13,7 +13,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { JsonTable } from "@/components/shared/json-table";
-import { monthlyColumns } from "../../RollCall/UserAttendanceDetailsPage/column";
 import { usePayRollPayment } from "./usePayRollPayment";
 
 const PayRollPayment = () => {
@@ -85,8 +84,8 @@ const PayRollPayment = () => {
        <Table
          table={
            <JsonTable
-             columns={monthlyColumns}
-             data={monthlyRows?.requests ?? []}
+             columns={columns}
+             data={monthlyRows?.items ?? []}
            />
          }
          Title="لیست پرداخت حقوق و دستمزد کاربران در ماه  "
