@@ -14,7 +14,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { JsonTable } from "@/components/shared/json-table";
-import { monthlyColumns } from "../../RollCall/UserAttendanceDetailsPage/column";
 
 const PayRollPeriod = () => {
    useEffect(() => {
@@ -83,12 +82,7 @@ const PayRollPeriod = () => {
          </div>
        </Form>
        <Table
-         table={
-           <JsonTable
-             columns={monthlyColumns}
-             data={monthlyRows?.requests ?? []}
-           />
-         }
+         table={<JsonTable columns={columns} data={monthlyRows?.items ?? []} />}
          Title="لیست وضعیت حقوق و دستمزد کاربران در ماه  "
        />
      </div>

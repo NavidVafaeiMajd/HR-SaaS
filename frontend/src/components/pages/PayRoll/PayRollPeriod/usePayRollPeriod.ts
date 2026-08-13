@@ -1,13 +1,12 @@
 import api from "@/api/axios";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import type { MonthlyReport } from "../AttendanceInterface";
 
 export const usePayRollPeriod = ({ setMonthlyRows }) => {
 return useMutation({
     mutationFn: async ({ year, month }: { year: number; month: number }) => {
-      const { data } = await api.get<MonthlyReport>(
-        `user-attendance//monthly?year=${year}&month=${month}`,
+      const { data } = await api.get(
+        `payroll-period?year=${year}&month=${month}`,
       );
 
       return data;
