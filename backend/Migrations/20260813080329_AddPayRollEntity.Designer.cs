@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260813080329_AddPayRollEntity")]
+    partial class AddPayRollEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,8 +279,9 @@ namespace HrSaaS.Migrations
                     b.Property<decimal>("HousingAllowance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Insurance")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Insurance")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("LatePerHour")
                         .HasColumnType("decimal(18,2)");
@@ -291,8 +295,9 @@ namespace HrSaaS.Migrations
                     b.Property<decimal>("SeniorityAllowance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Tax")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TransportationAllowance")
                         .HasColumnType("decimal(18,2)");
@@ -347,8 +352,9 @@ namespace HrSaaS.Migrations
                     b.Property<decimal>("HousingAllowance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Insurance")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Insurance")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("LatePerHour")
                         .HasColumnType("decimal(18,2)");
@@ -362,8 +368,9 @@ namespace HrSaaS.Migrations
                     b.Property<decimal>("SeniorityAllowance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Tax")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TransportationAllowance")
                         .HasColumnType("decimal(18,2)");

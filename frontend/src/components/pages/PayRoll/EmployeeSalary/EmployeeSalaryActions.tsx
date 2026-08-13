@@ -85,7 +85,7 @@ export function AnnouncementFields() {
     </>
   );
 }
-export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
+export function EmployeeSalaryAction({ news }: { news: PolicyColumnProps }) {
   const deleteRow = useDeleteRows({
     url: "hr-news",
     queryKey: ["hr-news"],
@@ -97,7 +97,7 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
     validation,
     "ابلاغیه",
   );
-  console.log("news",news)
+  console.log("news", news);
 
   return (
     <div className="flex items-center gap-2">
@@ -158,7 +158,6 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
             path: `/news-list/${news.id}`,
           },
         ]}
-        
       />
     </div>
   );

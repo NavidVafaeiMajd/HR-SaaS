@@ -4,55 +4,51 @@ import { EditDialog } from "@/components/shared/EditDialog";
 import { Form } from "@/components/shared/Form";
 import { Button } from "@/components/ui/button";
 import { useDeleteRows } from "@/hook/useDeleteRows";
-import { useDepartments } from "@/hook/useDepartments";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 import type { ColumnDef } from "@tanstack/react-table";
 import { LuArrowUpDown } from "react-icons/lu";
 import { z } from "zod";
-import { useUsersQuery } from "./hooks/useUsersQuery";
-import { useEmployees } from "@/hook/useEmployees";
-import { AnnouncementActions } from "./EmployeeSalaryActions";
+import { EmployeeSalaryAction } from "./EmployeeSalaryActions";
 
-export interface PolicyColumnProps extends Record<string, unknown> {
+export interface EmployeeSalaryColumnProps extends Record<string, unknown> {
   id: string;
 
-  title: string;
-  content: string;
+  userId: string;
 
-  publish_date: string | Date;
-  end_date: string | Date;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
 
-  departments: {
-    value: string;
-    label: string;
-  }[];
+  baseSalary: number;
 
-  positions: {
-    value: string;
-    label: string;
-  }[];
+  housingAllowance: number;
+  foodAllowance: number;
+  transportationAllowance: number;
+  childAllowance: number;
+  seniorityAllowance: number;
 
-  users: {
-    value: string;
-    label: string;
-  }[];
+  latePerHour: number;
+  leavePerDay: number;
+  absentPerDay: number;
+  overtimePerHour: number;
+
+  tax: number;
+  insurance: number;
+
+  isInsured: boolean;
+  isTaxable: boolean;
+
+  effectiveFrom: string | Date;
 
   createdAt: string;
-  createdBy: string | null;
+  updatedAt: string | null;
 }
 
-const validation = z.object({
-  title: z.string().min(1, "عنوان الزامی است"),
-  publish_date: z.date(),
-  end_date: z.date(),
-  department: z.string(),
-  summary: z.string(),
-  content: z.string(),
-});
-
-export const columns: ColumnDef<PolicyColumnProps>[] = [
+export const columns: ColumnDef<EmployeeSalaryColumnProps>[] = [
   {
-    accessorKey: "title",
+    accessorKey: "user",
     header: ({ column }) => {
       return (
         <Button
@@ -60,30 +56,88 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <LuArrowUpDown className="ml-2 h-4 w-4" />
-          عنوان
+          کارمند
         </Button>
       );
     },
-  },
-  {
-    accessorKey: "createdBy",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        <LuArrowUpDown className="ml-2 h-4 w-4" />
-        واحد سازمانی
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const user = row.original.createdBy;
 
-      return user ? `${user?.firstName} ${user?.lastName}` : "-";
+    cell: ({ row }) => {
+      const user = row.original.user;
+
+      if (!user) return "-";
+
+      return `${user.firstName} ${user.lastName}`;
     },
   },
+
   {
-    accessorKey: "startDate",
+    accessorKey: "baseSalary",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <LuArrowUpDown className="ml-2 h-4 w-4" />
+          حقوق پایه
+        </Button>
+      );
+    },
+
+    cell: ({ row }) => {
+      const value = row.original.baseSalary;
+
+      return `${value && value?.toLocaleString("fa-IR")} تومان`;
+    },
+  },
+
+  {
+    accessorKey: "housingAllowance",
+    header: "حق مسکن",
+
+    cell: ({ row }) => {
+      const value = row.original.housingAllowance;
+
+      return `${value?.toLocaleString("fa-IR")} تومان`;
+    },
+  },
+
+  {
+    accessorKey: "foodAllowance",
+    header: "حق غذا",
+
+    cell: ({ row }) => {
+      const value = row.original.foodAllowance;
+
+      return `${value?.toLocaleString("fa-IR")} تومان`;
+    },
+  },
+
+  {
+    accessorKey: "seniorityAllowance",
+    header: "سنوات",
+
+    cell: ({ row }) => {
+      const value = row.original.seniorityAllowance;
+
+      return `${value?.toLocaleString("fa-IR")} تومان`;
+    },
+  },
+
+  {
+    accessorKey: "overtimePerHour",
+    header: "اضافه‌کاری ساعتی",
+
+    cell: ({ row }) => {
+      const value = row.original.overtimePerHour;
+
+      return `${value?.toLocaleString("fa-IR")} تومان`;
+    },
+  },
+
+  {
+    accessorKey: "effectiveFrom",
+
     header: ({ column }) => {
       return (
         <Button
@@ -95,45 +149,48 @@ export const columns: ColumnDef<PolicyColumnProps>[] = [
         </Button>
       );
     },
+
     cell: ({ row }) => {
-      const rawDate = row.getValue("startDate") as string | null;
+      const rawDate = row.original.effectiveFrom;
 
       if (!rawDate) return "-";
 
-      const date = new Date(rawDate.replace(" ", "T"));
+      const date =
+        rawDate instanceof Date
+          ? rawDate
+          : new Date(String(rawDate).replace(" ", "T"));
+
       return date.toLocaleDateString("fa-IR");
     },
   },
+
   {
-    accessorKey: "endDate",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          <LuArrowUpDown className="ml-2 h-4 w-4" />
-          تاریخ پایان
-        </Button>
-      );
-    },
+    id: "status",
+
+    header: "وضعیت",
+
     cell: ({ row }) => {
-      const rawDate = row.getValue("endDate") as string | null;
+      const salary = row.original;
 
-      if (!rawDate) return "-";
+      return (
+        <div className="flex gap-2">
+          {salary.isInsured && <span className="text-sm">بیمه</span>}
 
-      const date = new Date(rawDate.replace(" ", "T"));
-      return date.toLocaleDateString("fa-IR");
+          {salary.isTaxable && <span className="text-sm">مالیات</span>}
+        </div>
+      );
     },
   },
 
   {
     id: "actions",
-    header: "عملیات",
-    cell: ({ row }) => {
-      const news = row.original;
 
-      return <AnnouncementActions news={news} />;
+    header: "عملیات",
+
+    cell: ({ row }) => {
+      const salary = row.original;
+
+      return <EmployeeSalaryAction news={salary} />;
     },
   },
 ];

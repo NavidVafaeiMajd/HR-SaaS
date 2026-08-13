@@ -18,8 +18,8 @@ public class EmployeeSalary : IAuditable
     public decimal OvertimePerHour { get; set; }
 
 
-    public string Tax { get; set; }
-    public string Insurance { get; set; }
+    public decimal Tax { get; set; }
+    public decimal Insurance { get; set; }
 
 
     public DateOnly EffectiveFrom { get; set; }

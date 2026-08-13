@@ -5,137 +5,252 @@ import { validation } from "./validation";
 import { Form } from "@/components/shared/Form";
 import type z from "zod";
 import { usePostRows } from "@/hook/usePostRows";
-import { useDepartments } from "@/hook/useDepartments";
-import { usePositionQuery } from "./hooks/usePositionQuery";
 import { useUsersQuery } from "./hooks/useUsersQuery";
+import { formatPrice } from "./utils";
 
 const EmployeeSalary: React.FC = () => {
-  const title = " ابلاغیه ";
+  const title = "حقوق و دستمزد";
+
   useEffect(() => {
     document.title = title;
   }, []);
 
+  const defaultValues = {
+    userId: "",
 
-  const { data: departments, isPending: departmentsLoading } = useDepartments();
+    baseSalary: 0,
 
-const defaultValues = {
-  title: "",
-  publish_date: null,
-  end_date: null,
-  departmentIds: [],
-  positionIds: [],
-  userIds: [],
-  content: "",
-};
+    housingAllowance: 0,
+    foodAllowance: 0,
+    transportationAllowance: 0,
+    childAllowance: 0,
+    seniorityAllowance: 0,
+
+    latePerHour: 0,
+    leavePerDay: 0,
+    absentPerDay: 0,
+    overtimePerHour: 0,
+
+    tax: 0,
+    insurance: 0,
+
+    effectiveFrom: null,
+  };
+
+  const { data: users, isPending: usersLoading } = useUsersQuery();
+
   const { mutation, form } = usePostRows(
-    "hr-news",
-    ["hr-news"],
+    "employee-salary",
+    ["employee-salary"],
     defaultValues,
     validation,
-    "ابلاغیه",
+    "حقوق کارمند",
     true,
   );
 
-  const selectedDepartments = form.watch("departmentIds");
-  const selectedPositions = form.watch("positionIds");
-
-    useEffect(() => {
-      form.setValue("positionIds", []);
-      form.setValue("userIds", []);
-    }, [selectedDepartments]);
-
-    useEffect(() => {
-      form.setValue("userIds", []);
-    }, [selectedPositions]);
-  
-  const { data: positions, isPending: positionsLoading } =
-    usePositionQuery(selectedDepartments);
-
-  const { data: users, isPending: usersLoading } = useUsersQuery(selectedPositions);
-  const departmentsMapped =
-    departments?.data?.map((item) => ({
-      value: String(item.id),
-      label: item.name,
-    })) || [];
-
-  const positionsMapped =
-    positions?.map((item) => ({
-      value: item.value,
-      label: item.label,
-    })) || [];
-
   const usersMapped =
     users?.map((item) => ({
-      value: item.value,
+      value: String(item.value),
       label: item.label,
     })) || [];
+
+  const baseSalary = form.watch("baseSalary");
+
+  const workingDays = 30;
+  const workingHoursPerDay = 7.33;
+  const overtimeMultiplier = 1.4;
+
+  const dailySalary = baseSalary / workingDays;
+
+  const hourlySalary = dailySalary / workingHoursPerDay;
+
+  const overtimePerHour = hourlySalary * overtimeMultiplier;
+  useEffect(() => {
+    if (!baseSalary) {
+      form.setValue("dailySalary", 0);
+      form.setValue("hourlySalary", 0);
+      form.setValue("latePerHour", 0);
+      form.setValue("leavePerDay", 0);
+      form.setValue("absentPerDay", 0);
+      form.setValue("overtimePerHour", 0);
+
+      return;
+    }
+
+    form.setValue("dailySalary", Math.round(dailySalary));
+    form.setValue("hourlySalary", Math.round(hourlySalary));
+
+    form.setValue("latePerHour", Math.round(hourlySalary));
+    form.setValue("leavePerDay", Math.round(dailySalary));
+    form.setValue("absentPerDay", Math.round(dailySalary));
+    form.setValue("overtimePerHour", Math.round(overtimePerHour));
+  }, [baseSalary, dailySalary, hourlySalary, overtimePerHour, form]);
+
   const formFields = (
     <div className="relative">
-      {(mutation.isPending || departmentsLoading) && (
+      {mutation.isPending || usersLoading ? (
         <div className="flex justify-center items-center absolute p-4 top-0 left-0 right-0 bottom-0 bg-bgBack/90 z-50">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           <span className="mr-2">در حال بارگذاری...</span>
         </div>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Form.Input
-          name="title"
-          label="عنوان ابلاغیه"
-          required
-          placeholder="عنوان ابلاغیه"
-        />
-        <div className="flex flex-col md:flex-row gap-5">
-          <Form.Date name="publish_date" label="تاریخ شروع" />
-          <Form.Date name="end_date" label="تاریخ پایان" />
-        </div>
-      </div>
-      <div className="flex flex-col md:flex-row gap-5"></div>
+      ) : null}
 
-      <div className="flex flex-col md:flex-row gap-5">
-        <Form.MultiSelect
-          name="departmentIds"
-          label="واحد سازمانی"
-          options={departmentsMapped || []}
-          required
-          placeholder="انتخاب واحد سازمانی"
-        />
-        <Form.MultiSelect
-          name="positionIds"
-          label="سمت شغلی"
-          options={positionsMapped}
-          disabled={!selectedDepartments?.length}
-        />
-        <Form.MultiSelect
-          name="userIds"
+      {/* کارمند و تاریخ شروع */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Form.Select
+          name="userId"
           label="کارمند"
           options={usersMapped}
-          disabled={!selectedPositions?.length}
+          required
+          placeholder="انتخاب کارمند"
         />
+
+        <Form.Date name="effectiveFrom" label="تاریخ شروع حقوق" />
       </div>
-      <Form.RichText name="content" label="متن ابلاغیه" required />
+
+      {/* حقوق پایه */}
+      <div className="mt-6 w-full  ">
+        <h3 className="text-lg font-semibold mb-4">حقوق پایه</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-5 w-full!">
+          <Form.PriceInput
+            name="baseSalary"
+            label="حقوق پایه"
+            required
+            placeholder="حقوق پایه"
+          />
+          <div className="flex  flex-col justify-between">
+            <span>حقوق روزانه: {formatPrice(dailySalary)} تومان</span>
+            <span>حقوق ساعتی: {formatPrice(hourlySalary)} تومان</span>
+            <p className="text-amber-400">
+              نکته : این حقوق ساعتی و روزانه بر اساس 30 روز در ماه و 7:30 ساعت
+              کار در روز لحاظ شده، در غیر این صورت میتنوانید با هر عددی که مورد
+              نظر شماست پر کنید. این نکته برای کسری مرخصی، غیبت و ... به همین
+              شکل است.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* مزایا */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">مزایا</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Form.PriceInput
+            name="housingAllowance"
+            label="حق مسکن"
+            placeholder="مبلغ حق مسکن"
+          />
+
+          <Form.PriceInput
+            name="foodAllowance"
+            label="حق غذا"
+            placeholder="مبلغ حق غذا"
+          />
+
+          <Form.PriceInput
+            name="transportationAllowance"
+            label="حق ایاب و ذهاب"
+            placeholder="مبلغ ایاب و ذهاب"
+          />
+
+          <Form.PriceInput
+            name="childAllowance"
+            label="حق اولاد"
+            placeholder="مبلغ حق اولاد"
+          />
+
+          <Form.PriceInput
+            name="seniorityAllowance"
+            label="سنوات"
+            placeholder="مبلغ سنوات"
+          />
+        </div>
+      </div>
+
+      {/* نرخ محاسبات حضور و غیاب */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">محاسبات حضور و غیاب</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Form.PriceInput
+            name="latePerHour"
+            label="کسری هر ساعت تأخیر"
+            placeholder="مبلغ هر ساعت"
+          />
+
+          <Form.PriceInput
+            name="leavePerDay"
+            label="کسری هر روز مرخصی"
+            placeholder="مبلغ هر روز"
+          />
+
+          <Form.PriceInput
+            name="absentPerDay"
+            label="کسری هر روز غیبت"
+            placeholder="مبلغ هر روز"
+          />
+
+          <Form.PriceInput
+            name="overtimePerHour"
+            label="اضافه‌کاری هر ساعت"
+            placeholder="مبلغ هر ساعت"
+          />
+        </div>
+      </div>
+
+      {/* بیمه و مالیات */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">بیمه و مالیات</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Form.PriceInput
+            name="tax"
+            label="مالیات"
+            placeholder="مبلغ مالیات"
+          />
+
+          <Form.PriceInput
+            name="insurance"
+            label="بیمه"
+            placeholder="مبلغ بیمه"
+          />
+
+        </div>
+      </div>
     </div>
   );
 
-const onSubmit = (data: z.infer<typeof validation>) => {
-  const formData = {
-    title: data.title,
-    content: data.content,
+  const onSubmit = (data: z.infer<typeof validation>) => {
+    const formData = {
+      userId: data.userId,
 
-    departmentIds: data.departmentIds,
-    positionIds: data.positionIds,
-    userIds: data.userIds,
+      baseSalary: data.baseSalary,
 
-    startDate: data.publish_date
-      ? data.publish_date.toISOString().slice(0, 19)
-      : null,
+      housingAllowance: data.housingAllowance,
+      foodAllowance: data.foodAllowance,
+      transportationAllowance: data.transportationAllowance,
+      childAllowance: data.childAllowance,
+      seniorityAllowance: data.seniorityAllowance,
 
-    endDate: data.end_date ? data.end_date.toISOString().slice(0, 19) : null,
+      latePerHour: data.latePerHour,
+      leavePerDay: data.leavePerDay,
+      absentPerDay: data.absentPerDay,
+      overtimePerHour: data.overtimePerHour,
+
+      tax: data.tax,
+      insurance: data.insurance,
+
+      effectiveFrom: data.effectiveFrom
+        ? data.effectiveFrom.toISOString().slice(0, 10)
+        : null,
+    };
+
+    console.log(formData);
+
+    mutation.mutate(formData);
   };
-
-  console.log(formData);
-
-  mutation.mutate(formData);
-};
 
   return (
     <>
@@ -146,8 +261,8 @@ const onSubmit = (data: z.infer<typeof validation>) => {
         formFields={formFields}
         onSubmit={onSubmit}
         table={<Table />}
-        FirstTitle="ثبت جدید ابلاغیه"
-        SecoundTitle="لیست همه ابلاغیه ها"
+        FirstTitle="ثبت حقوق کارمند"
+        SecoundTitle="لیست حقوق کارکنان"
       />
     </>
   );
