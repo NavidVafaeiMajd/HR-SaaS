@@ -1,4 +1,4 @@
-public class IncreaseSalaryDto
+public class UpdateEmployeeSalaryDto
 {
     public decimal BaseSalary { get; set; }
 
@@ -16,7 +16,9 @@ public class IncreaseSalaryDto
     public decimal Tax { get; set; }
     public decimal Insurance { get; set; }
 
-    public DateOnly EffectiveFrom { get; set; }
+    public int EffectiveMonth { get; set; }
+    public int EffectiveYear { get; set; }
+
 
     public string? ChangeReason { get; set; }
 }

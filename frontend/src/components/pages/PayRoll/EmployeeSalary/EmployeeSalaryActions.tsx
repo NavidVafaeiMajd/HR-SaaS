@@ -3,143 +3,291 @@ import { DeleteDialog } from "@/components/shared/DeleteDialog";
 import { EditDialog } from "@/components/shared/EditDialog";
 import { Form } from "@/components/shared/Form";
 import { useDeleteRows } from "@/hook/useDeleteRows";
-import { useDepartments } from "@/hook/useDepartments";
 import { useUpdateRows } from "@/hook/useUpdateRows";
-import type { PolicyColumnProps } from "./columns";
+import type { EmployeeSalaryColumnProps } from "./columns";
 import { validation } from "./validation";
-import { usePositionQuery } from "./hooks/usePositionQuery";
 import { useUsersQuery } from "./hooks/useUsersQuery";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
+import DateObject from "react-date-object";
+import persian from "react-date-object/calendars/persian";
 
-export function AnnouncementFields() {
+export function EmployeeSalaryFields() {
   const { watch, setValue } = useFormContext();
 
-  const selectedDepartments = watch("departmentIds") ?? [];
+  const baseSalary = watch("baseSalary") ?? 0;
 
-  const selectedPositions = watch("positionIds") ?? [];
-
-  const { data: departments, isPending: departmentsLoading } = useDepartments();
-
-  const { data: positions, isPending: positionsLoading } =
-    usePositionQuery(selectedDepartments);
-
-  const { data: users, isPending: usersLoading } =
-    useUsersQuery(selectedPositions);
+  /*
+   * فعلاً این مقادیر را ثابت در نظر گرفتیم.
+   * بعداً می‌توانیم از PayrollSettings بگیریم.
+   */
+  const workingDaysPerMonth = 30;
+  const workingHoursPerDay = 7.33;
+  const overtimeMultiplier = 1.4;
 
   useEffect(() => {
-    setValue("positionIds", []);
+    const salary = Number(baseSalary) || 0;
 
-    setValue("userIds", []);
-  }, [selectedDepartments, setValue]);
+    if (!salary) {
+      setValue("dailySalary", 0);
+      setValue("hourlySalary", 0);
 
-  useEffect(() => {
-    setValue("userIds", []);
-  }, [selectedPositions, setValue]);
+      setValue("latePerHour", 0);
+      setValue("leavePerDay", 0);
+      setValue("absentPerDay", 0);
+      setValue("overtimePerHour", 0);
 
-  const departmentsOptions =
-    departments?.data?.map((item) => ({
-      value: String(item.id),
-      label: item.name,
-    })) ?? [];
+      return;
+    }
+
+    const dailySalary = salary / workingDaysPerMonth;
+
+    const hourlySalary = dailySalary / workingHoursPerDay;
+
+    const overtimePerHour = hourlySalary * overtimeMultiplier;
+
+    setValue("dailySalary", Math.round(dailySalary));
+
+    setValue("hourlySalary", Math.round(hourlySalary));
+
+    setValue("latePerHour", Math.round(hourlySalary));
+
+    setValue("leavePerDay", Math.round(dailySalary));
+
+    setValue("absentPerDay", Math.round(dailySalary));
+
+    setValue("overtimePerHour", Math.round(overtimePerHour));
+  }, [baseSalary, setValue]);
+
+  const { data: users, isPending: usersLoading } = useUsersQuery();
+
+  const usersMapped =
+    users?.map((item) => ({
+      value: String(item.value),
+      label: item.label,
+    })) || [];
 
   return (
     <>
-      <div className="flex flex-col gap-5">
-        <Form.Input name="title" label="موضوع ابلاغیه" required />
+      {/* کارمند و تاریخ شروع */}
 
-        <div className="grid grid-cols-2 gap-4">
-          <Form.Date name="publish_date" label="تاریخ شروع" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Form.Select
+          name="userId"
+          label="کارمند"
+          options={usersMapped}
+          required
+          placeholder="انتخاب کارمند"
+          disabled={usersLoading}
+        />
 
-          <Form.Date name="end_date" label="تاریخ پایان" />
+        <Form.Date onlyMonthPicker name="effectiveFrom" label="تاریخ شروع حقوق"  />
+      </div>
+
+      {/* حقوق پایه */}
+
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">حقوق پایه</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Form.PriceInput
+            name="baseSalary"
+            label="حقوق پایه"
+            required
+            placeholder="حقوق پایه"
+          />
+
         </div>
       </div>
 
-      <div className="flex flex-col gap-5">
-        <Form.MultiSelect
-          name="departmentIds"
-          label="واحدهای سازمانی"
-          options={departmentsOptions}
-          disabled={departmentsLoading}
-          placeholder="انتخاب واحد سازمانی"
-        />
+      {/* مزایا */}
 
-        <Form.MultiSelect
-          name="positionIds"
-          label="سمت‌ها / پوزیشن‌ها"
-          options={positions ?? []}
-          disabled={positionsLoading || selectedDepartments.length === 0}
-          placeholder="ابتدا واحد سازمانی را انتخاب کنید"
-        />
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">مزایا</h3>
 
-        <Form.MultiSelect
-          name="userIds"
-          label="کاربران"
-          options={users ?? []}
-          disabled={usersLoading || selectedPositions.length === 0}
-          placeholder="ابتدا پوزیشن را انتخاب کنید"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Form.PriceInput
+            name="housingAllowance"
+            label="حق مسکن"
+            placeholder="مبلغ حق مسکن"
+          />
+
+          <Form.PriceInput
+            name="foodAllowance"
+            label="حق غذا"
+            placeholder="مبلغ حق غذا"
+          />
+
+          <Form.PriceInput
+            name="transportationAllowance"
+            label="حق ایاب و ذهاب"
+            placeholder="مبلغ ایاب و ذهاب"
+          />
+
+          <Form.PriceInput
+            name="childAllowance"
+            label="حق اولاد"
+            placeholder="مبلغ حق اولاد"
+          />
+
+          <Form.PriceInput
+            name="seniorityAllowance"
+            label="سنوات"
+            placeholder="مبلغ سنوات"
+          />
+        </div>
       </div>
 
-      <Form.RichText name="content" label="متن ابلاغیه" required />
+      {/* محاسبات حضور و غیاب */}
+
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">محاسبات حضور و غیاب</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Form.PriceInput
+            name="latePerHour"
+            label="کسری هر ساعت تأخیر"
+            disabled
+          />
+
+          <Form.PriceInput
+            name="leavePerDay"
+            label="کسری هر روز مرخصی"
+            disabled
+          />
+
+          <Form.PriceInput
+            name="absentPerDay"
+            label="کسری هر روز غیبت"
+            disabled
+          />
+
+          <Form.PriceInput
+            name="overtimePerHour"
+            label="اضافه‌کاری هر ساعت"
+            disabled
+          />
+        </div>
+      </div>
+
+      {/* بیمه و مالیات */}
+
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">بیمه و مالیات</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Form.PriceInput
+            name="tax"
+            label="مالیات"
+            placeholder="مبلغ مالیات"
+          />
+
+          <Form.PriceInput
+            name="insurance"
+            label="بیمه"
+            placeholder="مبلغ بیمه"
+          />
+        </div>
+      </div>
     </>
   );
 }
-export function EmployeeSalaryAction({ news }: { news: PolicyColumnProps }) {
+
+export function EmployeeSalaryAction({
+  salary,
+}: {
+  salary: EmployeeSalaryColumnProps;
+}) {
   const deleteRow = useDeleteRows({
-    url: "hr-news",
-    queryKey: ["hr-news"],
+    url: "employee-salary",
+    queryKey: ["employee-salary"],
   });
 
   const { mutation } = useUpdateRows(
-    `hr-news/${news?.id}`,
-    ["hr-news"],
+    `employee-salary/${salary?.userId}/increase`,
+    ["employee-salary"],
     validation,
-    "ابلاغیه",
+    "حقوق کارمند",
   );
-  console.log("news", news);
 
+  
   return (
     <div className="flex items-center gap-2">
       <EditDialog
-        title="ویرایش ابلاغیه"
-        triggerLabel="ویرایش"
-        fields={<AnnouncementFields />}
+        title="تغییر حقوق"
+        triggerLabel="افزایش/کاهش حقوق"
+        fields={<EmployeeSalaryFields />}
         defaultValues={{
-          title: news.title,
+          userId: salary?.userId,
 
-          publish_date: news.startDate ? new Date(news.startDate) : undefined,
+          baseSalary: salary?.baseSalary,
 
-          end_date: news.endDate ? new Date(news.endDate) : undefined,
+          dailySalary: salary?.baseSalary / 30,
 
-          departmentIds: news.departments ?? [],
+          hourlySalary: salary?.baseSalary / 30 / 7.33,
 
-          positionIds: news.positions ?? [],
+          housingAllowance: salary?.housingAllowance,
 
-          userIds: news.users ?? [],
+          foodAllowance: salary?.foodAllowance,
 
-          content: news.content,
+          transportationAllowance: salary?.transportationAllowance,
+
+          childAllowance: salary?.childAllowance,
+
+          seniorityAllowance: salary?.seniorityAllowance,
+
+          latePerHour: salary?.latePerHour,
+
+          leavePerDay: salary?.leavePerDay,
+
+          absentPerDay: salary?.absentPerDay,
+
+          overtimePerHour: salary?.overtimePerHour,
+
+          tax: salary?.tax,
+
+          insurance: salary?.insurance,
+
         }}
+        
         onSave={(data) => {
+                  const date = new DateObject(data.effectiveFrom).convert(
+                    persian,
+                  );
+
           const payload = {
-            title: data.title,
+            baseSalary: data.baseSalary,
 
-            content: data.content,
-            startDate: data.publish_date
-              ? new Date(data.publish_date).toISOString()
-              : null,
+            housingAllowance: data.housingAllowance,
 
-            endDate: data.end_date
-              ? new Date(data.end_date).toISOString()
-              : null,
+            foodAllowance: data.foodAllowance,
 
-            departmentIds: data.departmentIds,
+            transportationAllowance: data.transportationAllowance,
 
-            positionIds: data.positionIds,
+            childAllowance: data.childAllowance,
 
-            userIds: data.userIds,
+            seniorityAllowance: data.seniorityAllowance,
+
+            latePerHour: data.latePerHour,
+
+            leavePerDay: data.leavePerDay,
+
+            absentPerDay: data.absentPerDay,
+
+            overtimePerHour: data.overtimePerHour,
+
+            tax: data.tax,
+
+            insurance: data.insurance,
+
+            EffectiveYear: date.year,
+            EffectiveMonth: date.month.number,
+
+            changeReason: "Salary Change",
           };
-          console.log(data);
+
+          console.log("salary change:", payload);
+
           mutation.mutate(payload);
         }}
         schema={validation}
@@ -147,7 +295,7 @@ export function EmployeeSalaryAction({ news }: { news: PolicyColumnProps }) {
 
       <DeleteDialog
         onConfirm={() => {
-          deleteRow.mutate(news.id as any);
+          deleteRow.mutate(salary.id as any);
         }}
       />
 
@@ -155,7 +303,7 @@ export function EmployeeSalaryAction({ news }: { news: PolicyColumnProps }) {
         actions={[
           {
             label: "نمایش جزئیات",
-            path: `/news-list/${news.id}`,
+            path: `/user-pay-roll/${salary?.userId}`,
           },
         ]}
       />

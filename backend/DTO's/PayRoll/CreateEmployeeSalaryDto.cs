@@ -18,5 +18,5 @@ public class CreateEmployeeSalaryDto
     public decimal Tax { get; set; }
     public decimal Insurance { get; set; }
 
-    public DateOnly EffectiveFrom { get; set; }
-}
+    public int EffectiveMonth { get; set; }
+    public int EffectiveYear { get; set; }}

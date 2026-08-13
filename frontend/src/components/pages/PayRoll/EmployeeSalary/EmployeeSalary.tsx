@@ -7,6 +7,8 @@ import type z from "zod";
 import { usePostRows } from "@/hook/usePostRows";
 import { useUsersQuery } from "./hooks/useUsersQuery";
 import { formatPrice } from "./utils";
+import DateObject from "react-date-object";
+import persian from "react-date-object/calendars/persian";
 
 const EmployeeSalary: React.FC = () => {
   const title = "حقوق و دستمزد";
@@ -105,7 +107,7 @@ const EmployeeSalary: React.FC = () => {
           placeholder="انتخاب کارمند"
         />
 
-        <Form.Date name="effectiveFrom" label="تاریخ شروع حقوق" />
+        <Form.Date onlyMonthPicker name="effectiveFrom" label="تاریخ شروع حقوق" />
       </div>
 
       {/* حقوق پایه */}
@@ -223,6 +225,8 @@ const EmployeeSalary: React.FC = () => {
   );
 
   const onSubmit = (data: z.infer<typeof validation>) => {
+        const date = new DateObject(data.effectiveFrom).convert(persian);
+
     const formData = {
       userId: data.userId,
 
@@ -242,9 +246,8 @@ const EmployeeSalary: React.FC = () => {
       tax: data.tax,
       insurance: data.insurance,
 
-      effectiveFrom: data.effectiveFrom
-        ? data.effectiveFrom.toISOString().slice(0, 10)
-        : null,
+      EffectiveYear: date.year,
+      EffectiveMonth: date.month.number,
     };
 
     console.log(formData);

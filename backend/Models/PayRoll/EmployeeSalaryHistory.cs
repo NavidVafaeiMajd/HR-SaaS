@@ -20,9 +20,9 @@ public class EmployeeSalaryHistory
     public decimal Tax { get; set; }
     public decimal Insurance { get; set; }
 
-    public DateOnly EffectiveFrom { get; set; }
-    public DateOnly? EffectiveTo { get; set; }
-
+    public int EffectiveYear { get; set; }
+    public int EffectiveMonth { get; set; }
+    
     public string? ChangeReason { get; set; }
 
     public DateTime CreatedAt { get; set; }

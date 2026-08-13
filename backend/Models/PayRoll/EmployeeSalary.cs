@@ -22,8 +22,8 @@ public class EmployeeSalary : IAuditable
     public decimal Insurance { get; set; }
 
 
-    public DateOnly EffectiveFrom { get; set; }
-    public DateOnly? EffectiveTo { get; set; }
+    public int EffectiveYear { get; set; }
+    public int EffectiveMonth { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

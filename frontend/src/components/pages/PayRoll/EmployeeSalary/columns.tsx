@@ -190,7 +190,7 @@ export const columns: ColumnDef<EmployeeSalaryColumnProps>[] = [
     cell: ({ row }) => {
       const salary = row.original;
 
-      return <EmployeeSalaryAction news={salary} />;
+      return <EmployeeSalaryAction salary={salary} />;
     },
   },
 ];
