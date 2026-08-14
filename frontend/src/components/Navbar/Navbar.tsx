@@ -150,29 +150,29 @@ const data = {
       icon: GoClock,
       items: [],
     },
-    {
-      title: "ارزیابی عملکرد کارکنان",
-      url: "/performance",
-      icon: RiCameraLensLine,
-      items: [
-        {
-          title: "رتبه بندی شاخص ها",
-          url: "/performance/indicator-rating",
-        },
-        {
-          title: "ارزیابی کارکنان",
-          url: "/performance/employee-rating",
-        },
-        {
-          title: "پیگیری اهداف (OKR)",
-          url: "/performance/track-goals",
-        },
-        {
-          title: "تنظیم اندیکاتور",
-          url: "/performance/setup-indicator",
-        },
-      ],
-    },
+    // {
+    //   title: "ارزیابی عملکرد کارکنان",
+    //   url: "/performance",
+    //   icon: RiCameraLensLine,
+    //   items: [
+    //     {
+    //       title: "رتبه بندی شاخص ها",
+    //       url: "/performance/indicator-rating",
+    //     },
+    //     {
+    //       title: "ارزیابی کارکنان",
+    //       url: "/performance/employee-rating",
+    //     },
+    //     {
+    //       title: "پیگیری اهداف (OKR)",
+    //       url: "/performance/track-goals",
+    //     },
+    //     {
+    //       title: "تنظیم اندیکاتور",
+    //       url: "/performance/setup-indicator",
+    //     },
+    //   ],
+    // },
     {
       title: "درخواست مرخصی",
       url: "/user-leave",
@@ -196,24 +196,7 @@ const data = {
         },
       ],
     },
-
-    {
-      title: "آموزش",
-      url: "/teaching",
-      icon: MdOutlineRadar,
-    },
-
-    {
-      title: "پرونده های انضباطی",
-      url: "/disciplinary/list",
-      icon: BsExclamationCircle,
-    },
-
-    {
-      title: "مدیریت اسناد",
-      url: "/documents",
-      icon: BsExclamationCircle,
-    },
+ 
   ],
 
   navSecondary: [
