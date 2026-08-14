@@ -23,12 +23,26 @@ public class SalaryIncreaseRequestController : ControllerBase
         _userManager = userManager;
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var requests = await _context.SalaryIncreaseRequests
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+            return Unauthorized();
+
+        var canManageRequests = User.IsInRole("Admin")
+            || User.HasClaim("permission", Permission.EmployeeSalary_edit.ToString());
+
+        IQueryable<SalaryIncreaseRequest> query = _context.SalaryIncreaseRequests
             .AsNoTracking()
-            .Include(x => x.User)
+            .Include(x => x.User);
+
+        if (!canManageRequests)
+            query = query.Where(x => x.UserId == user.Id);
+
+        var requests = await query
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new
             {
@@ -106,9 +120,16 @@ public class SalaryIncreaseRequestController : ControllerBase
         return CreatedAtAction(nameof(GetAll), new { id = request.Id }, new { id = request.Id });
     }
 
+    [Authorize]
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateSalaryIncreaseRequestStatusDto dto)
     {
+        var canManageRequests = User.IsInRole("Admin")
+            || User.HasClaim("permission", Permission.EmployeeSalary_edit.ToString());
+
+        if (!canManageRequests)
+            return Forbid();
+
         var request = await _context.SalaryIncreaseRequests.FirstOrDefaultAsync(x => x.Id == id);
 
         if (request == null)

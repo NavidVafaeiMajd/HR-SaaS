@@ -24,4 +24,5 @@ public enum Permission
     Leave_post,
     Leave_edit,
     Leave_delete,
+    EmployeeSalary_edit,
 }

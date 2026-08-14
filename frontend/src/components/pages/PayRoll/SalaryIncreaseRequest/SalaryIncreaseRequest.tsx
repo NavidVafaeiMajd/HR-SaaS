@@ -7,7 +7,8 @@ import { DataTable } from "@/components/shared/data-table";
 import { Form } from "@/components/shared/Form";
 import { useGetRowsToTable } from "@/hook/useGetRows";
 import { usePostRows } from "@/hook/usePostRows";
-import { columns } from "./columns";
+import { useAuthContext } from "@/Context/AuthContext";
+import { createColumns } from "./columns";
 import { validation } from "./validation";
 
 const defaultValues = {
@@ -29,6 +30,10 @@ const SalaryIncreaseRequest = () => {
     "درخواست افزایش حقوق",
     true,
   );
+  const { user } = useAuthContext();
+  const canManageRequests = user?.roles?.includes("Admin")
+    || user?.permissions?.includes("EmployeeSalary_edit")
+    || false;
 
   const onSubmit = (data: z.infer<typeof validation>) => {
     const date = new DateObject(data.effectiveFrom).convert(persian);
@@ -57,7 +62,7 @@ const SalaryIncreaseRequest = () => {
       schema={validation}
       formFields={formFields}
       onSubmit={onSubmit}
-      table={<DataTable columns={columns} queryKey={["salary-increase-request"]} queryFn={() => useGetRowsToTable("salary-increase-request")} searchableKeys={["firstName", "lastName", "personnelCode", "status"]} />}
+      table={<DataTable columns={createColumns(canManageRequests)} queryKey={["salary-increase-request"]} queryFn={() => useGetRowsToTable("salary-increase-request")} searchableKeys={["firstName", "lastName", "personnelCode", "status"]} />}
       FirstTitle="ثبت درخواست جدید افزایش حقوق"
       SecoundTitle="لیست درخواست‌های افزایش حقوق"
     />

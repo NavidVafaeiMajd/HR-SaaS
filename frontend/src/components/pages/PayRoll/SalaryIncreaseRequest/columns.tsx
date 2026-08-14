@@ -47,7 +47,14 @@ const RequestActions = ({ request }: { request: SalaryIncreaseRequestColumnProps
   );
 };
 
-export const columns: ColumnDef<SalaryIncreaseRequestColumnProps>[] = [
+const actionColumn: ColumnDef<SalaryIncreaseRequestColumnProps> = {
+  id: "actions",
+  header: "عملیات",
+  cell: ({ row }) => <RequestActions request={row.original} />,
+};
+
+export const createColumns = (canManageRequests: boolean): ColumnDef<SalaryIncreaseRequestColumnProps>[] => {
+  const columns: ColumnDef<SalaryIncreaseRequestColumnProps>[] = [
   { id: "employee", header: "کارمند", cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}` },
   { accessorKey: "personnelCode", header: "کد پرسنلی", cell: ({ row }) => row.original.personnelCode || "—" },
   { accessorKey: "currentBaseSalary", header: "حقوق فعلی", cell: ({ row }) => money(row.original.currentBaseSalary) },
@@ -58,5 +65,7 @@ export const columns: ColumnDef<SalaryIncreaseRequestColumnProps>[] = [
   { accessorKey: "reason", header: "دلیل درخواست", cell: ({ row }) => row.original.reason || "—" },
   { accessorKey: "rejectionReason", header: "دلیل رد", cell: ({ row }) => row.original.rejectionReason || "—" },
   { accessorKey: "status", header: "وضعیت", cell: ({ row }) => statusLabels[row.original.status] },
-  { id: "actions", header: "عملیات", cell: ({ row }) => <RequestActions request={row.original} /> },
-];
+  ];
+
+  return canManageRequests ? [...columns, actionColumn] : columns;
+};
