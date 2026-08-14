@@ -1,96 +1,66 @@
 import { useEffect } from "react";
-import { validation } from "./validation";
-import { Form } from "@/components/shared/Form";
 import type z from "zod";
+import DateObject from "react-date-object";
+import persian from "react-date-object/calendars/persian";
+import SectionAcc from "@/components/shared/section/SectionAcc";
 import { DataTable } from "@/components/shared/data-table";
-import { columns } from "./columns";
-import SectionCol from "@/components/shared/section/SectionCol";
-import { usePostRows } from "@/hook/usePostRows";
+import { Form } from "@/components/shared/Form";
 import { useGetRowsToTable } from "@/hook/useGetRows";
-import { useDepartments } from "@/hook/useDepartments";
+import { usePostRows } from "@/hook/usePostRows";
+import { columns } from "./columns";
+import { validation } from "./validation";
 
 const defaultValues = {
-  name: "",
-  description: "",
-  departmentId: "",
+  requestedBaseSalary: 0,
+  effectiveFrom: null,
+  reason: "",
 };
 
 const SalaryIncreaseRequest = () => {
   useEffect(() => {
-    document.title = "سمت سازمانی";
+    document.title = "درخواست‌های افزایش حقوق";
   }, []);
 
-  const { data: departments, isPending: departmentsLoading } = useDepartments();
-
-  const departmentsMapped = departments?.data?.map((item) => ({
-    value: String(item.id),
-    label: item.name,
-  }));
-
   const { mutation, form } = usePostRows(
-    "designations",
-    ["designations"],
+    "salary-increase-request",
+    ["salary-increase-request"],
     defaultValues,
     validation,
-    "سمت سازمانی",
-    true
+    "درخواست افزایش حقوق",
+    true,
   );
 
-  const fetchDisciplinary = () => useGetRowsToTable("designations");
-
   const onSubmit = (data: z.infer<typeof validation>) => {
-    mutation.mutate(data);
+    const date = new DateObject(data.effectiveFrom).convert(persian);
+
+    mutation.mutate({
+      requestedBaseSalary: data.requestedBaseSalary,
+      effectiveYear: date.year,
+      effectiveMonth: date.month.number,
+      reason: data.reason || null,
+    });
   };
 
+  const formFields = (
+    <div className="relative grid gap-5 md:grid-cols-2">
+      {mutation.isPending && <div className="absolute inset-0 z-10 flex items-center justify-center bg-bgBack/90"><span>در حال بارگذاری...</span></div>}
+      <Form.PriceInput name="requestedBaseSalary" label="حقوق پایهٔ درخواستی" placeholder="مبلغ حقوق پایه" required />
+      <Form.Date name="effectiveFrom" label="تاریخ اثر افزایش" onlyMonthPicker />
+      <Form.Textarea name="reason" label="دلیل درخواست" placeholder="دلیل افزایش حقوق" />
+    </div>
+  );
+
   return (
-    <>
-      <div>
-        <SectionCol
-          defaultValues={defaultValues}
-          schema={validation}
-          form={form}
-          table={
-            <DataTable
-              columns={columns}
-              queryKey={["designations"]}
-              queryFn={fetchDisciplinary}
-              searchableKeys={["designation", "unit"]}
-            />
-          }
-          onSubmit={onSubmit}
-          FirstTitle="ثبت جدید سمت سازمانی"
-          SecoundTitle="لیست همه سمت ها"
-          formFields={
-            <div className="relative">
-              {(mutation.isPending || departmentsLoading) && (
-                <div className="flex justify-center items-center absolute p-4 top-0 left-0 right-0 bottom-0 bg-bgBack/90 z-50">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                  <span className="mr-2">در حال بارگذاری...</span>
-                </div>
-              )}
-              <Form.Select
-                label="واحد سازمانی  "
-                name="departmentId"
-                placeholder="انتخاب واحد سازمانی "
-                options={departmentsMapped || []}
-                required
-              />
-              <Form.Input
-                label="نام سمت سازمانی "
-                name="name"
-                placeholder="انتخاب نام سمت سازمانی "
-                required
-              />
-              <Form.Textarea
-                label="شرح"
-                name="description"
-                placeholder="شرح "
-              />
-            </div>
-          }
-        />
-      </div>
-    </>
+    <SectionAcc
+      form={form}
+      defaultValues={defaultValues}
+      schema={validation}
+      formFields={formFields}
+      onSubmit={onSubmit}
+      table={<DataTable columns={columns} queryKey={["salary-increase-request"]} queryFn={() => useGetRowsToTable("salary-increase-request")} searchableKeys={["firstName", "lastName", "personnelCode", "status"]} />}
+      FirstTitle="ثبت درخواست جدید افزایش حقوق"
+      SecoundTitle="لیست درخواست‌های افزایش حقوق"
+    />
   );
 };
 

@@ -1,7 +1,9 @@
-import z from "zod";
+import { z } from "zod";
 
 export const validation = z.object({
-   departmentId: z.string().min(1,"واحد سازمانی را انتخاب کنید"),
-   name: z.string().min(1,"نام سمت سازمانی را وارد کنید"),
-   description: z.string().optional(),
+  requestedBaseSalary: z.coerce
+    .number()
+    .positive("حقوق پایهٔ درخواستی باید بیشتر از صفر باشد"),
+  effectiveFrom: z.date({ message: "تاریخ اثر افزایش الزامی است" }),
+  reason: z.string().optional(),
 });
