@@ -6,6 +6,7 @@ import { EditDialog } from "@/components/shared/EditDialog";
 import { Form } from "@/components/shared/Form";
 import { useUpdateRows } from "@/hook/useUpdateRows";
 import { z } from "zod";
+import { Link } from "react-router-dom";
 
 export interface PayRollPaymentListColumnProps extends Record<string, unknown> {
   id: string;
@@ -166,6 +167,9 @@ const PayRollPaymentActions = ({
           status: z.enum(["Pending", "Paid", "Canceled"]),
         })}
       />
+      <Link to={`/payslip/${row.id}`}>
+        <Button>جزئیات </Button>
+      </Link>
     </div>
   );
 };

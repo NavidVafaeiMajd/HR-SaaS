@@ -16,6 +16,7 @@ const PayRollDetailsPage = lazy(
   () =>
     import("@/components/pages/PayRoll/PayRollDetailsPage/PayRollDetailsPage"),
 );
+const Payslip = lazy(() => import("@/components/pages/PayRoll/Payslip"));
 
 export const PayRollRoutes = (
   <>
@@ -66,6 +67,14 @@ export const PayRollRoutes = (
       element={
         <ProtectedRoute>
           <SalaryIncreaseRequest />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="payslip/:id"
+      element={
+        <ProtectedRoute>
+          <Payslip />
         </ProtectedRoute>
       }
     />
