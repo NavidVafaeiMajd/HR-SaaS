@@ -120,28 +120,59 @@ const data = {
       ],
     },
     {
-      title: "ارزیابی عملکرد کارکنان",
-      url: "/performance",
-      icon: RiCameraLensLine,
+      title: ` جزییات حقوق و دستمزد `,
+      url: `/user-pay-roll/${user?.id}`,
+      icon: GoClock,
+      items: [],
+    },
+    {
+      title: " حقوق دستمزد ",
+      url: "/pay-roll/pay-roll-period",
+      icon: GoClock,
       items: [
         {
-          title: "رتبه بندی شاخص ها",
-          url: "/performance/indicator-rating",
+          title: " لیست وضعبت حقوق در ماه ",
+          url: "/pay-roll/pay-roll-period",
         },
         {
-          title: "ارزیابی کارکنان",
-          url: "/performance/employee-rating",
+          title: " لیست پرداختی ها در ماه ",
+          url: "/pay-roll/pay-roll-payment",
         },
         {
-          title: "پیگیری اهداف (OKR)",
-          url: "/performance/track-goals",
-        },
-        {
-          title: "تنظیم اندیکاتور",
-          url: "/performance/setup-indicator",
+          title: " ثبت حقوق کارکنان  ",
+          url: "/pay-roll/employee-salary",
         },
       ],
     },
+    {
+      title: ` درحواست افزایش حقوق`,
+      url: `salary-increase-request`,
+      icon: GoClock,
+      items: [],
+    },
+    // {
+    //   title: "ارزیابی عملکرد کارکنان",
+    //   url: "/performance",
+    //   icon: RiCameraLensLine,
+    //   items: [
+    //     {
+    //       title: "رتبه بندی شاخص ها",
+    //       url: "/performance/indicator-rating",
+    //     },
+    //     {
+    //       title: "ارزیابی کارکنان",
+    //       url: "/performance/employee-rating",
+    //     },
+    //     {
+    //       title: "پیگیری اهداف (OKR)",
+    //       url: "/performance/track-goals",
+    //     },
+    //     {
+    //       title: "تنظیم اندیکاتور",
+    //       url: "/performance/setup-indicator",
+    //     },
+    //   ],
+    // },
     {
       title: "درخواست مرخصی",
       url: "/user-leave",
@@ -165,24 +196,7 @@ const data = {
         },
       ],
     },
-
-    {
-      title: "آموزش",
-      url: "/teaching",
-      icon: MdOutlineRadar,
-    },
-
-    {
-      title: "پرونده های انضباطی",
-      url: "/disciplinary/list",
-      icon: BsExclamationCircle,
-    },
-
-    {
-      title: "مدیریت اسناد",
-      url: "/documents",
-      icon: BsExclamationCircle,
-    },
+ 
   ],
 
   navSecondary: [

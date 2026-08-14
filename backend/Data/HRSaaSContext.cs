@@ -24,6 +24,10 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<LeaveType> LeaveTypes { get; set; } = null!;
     public DbSet<LeaveRequest> LeaveRequests { get; set; } = null!;
     public DbSet<Attendance> Attendances { get; set; } = null!;
+    public DbSet<EmployeeSalary> EmployeeSalaries { get; set; } = null!;
+    public DbSet<EmployeeSalaryHistory> EmployeeSalaryHistories { get; set; } = null!;
+    public DbSet<SalaryIncreaseRequest> SalaryIncreaseRequests { get; set; } = null!;
+    public DbSet<PayrollPayment> PayrollPayments { get; set; } = null!;
 
 
 
@@ -73,11 +77,20 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
         .HasForeignKey<SocialMedia>(b => b.UserId)
         .OnDelete(DeleteBehavior.Cascade);
 
-                modelBuilder.Entity<Users>()
-        .HasOne(u => u.Biography)
-        .WithOne(b => b.User)
-        .HasForeignKey<Biography>(b => b.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Users>()
+.HasOne(u => u.Biography)
+.WithOne(b => b.User)
+.HasForeignKey<Biography>(b => b.UserId)
+.OnDelete(DeleteBehavior.Cascade);
+        
+            modelBuilder.Entity<PayrollPayment>()
+        .HasIndex(x => new
+        {
+            x.UserId,
+            x.Year,
+            x.Month
+        })
+        .IsUnique();
     
     }
 }

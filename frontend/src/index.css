@@ -435,3 +435,28 @@ input.rmdp-input {
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #payslip,
+  #payslip * {
+    visibility: visible;
+  }
+
+  #payslip {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}

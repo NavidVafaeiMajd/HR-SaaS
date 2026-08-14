@@ -14,6 +14,8 @@ import { setupInterceptors } from "@/api/interceptors";
 interface User {
   id: string;
   name: string;
+  roles?: string[];
+  permissions?: string[];
 }
 
 interface AuthContextType {

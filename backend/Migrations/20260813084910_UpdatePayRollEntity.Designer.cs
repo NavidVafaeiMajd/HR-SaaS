@@ -4,6 +4,7 @@ using HrSaaS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HrSaaS.Migrations
 {
     [DbContext(typeof(HRSaaSDbContext))]
-    partial class HRSaaSContextModelSnapshot : ModelSnapshot
+    [Migration("20260813084910_UpdatePayRollEntity")]
+    partial class UpdatePayRollEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,11 +267,11 @@ namespace HrSaaS.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EffectiveMonth")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
 
-                    b.Property<int>("EffectiveYear")
-                        .HasColumnType("int");
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date");
 
                     b.Property<decimal>("FoodAllowance")
                         .HasColumnType("decimal(18,2)");
@@ -332,11 +335,11 @@ namespace HrSaaS.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EffectiveMonth")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
 
-                    b.Property<int>("EffectiveYear")
-                        .HasColumnType("int");
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date");
 
                     b.Property<Guid>("EmployeeSalaryId")
                         .HasColumnType("uniqueidentifier");
@@ -696,90 +699,6 @@ namespace HrSaaS.Migrations
                     b.ToTable("Notification");
                 });
 
-            modelBuilder.Entity("PayrollPayment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("AbsentDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("BaseSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ChildAllowance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("FoodAllowance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("HousingAllowance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Insurance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("LateDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("LeaveDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("NetSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OvertimeAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("SeniorityAllowance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalAllowances")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalDeductions")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TransportationAllowance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId", "Year", "Month")
-                        .IsUnique();
-
-                    b.ToTable("PayrollPayments");
-                });
-
             modelBuilder.Entity("Position", b =>
                 {
                     b.Property<int>("Id")
@@ -810,64 +729,6 @@ namespace HrSaaS.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Positions");
-                });
-
-            modelBuilder.Entity("SalaryIncreaseRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ApprovedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("CurrentBaseSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("EffectiveMonth")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EffectiveYear")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("IncreaseAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("IncreasePercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("RequestedBaseSalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApprovedById");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SalaryIncreaseRequests");
                 });
 
             modelBuilder.Entity("Shift", b =>
@@ -1314,17 +1175,6 @@ namespace HrSaaS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PayrollPayment", b =>
-                {
-                    b.HasOne("Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Position", b =>
                 {
                     b.HasOne("Departments", "Department")
@@ -1334,23 +1184,6 @@ namespace HrSaaS.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("SalaryIncreaseRequest", b =>
-                {
-                    b.HasOne("Users", "ApprovedBy")
-                        .WithMany()
-                        .HasForeignKey("ApprovedById");
-
-                    b.HasOne("Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApprovedBy");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShiftTime", b =>

@@ -706,11 +706,22 @@ export function FormPriceInput<T extends FieldValues>({
 }: FormPriceInputProps<T>) {
   const { control } = useFormContextSafe<T>();
 
-  const formatPrice = useCallback((value: string) => {
-    if (!value) return "";
-    const onlyInteger = value.split(".")[0];
-    const numeric = onlyInteger.replace(/\D/g, "");
-    return numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatPrice = useCallback((value: string | number) => {
+    if (value === "" || value === null || value === undefined) {
+      return "";
+    }
+
+    const stringValue = String(value);
+
+    const [integerPart, decimalPart] = stringValue.split(".");
+
+    const formattedInteger = integerPart
+      .replace(/\D/g, "")
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    return decimalPart !== undefined
+      ? `${formattedInteger}.${decimalPart}`
+      : formattedInteger;
   }, []);
 
   return (
@@ -722,23 +733,46 @@ export function FormPriceInput<T extends FieldValues>({
           <FormLabel className="text-base">
             {label} {required && <span className="text-red-500">*</span>}
           </FormLabel>
+
           <FormControl>
             <div className="relative">
               <Input
+                type="text"
+                inputMode="decimal"
                 placeholder={placeholder}
                 className={`min-h-12 pr-16 text-end ${inputClassName ?? ""}`}
                 disabled={disabled}
                 value={formatPrice(field.value ?? "")}
                 onChange={(e) => {
-                  const formatted = formatPrice(e.target.value);
-                  field.onChange(formatted.replace(/,/g, "")); // در فرم عدد خام ذخیره شود
+                  const rawValue = e.target.value.replace(/,/g, "");
+
+                  if (rawValue === "") {
+                    field.onChange("");
+                    return;
+                  }
+
+                  // اگر مقدار اولیه number بوده، number نگه دار
+                  if (typeof field.value === "number") {
+                    const numberValue = Number(rawValue);
+
+                    if (!Number.isNaN(numberValue)) {
+                      field.onChange(numberValue);
+                    }
+
+                    return;
+                  }
+
+                  // اگر مقدار اولیه string بوده، string نگه دار
+                  field.onChange(rawValue);
                 }}
               />
+
               <span className="absolute inset-y-0 right-3 flex items-center text-sm text-gray-500">
                 تومان
               </span>
             </div>
           </FormControl>
+
           <FormMessage />
         </FormItem>
       )}
