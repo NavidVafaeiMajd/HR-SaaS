@@ -5,6 +5,8 @@ import { Form } from "@/components/shared/Form";
 import { EditDialog } from "@/components/shared/EditDialog";
 import { z } from "zod";
 import { usePostRows } from "@/hook/usePostRows";
+import { useForm, useFormContext } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export interface PayRollPeriodListColumnProps extends Record<string, unknown> {
   userId: string;
@@ -105,22 +107,38 @@ const PayRollPeriodActions = ({
     "پرداخت حقوق",
     true,
   );
+  const schema = z.object({
+    absentDeduction: z.coerce.number().min(0, "مبلغ نمی‌تواند منفی باشد"),
 
-  const handlePayment = (data: {
-    absentDeduction: number;
-    lateDeduction: number;
-  }) => {
-    /*
-     * محاسبات اصلی از Period آمده‌اند.
-     *
-     * فقط دو مقدار اجازه ویرایش دارند:
-     * 1. کسری کل غیبت
-     * 2. کسری کل تأخیر
-     */
+    lateDeduction: z.coerce.number().min(0, "مبلغ نمی‌تواند منفی باشد"),
+  });
 
+  type PaymentForm = z.infer<typeof schema>;
+
+  const form = useForm<PaymentForm>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      absentDeduction: row.absentDeduction,
+      lateDeduction: row.lateDeduction,
+    },
+  });
+
+  const lateDeduction = Number(form.watch("lateDeduction") || 0);
+
+  const absentDeduction = Number(form.watch("absentDeduction") || 0);
+
+  const lateDifference = lateDeduction - Number(row.lateDeduction || 0);
+
+  const absentDifference = absentDeduction - Number(row.absentDeduction || 0);
+
+  const totalDeductions =
+    row.totalDeductions + lateDifference + absentDifference;
+
+  const netSalary = row.netSalary - lateDifference - absentDifference;
+
+  const handlePayment = (data: PaymentForm) => {
     mutation.mutate({
       userId: row.userId,
-
       year: row.year,
       month: row.month,
 
@@ -136,43 +154,18 @@ const PayRollPeriodActions = ({
 
       overtimeAmount: row.overtimeAmount,
 
-      /*
-       * مقادیر اصلاح‌شده توسط مدیر
-       */
-      lateDeduction: data.lateDeduction,
-      absentDeduction: data.absentDeduction,
+      lateDeduction: Number(data.lateDeduction),
+      absentDeduction: Number(data.absentDeduction),
 
-      /*
-       * فعلاً مقدار محاسبه‌شده Period
-       */
       leaveDeduction: row.leaveDeduction,
-
       tax: row.tax,
       insurance: row.insurance,
 
-      /*
-       * توجه:
-       * اگر Backend قرار است totalDeductions و netSalary
-       * را از همین مقادیر دوباره محاسبه کند،
-       * بهتر است این دو مقدار را از Front ارسال نکنیم.
-       *
-       * فعلاً طبق ساختار فعلی ارسال می‌کنیم.
-       */
-      totalDeductions:
-        row.totalDeductions -
-        row.lateDeduction -
-        row.absentDeduction +
-        data.lateDeduction +
-        data.absentDeduction,
+      totalDeductions,
 
       grossSalary: row.baseSalary + row.totalAllowances + row.overtimeAmount,
 
-      netSalary:
-        row.netSalary -
-        row.lateDeduction -
-        row.absentDeduction +
-        data.lateDeduction +
-        data.absentDeduction,
+      netSalary,
     });
   };
 
@@ -181,6 +174,7 @@ const PayRollPeriodActions = ({
       <EditDialog
         btnTitle="پرداخت حقوق"
         title="تأیید پرداخت حقوق"
+        form={form}
         triggerLabel="پرداخت حقوق"
         variant="outline"
         fields={
@@ -276,7 +270,7 @@ const PayRollPeriodActions = ({
                 <span className="font-semibold">خالص پرداختی</span>
 
                 <span className="text-xl font-bold">
-                  {formatPrice(row.netSalary)} تومان
+                  {formatPrice(netSalary)} تومان
                 </span>
               </div>
             </div>

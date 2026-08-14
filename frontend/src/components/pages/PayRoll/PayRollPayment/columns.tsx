@@ -37,7 +37,7 @@ export interface PayRollPaymentListColumnProps extends Record<string, unknown> {
 
   netSalary: number;
 
-  status: "Pending" | "IsPaid" | "Canceled";
+  status: "Pending" | "Paid" | "Canceled";
 }
 
 export const paymentStatusLabels: Record<
@@ -45,7 +45,7 @@ export const paymentStatusLabels: Record<
   string
 > = {
   Pending: "در انتظار پرداخت",
-  IsPaid: "پرداخت شده",
+  Paid: "پرداخت شده",
   Canceled: "لغو شده",
 };
 
@@ -122,7 +122,7 @@ const PayRollPaymentActions = ({
     `payroll-payment/${row.id}/status`,
     ["payroll-payment"],
     z.object({
-      status: z.enum(["Pending", "IsPaid", "Canceled"]),
+      status: z.enum(["Pending", "Paid", "Canceled"]),
     }),
     "وضعیت پرداخت",
   );
@@ -145,7 +145,7 @@ const PayRollPaymentActions = ({
                 label: "در انتظار پرداخت",
               },
               {
-                value: "IsPaid",
+                value: "Paid",
                 label: "پرداخت شده",
               },
               {
@@ -163,7 +163,7 @@ const PayRollPaymentActions = ({
           mutation.mutate(data);
         }}
         schema={z.object({
-          status: z.enum(["Pending", "IsPaid", "Canceled"]),
+          status: z.enum(["Pending", "Paid", "Canceled"]),
         })}
       />
     </div>
@@ -400,12 +400,12 @@ export const columns: ColumnDef<PayRollPaymentListColumnProps>[] = [
   ------------------------------------------------------- */
 
   {
-    accessorKey: "grossSalary",
+    accessorKey: "status",
 
-    header: "حقوق ناخالص",
+    header: "وضعیت پرداخت ",
 
     cell: ({ row }) => {
-      return `${formatPrice(row.original.grossSalary)} تومان`;
+      return `${paymentStatusLabels[row.original.status]}`;
     },
   },
 

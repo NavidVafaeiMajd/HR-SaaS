@@ -102,7 +102,7 @@ public class PayrollPaymentController : ControllerBase
         );
     }
 
-    [HttpPut("{id}/status")]
+    [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(
         Guid id,
         [FromBody] UpdatePayrollPaymentStatusDto dto
@@ -122,6 +122,7 @@ public class PayrollPaymentController : ControllerBase
 
         payment.Status = status;
         payment.UpdatedAt = DateTime.UtcNow;
+        payment.PaidAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
