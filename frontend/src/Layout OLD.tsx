@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar/Navbar";
 import { lazy, useEffect } from "react";
 import { useBootstrapData } from "./hook/useBootstrapData";
 import { LoadingProvider, useLoading } from "./Context/LoadingContext";
-const Desk = lazy(() => import("./components/pages/Desk"));
+const Desk = lazy(() => import("./components/pages/Desk/Desk"));
 import {
   BrowserRouter as Router,
   Routes,

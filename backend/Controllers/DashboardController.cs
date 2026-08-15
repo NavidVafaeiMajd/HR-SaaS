@@ -117,6 +117,12 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
                             !string.IsNullOrWhiteSpace(shiftTime.StartTime) &&
                             !string.IsNullOrWhiteSpace(shiftTime.EndTime);
 
+       var currentSalary = await _context.PayrollPayments
+            .AsNoTracking()
+            .Where(x =>
+                x.UserId == userId)
+            .Select(x => (decimal?)x.NetSalary)
+            .FirstOrDefaultAsync();
         // =========================================================
         // Today's Attendance
         // =========================================================
@@ -127,25 +133,30 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
                 x.UserId == userId &&
                 x.Date == today);
 
-        string todayStatus;
+    string todayStatus;
 
-        if (!hasShiftToday)
+    if (!hasShiftToday)
+    {
+        todayStatus = "خارج از شیفت";
+    }
+    else if (todayLeave)
+    {
+        todayStatus = "مرخصی";
+    }
+    else if (todayAttendance == null)
+    {
+        todayStatus = "غایب";
+    }
+    else
+    {
+        todayStatus = todayAttendance.Status switch
         {
-            todayStatus = "OutOfShift";
-        }
-        else if (todayLeave)
-        {
-            todayStatus = "Leave";
-        }
-        else if (todayAttendance == null)
-        {
-            todayStatus = "Absent";
-        }
-        else
-        {
-            todayStatus = todayAttendance.Status.ToString();
-        }
-
+            AttendanceStatus.Present => "حاضر",
+            AttendanceStatus.Absent => "غایب",
+            AttendanceStatus.Leave => "مرخصی",
+            _ => "نامشخص"
+        };
+    }
         // =========================================================
         // Remaining Leave Days
         // =========================================================
@@ -288,7 +299,7 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
         var announcements = await _context.Announcement
             .AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
-            .Take(4)
+            .Take(3)
             .Select(x => new AnnouncementDashboardItemDto
             {
                 Id = x.Id,
@@ -313,7 +324,9 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
 
                 RemainingLeaveDays = remainingLeaveDays,
 
-                PendingLeaveRequests = pendingLeaveRequests
+                PendingLeaveRequests = pendingLeaveRequests,
+CurrentSalary =currentSalary
+
             },
 
             Profile = new EmployeeProfileDashboardDto

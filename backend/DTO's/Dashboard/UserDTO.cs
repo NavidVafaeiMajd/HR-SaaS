@@ -17,11 +17,13 @@ public class EmployeeTodayStatusDto
 
     public string? CheckOut { get; set; }
 
+    public decimal? CurrentSalary { get; set; }
+
     public int RemainingLeaveDays { get; set; }
 
     public int PendingLeaveRequests { get; set; }
-}
 
+}
 public class EmployeeProfileDashboardDto
 {
     public string FirstName { get; set; } = "";
