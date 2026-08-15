@@ -28,6 +28,9 @@ import { CiSquarePlus } from "react-icons/ci";
 import { MdOutlineRadar } from "react-icons/md";
 import { BsExclamationCircle } from "react-icons/bs";
 import { useAuthContext } from "@/Context/AuthContext";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/api/axios";
 
 
 export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -205,6 +208,23 @@ const data = {
   ],
 };
 
+const useGetUser = async () => {
+  const res = await api.get(`/company`);
+  return res.data;
+};
+
+const {
+  data: queryData,
+} = useQuery<any>({
+  queryKey: ["company"],
+  queryFn: useGetUser,
+});
+
+const apiUrl = import.meta.env.VITE_BASE_URL;
+
+const logoUrl = queryData?.logo && `${apiUrl}/uploads/${queryData.logo}`;
+
+
   return (
     <Sidebar
       variant="inset"
@@ -217,15 +237,25 @@ const data = {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link to={"company"}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+                  <div>
+                    {queryData?.logo ? (
+                      <img className="" src={logoUrl} alt="" />
+                    ) : (
+                      <Command className="size-4" />
+                    )}
+                  </div>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">
+                    {queryData?.name ? queryData?.name : `Acme Inc`}
+                  </span>
+                  <span className="truncate text-xs">
+                    {queryData?.companyType ? queryData?.companyType : `business`}
+                  </span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

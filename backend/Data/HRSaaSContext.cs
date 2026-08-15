@@ -28,6 +28,8 @@ public class HRSaaSDbContext : IdentityDbContext<Users, Role, string>
     public DbSet<EmployeeSalaryHistory> EmployeeSalaryHistories { get; set; } = null!;
     public DbSet<SalaryIncreaseRequest> SalaryIncreaseRequests { get; set; } = null!;
     public DbSet<PayrollPayment> PayrollPayments { get; set; } = null!;
+    public DbSet<Company> Company { get; set; } = null!;
+
 
 
 
