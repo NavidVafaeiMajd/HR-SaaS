@@ -249,7 +249,7 @@ const logoUrl = queryData?.logo && `${apiUrl}/uploads/${queryData.logo}`;
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {queryData?.name ? queryData?.name : `Acme Inc`}
+                    {queryData?.name ? queryData?.name : `نام شرکت`}
                   </span>
                   <span className="truncate text-xs">
                     {queryData?.companyType ? queryData?.companyType : `business`}

@@ -7,6 +7,7 @@ public class Departments : IAuditable
 
     [JsonIgnore]
     public ICollection<Position> Positions { get; set; } = [];
+    public ICollection<Users> Users { get; set; } = [];
 
     public DateTime CreatedAt { set; get; }
 
