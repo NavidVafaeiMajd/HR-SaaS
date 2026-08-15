@@ -373,12 +373,24 @@ public async Task<IActionResult> GetManagementDashboard()
 {
     var today = DateOnly.FromDateTime(DateTime.Now);
 
-    var monthStart = new DateOnly(
-        today.Year,
-        today.Month,
-        1
-    );
+var now = DateTime.Now;
 
+var persianCalendar = new PersianCalendar();
+
+var persianYear = persianCalendar.GetYear(now);
+var persianMonth = persianCalendar.GetMonth(now);
+
+var monthStartDateTime = persianCalendar.ToDateTime(
+    persianYear,
+    persianMonth,
+    1,
+    0,
+    0,
+    0,
+    0
+);
+
+var monthStart = DateOnly.FromDateTime(monthStartDateTime);
     // =========================================================
     // Active Employees
     // =========================================================

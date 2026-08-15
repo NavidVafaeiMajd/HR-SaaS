@@ -49,6 +49,12 @@ const data = {
       icon: CiHome,
       isActive: true,
     },
+    {
+      title: "پیشخوان مدیران",
+      url: "manager-desk",
+      icon: CiHome,
+      isActive: true,
+    },
 
     {
       title: "پرسنل",
@@ -199,7 +205,6 @@ const data = {
         },
       ],
     },
- 
   ],
 
   navSecondary: [

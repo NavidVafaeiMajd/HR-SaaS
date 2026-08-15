@@ -32,6 +32,7 @@ import { RolesRoutes } from "./routes/role.routes";
 import { NewsListRoutes } from "./routes/News.routes";
 import { PayRollRoutes } from "./routes/payRoll.routes";
 import CompanyPage from "./components/pages/Company/CompanyPage";
+import ManagerDesk from "./components/pages/ManagerDesk/ManagerDesk";
 // Documents components - now lazy loaded
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
@@ -124,6 +125,14 @@ const Layout = () => {
                   element={
                     <ProtectedRoute>
                       <Desk />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="manager-desk"
+                  element={
+                    <ProtectedRoute>
+                      <ManagerDesk />
                     </ProtectedRoute>
                   }
                 />
