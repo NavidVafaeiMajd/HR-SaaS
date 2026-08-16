@@ -72,7 +72,12 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="flex justify-center items-center h-screen w-full!">
-      <div className="w-full max-w-md p-6 border rounded shadow">
+      <div className="fixed z-0 ">
+        <h2 className="font-black text-primary! text-[100px]  md:text-[150px]  lg:text-[250px] tracking-widest! align-middle! text-center">
+          HR SaaS
+        </h2>
+      </div>
+      <div className="w-full max-w-md p-6 border border-primary/50 rounded-2xl shadow z-1 backdrop-blur-sm bg-white/20">
         <h2 className="text-2xl font-bold mb-4 text-center">ورود به حساب</h2>
         <Form formProp={form} onSubmit={onSubmit}>
           <Form.Input label="نام کاربری" name="username" />

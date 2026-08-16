@@ -17,38 +17,6 @@ const LayoutStaffList = () => {
       <>
          <Breadcrumb>{title}</Breadcrumb>
          <div className="">
-            <div className="">
-               <div>
-                  <Smartwizard
-                     data={[
-                        [
-                           <>
-                              <FaUserFriends className="w-7 h-7" />
-                           </>,
-                           "/staff",
-                           "پرسنل",
-                           "تنظیمات پرسنل",
-                        ],
-                        [
-                           <>
-                              <FaRegClock className="w-7 h-7" />
-                           </>,
-                           "office-shifts",
-                           "شیفت و برنامه ریزی",
-                           " شیفت ها",
-                        ],
-                        [
-                           <>
-                              <FaRegClock className="w-7 h-7" />
-                           </>,
-                           "employ-exit",
-                           "انفصال از خدمت",
-                           " انفصال ",
-                        ]
-                     ]}
-                  />
-               </div>
-            </div>
             <div>
                <Outlet />
             </div>

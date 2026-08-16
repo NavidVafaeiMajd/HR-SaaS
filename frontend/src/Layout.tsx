@@ -22,10 +22,10 @@ import { HrRoutes } from "./routes/hr.routes";
 import { ToastContainer } from "react-toastify";
 import { RollCallRoutes } from "./routes/rollCall.routes";
 import { LeaveRoutes } from "./routes/leave.routes";
-import { DisciplinaryRoutes } from "./routes/disciplinary.routes";
-import { PerformanceRoutes } from "./routes/performance.routes";
-import { TeachingRoutes } from "./routes/teaching.routes";
-import { DocumentsRoutes } from "./routes/documents.routes";
+// import { DisciplinaryRoutes } from "./routes/disciplinary.routes";
+// import { PerformanceRoutes } from "./routes/performance.routes";
+// import { TeachingRoutes } from "./routes/teaching.routes";
+// import { DocumentsRoutes } from "./routes/documents.routes";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
 import { NewsListRoutes } from "./routes/News.routes";
@@ -185,10 +185,10 @@ const Layout = () => {
                 {HrRoutes}
                 {RollCallRoutes}
                 {LeaveRoutes}
-                {DisciplinaryRoutes}
+                {/* {DisciplinaryRoutes}
                 {PerformanceRoutes}
                 {TeachingRoutes}
-                {DocumentsRoutes}
+                {DocumentsRoutes} */}
                 {RolesRoutes}
                 {NewsListRoutes}
                 {PayRollRoutes}
