@@ -11,9 +11,9 @@ interface EmployeeProtectRouteProps {
 const EmployeeProtectRoute: React.FC<EmployeeProtectRouteProps> = ({ children }) => {
   const { user } = useAuthContext();
 
-  if (user?.roles[0]!== "Admin" && user?.dashboardType == "employee") {
-    return <Navigate to="/403"/>;
-  }
+if (user?.roles?.[0] !== "Admin" && user?.dashboardType === "employee") {
+  return <Navigate to="/403" replace />;
+}
 
   return (
     <Suspense fallback={<SkeletonLoading />}>
