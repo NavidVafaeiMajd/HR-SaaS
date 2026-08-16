@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext } from "react";
+import React, { createContext, lazy, useCallback, useContext } from "react";
 import {
   Form as ShadcnForm,
   FormField,
@@ -28,14 +28,12 @@ import type {
   SubmitHandler,
 } from "react-hook-form";
 import { cn } from "@/lib/utils";
-import CuDatePicker from "./DatePicker";
-import RichTextEditor from "./RichTextEditor";
+const CuDatePicker = lazy(() => import("./DatePicker"));
+const RichTextEditor = lazy(() => import("./RichTextEditor"));
 import { ImageUploadInput } from "./ImageUploadInput";
-import { Checkbox } from "@/components/ui/checkbox";
-import Select from "react-select";
-import StarRating from "./StarRating";
-import TimePicker from "./TimePicker";
-
+const Select = lazy(() => import("react-select"));
+const StarRating = lazy(() => import("./StarRating"));
+const TimePicker = lazy(() => import("./TimePicker"));
 // ---------- Context ----------
 interface FormContextType<T extends FieldValues> {
   form: UseFormReturn<T>;
@@ -788,7 +786,7 @@ export const Form = Object.assign(FormRoot, {
   Image: FormImage,
   Checkbox: FormCheckbox,
   Select: SimpleSelect,
-  MultiSelect: MultiSelect, 
+  MultiSelect: MultiSelect,
   StarRate: StarRate,
   TimePicker: FormTimePicker,
   Hidden: FormHidden,

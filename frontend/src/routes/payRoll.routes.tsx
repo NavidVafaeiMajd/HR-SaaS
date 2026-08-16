@@ -1,7 +1,8 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import SalaryIncreaseRequest from "@/components/pages/PayRoll/SalaryIncreaseRequest/SalaryIncreaseRequest";
+const SalaryIncreaseRequest = lazy(() => import("@/components/pages/PayRoll/SalaryIncreaseRequest/SalaryIncreaseRequest"));
+
 const LayoutPayRoll = lazy(() => import("@/components/pages/PayRoll/Layout"));
 const PayRollPeriod = lazy(
   () => import("@/components/pages/PayRoll/PayRollPeriod/PayRollPeriod"),

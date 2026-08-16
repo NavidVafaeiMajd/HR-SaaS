@@ -1,6 +1,5 @@
-import Header from "./components/shared/Header";
-import { Navbar } from "./components/Navbar/Navbar";
 import { lazy, useEffect } from "react";
+const Header = lazy(() => import("./components/shared/Header"));
 import { useBootstrapData } from "./hook/useBootstrapData";
 import { LoadingProvider, useLoading } from "./Context/LoadingContext";
 const Desk = lazy(() => import("./components/pages/Desk/Desk"));
@@ -31,9 +30,10 @@ import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
 import { NewsListRoutes } from "./routes/News.routes";
 import { PayRollRoutes } from "./routes/payRoll.routes";
-import CompanyPage from "./components/pages/Company/CompanyPage";
-import ManagerDesk from "./components/pages/ManagerDesk/ManagerDesk";
-// Documents components - now lazy loaded
+const CompanyPage = lazy(() => import("./components/pages/Company/CompanyPage"));
+const ManagerDesk = lazy(() => import("./components/pages/ManagerDesk/ManagerDesk"));
+
+const Navbar = lazy(() => import("./components/Navbar/Navbar"));
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
 
@@ -49,11 +49,11 @@ const NewsListDetailes = lazy(
 );
 
 const AppLayout = () => {
-  useBootstrapData();
   const { toggleNavbar, isNavbarOpen } = useNavbar();
   const location = useLocation();
   const { isLoggedIn, authLoading } = useAuthContext();
   const { isLoadingNavbar } = useLoading();
+  useBootstrapData();
 
   if (authLoading) {
     return (

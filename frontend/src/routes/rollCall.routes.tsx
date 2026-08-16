@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import UserAttendanceDetailsPage from "@/components/pages/RollCall/UserAttendanceDetailsPage/UaerAttendanceDetailsPage";
+const UserAttendanceDetailsPage = lazy(() => import("@/components/pages/RollCall/UserAttendanceDetailsPage/UaerAttendanceDetailsPage"));
 
 const LayoutRollCall = lazy(() => import("@/components/pages/RollCall/Layout"));
 const AttendanceList = lazy(

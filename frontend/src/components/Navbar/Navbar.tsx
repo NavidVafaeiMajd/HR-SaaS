@@ -33,7 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/api/axios";
 
 
-export function Navbar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const  Navbar =({ ...props }: React.ComponentProps<typeof Sidebar>) =>{
   const { user } = useAuthContext();
 const data = {
   user: {
@@ -275,3 +275,5 @@ const logoUrl = queryData?.logo && `${apiUrl}/uploads/${queryData.logo}`;
     </Sidebar>
   );
 }
+
+export default Navbar;
