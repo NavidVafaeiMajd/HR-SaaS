@@ -128,8 +128,8 @@ export const userColumns: ColumnDef<User>[] = [
     accessorKey: "id",
     cell: ({ row }) => {
       const deleteRow = useDeleteRows({
-        url: "employees",
-        queryKey: ["employees"],
+        url: "users",
+        queryKey: ["users"],
       });
       const user = row.original;
       return (

@@ -61,7 +61,6 @@ export const columns: ColumnDef<organizationUnitColumnProps>[] = [
       const { mutation } = useUpdateRows(
         `departments/${user.id}`,
         ["departments"],
-        validation,
         "واحد سازمانی"
       );
       const {can}=usePermission();

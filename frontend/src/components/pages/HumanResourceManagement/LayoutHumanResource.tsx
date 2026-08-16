@@ -18,38 +18,6 @@ const LayoutHumanResource = () => {
       <>
          <Breadcrumb>{title}</Breadcrumb>
          <div className="">
-            <div className="">
-               <div>
-                  <Smartwizard
-                     data={[
-                        [
-                           <>
-                              <FaUserFriends className="w-7 h-7" />
-                           </>,
-                           "departments-list",
-                           "واحد سازمانی",
-                           "تنظیمات واحد ها",
-                        ],
-                        [
-                           <>
-                              <FaUserLock className="w-7 h-7" />
-                           </>,
-                           "designation-list",
-                           "  سمت سازمانی",
-                           " تنظمات سمت ها",
-                        ],
-                        [
-                           <>
-                              <FaRegClock className="w-7 h-7" />
-                           </>,
-                           "news-list",
-                           "ابلاغیه ها",
-                           "تنظیمات ابلاغیه ها",
-                        ]
-                     ]}
-                  />
-               </div>
-            </div>
             <div>
                <Outlet />
             </div>

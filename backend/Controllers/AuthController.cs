@@ -59,8 +59,9 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByNameAsync(request.UserName);
 
         if (user is null)
-            return Unauthorized();
-
+            return Unauthorized("نام کاربری یا رمز عبور را درست وارد کنید");
+        if (user.IsActive is false)
+            return BadRequest("حساب شما غیرغعال شده است. لطفا به مدیر اعلام کنید !!!!");
         var result = await _signInManager.PasswordSignInAsync(
             request.UserName,
             request.Password,

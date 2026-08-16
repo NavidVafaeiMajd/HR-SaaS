@@ -82,7 +82,7 @@ const AppLayout = () => {
 
   return (
     <>
-      <ToastContainer toastClassName="custom-toast-font" position="top-right" />
+      <ToastContainer toastClassName="custom-toast-font" className="z-1000" position="top-right" />
       <Navbar />
       <SidebarInset className="h-[calc(100dvh-15px)] max-w-full! overflow-auto">
         {" "}

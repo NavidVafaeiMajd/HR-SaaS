@@ -257,7 +257,6 @@ export const userColumns: ColumnDef<Shift>[] = [
       const updateRow = useUpdateRows(
         `shifts/${shift.id}`,
         ["shifts"],
-        {},
         "شیفت",
       );
 

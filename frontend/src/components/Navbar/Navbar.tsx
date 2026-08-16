@@ -23,7 +23,6 @@ import { CiHome } from "react-icons/ci";
 import { FiUsers, FiUserCheck } from "react-icons/fi";
 import { TfiTarget } from "react-icons/tfi";
 import { GoClock } from "react-icons/go";
-import { RiCameraLensLine, RiCustomerService2Fill } from "react-icons/ri";
 import { CiSquarePlus } from "react-icons/ci";
 import { MdOutlineRadar } from "react-icons/md";
 import { BsExclamationCircle } from "react-icons/bs";
@@ -86,7 +85,7 @@ const data = {
 
     {
       title: "مدیریت منابع انسانی",
-      url: "/hr",
+      url: "/hr/departments-list",
       authorize: ["manager", "both"],
       icon: TfiTarget,
       items: [
