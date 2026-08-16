@@ -150,6 +150,7 @@ function FormInput<T extends FieldValues>({
 
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { Checkbox } from "../ui/checkbox";
 
 interface FormPasswordProps<T extends FieldValues> {
   name: Path<T>;

@@ -1,4 +1,4 @@
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 const Header = lazy(() => import("./components/shared/Header"));
 import { useBootstrapData } from "./hook/useBootstrapData";
 import { LoadingProvider, useLoading } from "./Context/LoadingContext";
@@ -88,10 +88,14 @@ const AppLayout = () => {
         {" "}
         <main className="h-full p-6 bg-background rounded-2xl flex flex-col overflow-hidden mb-3 ">
           {" "}
-          <Header />
+          <Suspense fallback={<div className="h-12" />}>
+            <Header />
+          </Suspense>{" "}
           <div className="flex-1 min-h-0 overflow-scroll " dir="ltr">
             <div dir="rtl">
-              <Outlet />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </div>
           </div>
         </main>
@@ -99,6 +103,11 @@ const AppLayout = () => {
     </>
   );
 };
+const PageLoader = () => (
+  <div className="flex min-h-[200px] items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+);
 
 const Layout = () => {
   return (
@@ -110,8 +119,10 @@ const Layout = () => {
               <Route
                 path="login"
                 element={
-                  <PublicRoute>
-                    <LoginPage />
+                  <PublicRoute >
+                    <Suspense fallback={<PageLoader />}>
+                      <LoginPage />
+                    </Suspense>
                   </PublicRoute>
                 }
               />

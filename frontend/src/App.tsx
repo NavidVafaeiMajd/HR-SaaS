@@ -1,7 +1,6 @@
 
-import { lazy } from "react";
 import { NavbarProvider } from "./Context/NavbarContext";
-const Layout = lazy(() => import("./Layout"));
+import Layout from "./Layout";
 
 function App() {
    return (
