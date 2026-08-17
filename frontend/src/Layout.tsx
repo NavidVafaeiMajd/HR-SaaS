@@ -30,6 +30,7 @@ import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
 import { NewsListRoutes } from "./routes/News.routes";
 import { PayRollRoutes } from "./routes/payRoll.routes";
+import Notifications from "./components/pages/notifications/Notifications";
 const CompanyPage = lazy(() => import("./components/pages/Company/CompanyPage"));
 const ManagerDesk = lazy(() => import("./components/pages/ManagerDesk/ManagerDesk"));
 
@@ -119,7 +120,7 @@ const Layout = () => {
               <Route
                 path="login"
                 element={
-                  <PublicRoute >
+                  <PublicRoute>
                     <Suspense fallback={<PageLoader />}>
                       <LoginPage />
                     </Suspense>
@@ -177,6 +178,14 @@ const Layout = () => {
                   element={
                     <ProtectedRoute>
                       <CompanyPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="notifications"
+                  element={
+                    <ProtectedRoute>
+                      <Notifications />
                     </ProtectedRoute>
                   }
                 />
