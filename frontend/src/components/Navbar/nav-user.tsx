@@ -29,6 +29,7 @@ import {
 import { useAuthContext } from "@/Context/AuthContext";
 import { Button } from "../ui/button";
 import { NavLink } from "react-router-dom";
+import LogoutDialog from "../shared/LogoutDialog";
 
 export function NavUser({
   user,
@@ -43,7 +44,7 @@ export function NavUser({
   const { user: userData } = useAuthContext();
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem dir="rtl">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
@@ -92,33 +93,21 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
               <NavLink to={`account`}>
                 <DropdownMenuItem>
                   <BadgeCheck />
-                  Account
+                  اکانت
                 </DropdownMenuItem>
               </NavLink>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              <NavLink to={`notifications`}>
+                <DropdownMenuItem>
+                  <Bell />
+                  اعلان ها
+                </DropdownMenuItem>
+              </NavLink>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+<LogoutDialog/>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
