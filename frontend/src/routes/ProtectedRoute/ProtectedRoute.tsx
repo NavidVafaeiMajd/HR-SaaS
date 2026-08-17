@@ -6,14 +6,20 @@ import 'react-loading-skeleton/dist/skeleton.css'
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  permission?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isLoggedIn } = useAuthContext();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children , permission =""}) => {
+  const { isLoggedIn , user} = useAuthContext();
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
+
+if (user?.roles?.[0] !== "Admin" && !user?.permissions?.includes(permission) && permission != "") {
+  return <Navigate to="/403" replace />;
+}
+
 
   return (
     <Suspense fallback={<SkeletonLoading />}>

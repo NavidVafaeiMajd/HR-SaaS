@@ -110,7 +110,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
     options.Cookie.SameSite = SameSiteMode.Lax;
 
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
 
     options.SlidingExpiration = true;
 

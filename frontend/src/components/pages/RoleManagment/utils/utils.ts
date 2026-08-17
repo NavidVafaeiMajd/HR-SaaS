@@ -16,6 +16,10 @@ export const getPermissionLabel = (permission: string) => {
      name: "پرسنل",
      itemPermission: ["Users_view", "Users_post", "Users_edit", "Users_delete"],
    },
+      {
+     name: "پیشخوان مدیریتی",
+     itemPermission: ["Manager_Dashboard"],
+   },
    {
      name: "دپارتمان",
      itemPermission: ["Department_view", "Department_post", "Department_edit", "Department_delete"],

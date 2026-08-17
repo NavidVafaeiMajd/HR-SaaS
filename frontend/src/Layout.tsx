@@ -143,7 +143,7 @@ const Layout = () => {
                 <Route
                   path="manager-desk"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute permission="Manager_Dashboard">
                       <ManagerDesk />
                     </ProtectedRoute>
                   }

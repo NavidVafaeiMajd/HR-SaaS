@@ -61,6 +61,7 @@ const Navbar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         title: "پیشخوان مدیران",
         url: "manager-desk",
         icon: MdDashboard,
+        authorize: ["manager", "both"],
         isActive: true,
       },
       {
