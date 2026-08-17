@@ -16,6 +16,7 @@ interface SectionAccProps<T extends z.ZodTypeAny> {
   table?: React.ReactNode;
   FirstTitle?: string;
   SecoundTitle?: string;
+  canCreate?: boolean;
 }
 
 const SectionAcc = <T extends z.ZodTypeAny<any, any, any>>({
@@ -25,6 +26,7 @@ const SectionAcc = <T extends z.ZodTypeAny<any, any, any>>({
   table,
   FirstTitle = "فرم",
   SecoundTitle = "فرم",
+  canCreate = true,
 }: SectionAccProps<T>) => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -58,9 +60,12 @@ const SectionAcc = <T extends z.ZodTypeAny<any, any, any>>({
         <div className="border-b-red-500 border-b-2 px-5 py-3 flex justify-between items-center">
           <span>{SecoundTitle}</span>
 
-          <span>
-            <Button onClick={() => setIsOpen(true)}> <FaPlus className="w-7 h-7" /> ثبت جدید </Button>
-          </span>
+          { canCreate && !isOpen && (
+            <span>
+              <Button onClick={() => setIsOpen(true)}> <FaPlus className="w-7 h-7" /> ثبت جدید </Button>
+            </span>
+          )}
+
         </div>
         {table && <div className="mt-5 bg-[#F9F9FB]">{table}</div>}
       </div>

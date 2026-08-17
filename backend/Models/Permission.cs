@@ -26,5 +26,9 @@ public enum Permission
     Leave_delete,
     EmployeeSalary_edit,
     Manager_Dashboard,
+    Announcement_post,
+    Announcement_edit,
+    Announcement_delete,
+   Announcement_view,
 
 }

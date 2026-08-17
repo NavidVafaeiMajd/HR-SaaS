@@ -11,6 +11,7 @@ import { usePositionQuery } from "./hooks/usePositionQuery";
 import { useUsersQuery } from "./hooks/useUsersQuery";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { useAuthContext } from "@/Context/AuthContext";
 
 export function AnnouncementFields() {
   const { watch, setValue } = useFormContext();
@@ -99,57 +100,70 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
   );
   console.log("news",news)
 
+        const { user } = useAuthContext();
+        const canEdit =
+          user?.roles?.includes("Admin") ||
+          user?.permissions?.includes("Announcement_edit") ||
+          false;
+        const canDelete =
+          user?.roles?.includes("Admin") ||
+          user?.permissions?.includes("Announcement_delete") ||
+          false;
   return (
     <div className="flex items-center gap-2">
-      <EditDialog
-        title="ویرایش ابلاغیه"
-        triggerLabel="ویرایش"
-        fields={<AnnouncementFields />}
-        defaultValues={{
-          title: news.title,
+      {canEdit && (
+        <EditDialog
+          title="ویرایش ابلاغیه"
+          triggerLabel="ویرایش"
+          fields={<AnnouncementFields />}
+          defaultValues={{
+            title: news.title,
 
-          publish_date: news.startDate ? new Date(news.startDate) : undefined,
+            publish_date: news.startDate ? new Date(news.startDate) : undefined,
 
-          end_date: news.endDate ? new Date(news.endDate) : undefined,
+            end_date: news.endDate ? new Date(news.endDate) : undefined,
 
-          departmentIds: news.departments ?? [],
+            departmentIds: news.departments ?? [],
 
-          positionIds: news.positions ?? [],
+            positionIds: news.positions ?? [],
 
-          userIds: news.users ?? [],
+            userIds: news.users ?? [],
 
-          content: news.content,
-        }}
-        onSave={(data) => {
-          const payload = {
-            title: data.title,
+            content: news.content,
+          }}
+          onSave={(data) => {
+            const payload = {
+              title: data.title,
 
-            content: data.content,
-            startDate: data.publish_date
-              ? new Date(data.publish_date).toISOString()
-              : null,
+              content: data.content,
+              startDate: data.publish_date
+                ? new Date(data.publish_date).toISOString()
+                : null,
 
-            endDate: data.end_date
-              ? new Date(data.end_date).toISOString()
-              : null,
+              endDate: data.end_date
+                ? new Date(data.end_date).toISOString()
+                : null,
 
-            departmentIds: data.departmentIds,
+              departmentIds: data.departmentIds,
 
-            positionIds: data.positionIds,
+              positionIds: data.positionIds,
 
-            userIds: data.userIds,
-          };
-          console.log(data);
-          mutation.mutate(payload);
-        }}
-        schema={validation}
-      />
+              userIds: data.userIds,
+            };
+            console.log(data);
+            mutation.mutate(payload);
+          }}
+          schema={validation}
+        />
+      )}
 
-      <DeleteDialog
-        onConfirm={() => {
-          deleteRow.mutate(news.id as any);
-        }}
-      />
+      {canDelete && (
+        <DeleteDialog
+          onConfirm={() => {
+            deleteRow.mutate(news.id as any);
+          }}
+        />
+      )}
 
       <ActionsCell
         actions={[
@@ -158,7 +172,6 @@ export function AnnouncementActions({ news }: { news: PolicyColumnProps }) {
             path: `/news-list/${news.id}`,
           },
         ]}
-        
       />
     </div>
   );

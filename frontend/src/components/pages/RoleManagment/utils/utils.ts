@@ -32,6 +32,10 @@ export const getPermissionLabel = (permission: string) => {
      name: "شیفت کاری",
      itemPermission: ["Shift_view", "Shift_post", "Shift_edit", "Shift_delete"],
    },
+      {
+     name: "ابلاغیه ها ",
+     itemPermission: ["Announcement_view","Announcement_post", "Announcement_edit", "Announcement_delete"],
+   },
    {
      name: "مدیریت نقش های کاربری",
      itemPermission: ["Role_view", "Role_post", "Role_edit", "Role_delete"],
