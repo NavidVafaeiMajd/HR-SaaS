@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
+import { useAuthContext } from "@/Context/AuthContext";
 
 export function EmployeeSalaryFields() {
   const { watch, setValue } = useFormContext();
@@ -237,108 +238,121 @@ export function EmployeeSalaryAction({
     "حقوق کارمند",
   );
 
-  
+  const { user } = useAuthContext();
+  const canEdit =
+    user?.roles?.includes("Admin") ||
+    user?.permissions?.includes("Payment_edit") ||
+    false;
+  const canDelete =
+    user?.roles?.includes("Admin") ||
+    user?.permissions?.includes("Payment_delete") ||
+    false;
+
   return (
     <div className="flex items-center gap-2">
-      <EditDialog
-        title="تغییر حقوق"
-        triggerLabel="افزایش/کاهش حقوق"
-        fields={<EmployeeSalaryFields />}
-        defaultValues={{
-          userId: salary?.userId,
+      {canEdit && (
+        <EditDialog
+          title="تغییر حقوق"
+          triggerLabel="افزایش/کاهش حقوق"
+          fields={<EmployeeSalaryFields />}
+          defaultValues={{
+            userId: salary?.userId,
 
-          baseSalary: salary?.baseSalary,
+            baseSalary: salary?.baseSalary,
 
-          dailySalary: salary?.baseSalary / 30,
+            dailySalary: salary?.baseSalary / 30,
 
-          hourlySalary: salary?.baseSalary / 30 / 7.33,
+            hourlySalary: salary?.baseSalary / 30 / 7.33,
 
-          housingAllowance: salary?.housingAllowance,
+            housingAllowance: salary?.housingAllowance,
 
-          foodAllowance: salary?.foodAllowance,
+            foodAllowance: salary?.foodAllowance,
 
-          transportationAllowance: salary?.transportationAllowance,
+            transportationAllowance: salary?.transportationAllowance,
 
-          childAllowance: salary?.childAllowance,
+            childAllowance: salary?.childAllowance,
 
-          seniorityAllowance: salary?.seniorityAllowance,
+            seniorityAllowance: salary?.seniorityAllowance,
 
-          latePerHour: salary?.latePerHour,
+            latePerHour: salary?.latePerHour,
 
-          leavePerDay: salary?.leavePerDay,
+            leavePerDay: salary?.leavePerDay,
 
-          absentPerDay: salary?.absentPerDay,
+            absentPerDay: salary?.absentPerDay,
 
-          overtimePerHour: salary?.overtimePerHour,
+            overtimePerHour: salary?.overtimePerHour,
 
-          tax: salary?.tax,
+            tax: salary?.tax,
 
-          insurance: salary?.insurance,
-          bankName: salary?.bankName,
+            insurance: salary?.insurance,
+            bankName: salary?.bankName,
 
-          accountHolderName: salary?.accountHolderName,
+            accountHolderName: salary?.accountHolderName,
 
-          accountNumber: salary?.accountNumber,
+            accountNumber: salary?.accountNumber,
 
-          cardNumber: salary?.cardNumber,
+            cardNumber: salary?.cardNumber,
 
-          shebaNumber: salary?.shebaNumber,
-        }}
-        onSave={(data) => {
-          const date = new DateObject(data.effectiveFrom).convert(persian);
+            shebaNumber: salary?.shebaNumber,
+          }}
+          onSave={(data) => {
+            const date = new DateObject(data.effectiveFrom).convert(persian);
 
-          const payload = {
-            baseSalary: data.baseSalary,
+            const payload = {
+              baseSalary: data.baseSalary,
 
-            housingAllowance: data.housingAllowance,
+              housingAllowance: data.housingAllowance,
 
-            foodAllowance: data.foodAllowance,
+              foodAllowance: data.foodAllowance,
 
-            transportationAllowance: data.transportationAllowance,
+              transportationAllowance: data.transportationAllowance,
 
-            childAllowance: data.childAllowance,
+              childAllowance: data.childAllowance,
 
-            seniorityAllowance: data.seniorityAllowance,
+              seniorityAllowance: data.seniorityAllowance,
 
-            latePerHour: data.latePerHour,
+              latePerHour: data.latePerHour,
 
-            leavePerDay: data.leavePerDay,
+              leavePerDay: data.leavePerDay,
 
-            absentPerDay: data.absentPerDay,
+              absentPerDay: data.absentPerDay,
 
-            overtimePerHour: data.overtimePerHour,
+              overtimePerHour: data.overtimePerHour,
 
-            tax: data.tax,
+              tax: data.tax,
 
-            insurance: data.insurance,
+              insurance: data.insurance,
 
-            EffectiveYear: date.year,
-            EffectiveMonth: date.month.number,
+              EffectiveYear: date.year,
+              EffectiveMonth: date.month.number,
 
-            changeReason: "Salary Change",
-            bankName: data.bankName,
+              changeReason: "Salary Change",
+              bankName: data.bankName,
 
-            accountHolderName: data.accountHolderName,
+              accountHolderName: data.accountHolderName,
 
-            accountNumber: data.accountNumber,
+              accountNumber: data.accountNumber,
 
-            cardNumber: data.cardNumber,
+              cardNumber: data.cardNumber,
 
-            shebaNumber: data.shebaNumber,
-          };
+              shebaNumber: data.shebaNumber,
+            };
 
-          console.log("salary change:", payload);
+            console.log("salary change:", payload);
 
-          mutation.mutate(payload);
-        }}
-        schema={validation}
-      />
+            mutation.mutate(payload);
+          }}
+          schema={validation}
+        />
+      )}
 
-      <DeleteDialog
-        onConfirm={() => {
-          deleteRow.mutate(salary.id as any);
-        }}
-      />
+      {canDelete && (
+        <DeleteDialog
+          onConfirm={() => {
+            deleteRow.mutate(salary.id as any);
+          }}
+        />
+      )}
 
       <ActionsCell
         actions={[

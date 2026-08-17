@@ -1,17 +1,21 @@
 using System.Globalization;
 using HrSaaS.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/payroll-details")]
+[Authorize]
 public class PayrollDetailsController : ControllerBase
 {
     private readonly HRSaaSDbContext _context;
-
-    public PayrollDetailsController(HRSaaSDbContext context)
+private readonly UserManager<Users> _userManager;
+    public PayrollDetailsController(HRSaaSDbContext context , UserManager<Users> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     // GET: api/payroll-details/{userId}
@@ -21,6 +25,13 @@ public async Task<IActionResult> GetEmployeePayrollDetails(string userId)
 {
     if (string.IsNullOrWhiteSpace(userId))
         return BadRequest("کارمند مشخص نشده است.");
+        var manager = await _userManager.GetUserAsync(User);
+
+        if (manager is null)
+            return Unauthorized();
+
+        if (manager.dashboardType == DashboardType.employee && manager.Id != userId)
+            return BadRequest();
 
     var salary = await _context.EmployeeSalaries
         .AsNoTracking()

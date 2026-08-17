@@ -38,4 +38,9 @@ public enum Permission
     Attendance_edit,
     Attendance_post,
     Attendance_delete,
+    Payment_view,
+    Payment_edit,
+    Payment_post,
+    Payment_delete,
+
 }

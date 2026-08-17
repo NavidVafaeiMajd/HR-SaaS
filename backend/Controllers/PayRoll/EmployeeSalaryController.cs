@@ -14,6 +14,7 @@ public class EmployeeSalaryController : ControllerBase
     }
 
     // GET: api/employee-salary
+    [Permission(Permission.Payment_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -61,6 +62,7 @@ public class EmployeeSalaryController : ControllerBase
     }
 
     // GET: api/employee-salary/{id}
+    [Permission(Permission.Payment_view)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -76,6 +78,7 @@ public class EmployeeSalaryController : ControllerBase
     }
 
     // DELETE: api/employee-salary/{id}
+    [Permission(Permission.Payment_delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -100,6 +103,7 @@ public class EmployeeSalaryController : ControllerBase
     }
 
     // POST: api/employee-salary
+    [Permission(Permission.Payment_post)]
     [HttpPost]
     public async Task<IActionResult> Create(CreateEmployeeSalaryDto dto)
     {
@@ -164,6 +168,7 @@ public class EmployeeSalaryController : ControllerBase
     }
 
     // PUT: api/employee-salary/{userId}/increase
+    [Permission(Permission.Payment_edit)]
     [HttpPatch("{userId}/increase")]
     public async Task<IActionResult> IncreaseSalary(string userId, UpdateEmployeeSalaryDto dto)
     {

@@ -24,7 +24,7 @@ export const PayRollRoutes = (
     <Route
       path="pay-roll"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute permission="Pay_view">
           <LayoutPayRoll />
         </ProtectedRoute>
       }

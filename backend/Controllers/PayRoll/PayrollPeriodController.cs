@@ -15,6 +15,7 @@ public class PayrollPeriodController : ControllerBase
     }
 
     // GET: api/payroll-period?year=1405&month=6
+            [Permission(Permission.Payment_view)]
     [HttpGet]
     public async Task<IActionResult> GetPeriod([FromQuery] int year, [FromQuery] int month)
     {

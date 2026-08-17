@@ -139,6 +139,7 @@ const Navbar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         title: "حقوق و دستمزد",
         url: "/pay-roll/pay-roll-period",
         icon: LuWallet,
+        authorize: ["manager", "both"],
         items: [
           {
             title: "لیست وضعیت حقوق در ماه",
