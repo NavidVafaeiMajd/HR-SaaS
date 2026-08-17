@@ -113,9 +113,9 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
         var shiftTime = user.Shift?.ShiftTimes?
             .FirstOrDefault(x => x.DayOfWeek == ToWeekDay(todayDayOfWeek));
 
-        var hasShiftToday = shiftTime != null &&
-                            !string.IsNullOrWhiteSpace(shiftTime.StartTime) &&
-                            !string.IsNullOrWhiteSpace(shiftTime.EndTime);
+        var outOfShift = shiftTime != null &&
+                            shiftTime.StartTime == "" &&
+                            shiftTime.EndTime == "" ;
 
        var currentSalary = await _context.PayrollPayments
             .AsNoTracking()
@@ -135,7 +135,7 @@ private static WeekDay ToWeekDay(DayOfWeek dayOfWeek)
 
     string todayStatus;
 
-    if (!hasShiftToday)
+    if (outOfShift)
     {
         todayStatus = "خارج از شیفت";
     }

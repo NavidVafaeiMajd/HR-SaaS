@@ -70,8 +70,8 @@ public class AttendanceController : ControllerBase
 
                 var isOutOfShift =
                     todayShiftTime is null
-                    || todayShiftTime.StartTime is null
-                    || todayShiftTime.EndTime is null;
+                    || todayShiftTime.StartTime is ""
+                    || todayShiftTime.EndTime is "";
 
                 AttendanceStatus? status;
 
