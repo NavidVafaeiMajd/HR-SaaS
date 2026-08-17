@@ -40,7 +40,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>منو کاربری</SidebarGroupLabel>
       <SidebarMenu>
         {items
           .filter((item) => {
