@@ -24,13 +24,27 @@ export const staffRoutes = (
     <Route
       path="staff"
       element={
-          <ProtectedRoute>
-            <LayoutStaffList />
-          </ProtectedRoute>
+        <ProtectedRoute>
+          <LayoutStaffList />
+        </ProtectedRoute>
       }
     >
-      <Route index element={<StaffList />} />
-      <Route path="office-shifts" element={<OfficeShifts />} />
+      <Route
+        index
+        element={
+          <ProtectedRoute permission="users_view">
+            <StaffList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="office-shifts"
+        element={
+          <ProtectedRoute permission="Shift_view">
+            <OfficeShifts />
+          </ProtectedRoute>
+        }
+      />
       <Route path="employ-exit" element={<EmployExit />} />
     </Route>
     <Route

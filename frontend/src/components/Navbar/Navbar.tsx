@@ -108,12 +108,6 @@ const Navbar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         items: [],
       },
       {
-        title: "اعلان ها",
-        url: "/notifications",
-        icon: LuBell,
-        items: [],
-      },
-      {
         title: "جزییات حضور و غیاب",
         url: `/user-attendance/${user?.id}`,
         icon: LuUserCheck,

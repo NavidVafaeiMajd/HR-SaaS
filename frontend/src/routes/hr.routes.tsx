@@ -31,13 +31,27 @@ export const HrRoutes = (
     <Route
       path="hr"
       element={
-          <ProtectedRoute permission="">
-            <LayoutHumanResource />
-          </ProtectedRoute>
+        <ProtectedRoute permission="">
+          <LayoutHumanResource />
+        </ProtectedRoute>
       }
     >
-      <Route path="departments-list" element={<OrganizationalUnit />} />
-      <Route path="designation-list" element={<OrganizationalPosition />} />
+      <Route
+        path="departments-list"
+        element={
+          <ProtectedRoute permission="Department_view">
+            <OrganizationalUnit />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="designation-list"
+        element={
+          <ProtectedRoute permission="Position_view">
+            <OrganizationalPosition />
+          </ProtectedRoute>
+        }
+      />
       <Route path="office-shifts" element={<OfficeShifts />} />
       <Route path="policies-list" element={<Policies />} />
     </Route>

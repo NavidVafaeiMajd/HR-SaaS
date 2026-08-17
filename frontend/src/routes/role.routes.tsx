@@ -12,9 +12,9 @@ export const RolesRoutes = (
   <Route
     path="roles"
     element={
-        <ProtectedRoute>
-          <LayoutRoleMangment />
-        </ProtectedRoute>
+      <ProtectedRoute permission="Role_view">
+        <LayoutRoleMangment />
+      </ProtectedRoute>
     }
   >
     <Route index element={<RolesList />} />
