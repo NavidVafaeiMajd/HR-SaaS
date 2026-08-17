@@ -19,6 +19,7 @@ public class UserAttendanceController : ControllerBase
         _userManager = userManager;
     }
 
+    [Permission(Permission.UserAttendance_view)]
     [HttpGet()]
     public async Task<IActionResult> GetUsersAttendance()
     {
@@ -27,263 +28,208 @@ public class UserAttendanceController : ControllerBase
         if (manager is null)
             return Unauthorized();
 
-        var users = await _db.Users
-            .Select(x => new
+        var users = await _db
+            .Users.Select(x => new
             {
                 x.Id,
                 x.FirstName,
-                x.LastName
+                x.LastName,
             })
             .ToListAsync();
 
-        var attendances = await _db.Attendances
-            .ToListAsync();
+        var attendances = await _db.Attendances.ToListAsync();
 
-        var result = users.Select(user =>
-        {
-            var userAttendances = attendances
-                .Where(x => x.UserId == user.Id)
-                .ToList();
-
-            return new UserAttendanceSummaryDto
+        var result = users
+            .Select(user =>
             {
-                UserId = user.Id,
+                var userAttendances = attendances.Where(x => x.UserId == user.Id).ToList();
 
-                Name = user.FirstName + " " + user.LastName,
+                return new UserAttendanceSummaryDto
+                {
+                    UserId = user.Id,
 
-                TotalWorkedMinutes = userAttendances
-                    .Sum(x => x.WorkedMinutes),
+                    Name = user.FirstName + " " + user.LastName,
 
-                TotalLateMinutes = userAttendances
-                    .Sum(x => x.LateMinutes),
+                    TotalWorkedMinutes = userAttendances.Sum(x => x.WorkedMinutes),
 
-                TotalEarlyLeaveMinutes = userAttendances
-                    .Sum(x => x.EarlyLeaveMinutes),
+                    TotalLateMinutes = userAttendances.Sum(x => x.LateMinutes),
 
-                TotalOvertimeMinutes = userAttendances
-                    .Sum(x => x.OvertimeMinutes),
+                    TotalEarlyLeaveMinutes = userAttendances.Sum(x => x.EarlyLeaveMinutes),
 
-                PresentDays = userAttendances
-                    .Count(x => x.Status == AttendanceStatus.Present),
+                    TotalOvertimeMinutes = userAttendances.Sum(x => x.OvertimeMinutes),
 
-                AbsentDays = userAttendances
-                    .Count(x => x.Status == AttendanceStatus.Absent),
+                    PresentDays = userAttendances.Count(x => x.Status == AttendanceStatus.Present),
 
-                LeaveDays = userAttendances
-                    .Count(x => x.Status == AttendanceStatus.Leave)
-            };
-        }).ToList();
+                    AbsentDays = userAttendances.Count(x => x.Status == AttendanceStatus.Absent),
+
+                    LeaveDays = userAttendances.Count(x => x.Status == AttendanceStatus.Leave),
+                };
+            })
+            .ToList();
 
         return Ok(result);
     }
 
-[HttpGet("{userId}")]
-public async Task<IActionResult> GetUserAttendanceReport(string userId)
-{
-    var manager = await _userManager.GetUserAsync(User);
-
-    if (manager is null)
-        return Unauthorized();
-
-    var user = await _db.Users
-        .Include(x => x.Shift)
-        .ThenInclude(x => x.ShiftTimes)
-        .FirstOrDefaultAsync(x => x.Id == userId);
-
-    if (user is null)
-        return NotFound("User not found.");
-
-
-    // =====================================================
-    // امروز
-    // =====================================================
-
-    var today = DateOnly.FromDateTime(DateTime.Now);
-
-    var todayAttendance = await _db.Attendances
-        .FirstOrDefaultAsync(x =>
-            x.UserId == userId &&
-            x.Date == today);
-
-
-    // =====================================================
-    // شیفت امروز
-    // =====================================================
-
-    var todayWeekDay = (WeekDay)(((int)DateTime.Now.DayOfWeek + 1) % 7);
-
-    var todayShift = user.Shift?
-        .ShiftTimes
-        .FirstOrDefault(x => x.DayOfWeek == todayWeekDay);
-
-
-    // =====================================================
-    // مرخصی امروز
-    // =====================================================
-
-    var todayLeave = await _db.LeaveRequests
-        .AnyAsync(x =>
-            x.UserId == userId &&
-            x.Status == LeaveStatus.Approved &&
-            x.StartDate <= today &&
-            x.EndDate >= today);
-
-
-    // =====================================================
-    // وضعیت امروز
-    // =====================================================
-
-    AttendanceStatus todayStatus;
-
-    if (todayLeave)
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetUserAttendanceReport(string userId)
     {
-        todayStatus = AttendanceStatus.Leave;
-    }
-    else if (todayShift is null)
-    {
-        todayStatus = AttendanceStatus.OutOfShift;
-    }
-    else if (todayAttendance is not null)
-    {
-        todayStatus = todayAttendance.Status;
-    }
-    else
-    {
-        todayStatus = AttendanceStatus.unknown;
-    }
+        var manager = await _userManager.GetUserAsync(User);
 
+        if (manager is null)
+            return Unauthorized();
 
-    var todayDto = new TodayAttendanceDto
-    {
-        Date = today,
+        if (manager.dashboardType == DashboardType.employee && manager.Id != userId)
+            return BadRequest();
 
-        Status = todayStatus,
+        var user = await _db
+            .Users.Include(x => x.Shift)
+                .ThenInclude(x => x.ShiftTimes)
+            .FirstOrDefaultAsync(x => x.Id == userId);
 
-        ShiftName = user.Shift?.Name,
+        if (user is null)
+            return NotFound("User not found.");
 
-        ShiftStart = todayShift?.StartTime,
+        // =====================================================
+        // امروز
+        // =====================================================
 
-        ShiftEnd = todayShift?.EndTime,
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
-        CheckIn = todayAttendance?.CheckIn,
-
-        CheckOut = todayAttendance?.CheckOut,
-
-        WorkedMinutes = todayAttendance?.WorkedMinutes ?? 0,
-
-        LateMinutes = todayAttendance?.LateMinutes ?? 0,
-
-        EarlyLeaveMinutes =
-            todayAttendance?.EarlyLeaveMinutes ?? 0,
-
-        OvertimeMinutes =
-            todayAttendance?.OvertimeMinutes ?? 0,
-
-        IsOnLeave = todayLeave
-    };
-
-
-    // =====================================================
-    // خلاصه کل حضور و غیاب
-    // =====================================================
-
-    var attendances = await _db.Attendances
-        .Where(x => x.UserId == userId)
-        .ToListAsync();
-
-
-    var leaveDays = await _db.LeaveRequests
-        .Where(x =>
-            x.UserId == userId &&
-            x.Status == LeaveStatus.Approved)
-        .Select(x => new
-        {
-            x.StartDate,
-            x.EndDate
-        })
-        .ToListAsync();
-
-
-    var totalLeaveDays = leaveDays.Sum(x =>
-        x.EndDate.DayNumber - x.StartDate.DayNumber + 1);
-
-
-    var summary = new AttendanceSummaryDto
-    {
-        TotalDays = attendances.Count,
-
-        PresentDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.Present),
-
-        AbsentDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.Absent),
-
-        LeaveDays = totalLeaveDays,
-
-        TotalWorkedMinutes = attendances.Sum(x =>
-            x.WorkedMinutes),
-
-        TotalLateMinutes = attendances.Sum(x =>
-            x.LateMinutes),
-
-        TotalEarlyLeaveMinutes = attendances.Sum(x =>
-            x.EarlyLeaveMinutes),
-
-        TotalOvertimeMinutes = attendances.Sum(x =>
-            x.OvertimeMinutes)
-    };
-
-
-    // =====================================================
-    // نتیجه
-    // =====================================================
-
-    return Ok(new UserAttendanceReportDto
-    {
-        Today = todayDto,
-        Summary = summary
-    });
-}
-[HttpGet("{userId}/monthly")]
-public async Task<IActionResult> GetUserMonthlyAttendance(
-    string userId,
-    int year,
-    int month)
-{
-    var manager = await _userManager.GetUserAsync(User);
-
-    if (manager is null)
-        return Unauthorized();
-
-    if (month < 1 || month > 12)
-        return BadRequest("Invalid Persian month.");
-
-    var user = await _db.Users
-        .FirstOrDefaultAsync(x => x.Id == userId);
-
-    if (user is null)
-        return NotFound("User not found.");
-
-
-
-    var persianCalendar = new PersianCalendar();
-
-    DateTime startGregorian =
-        persianCalendar.ToDateTime(
-            year,
-            month,
-            1,
-            0,
-            0,
-            0,
-            0
+        var todayAttendance = await _db.Attendances.FirstOrDefaultAsync(x =>
+            x.UserId == userId && x.Date == today
         );
 
-    int daysInMonth =
-        persianCalendar.GetDaysInMonth(year, month);
+        // =====================================================
+        // شیفت امروز
+        // =====================================================
 
-    DateTime endGregorian =
-        persianCalendar.ToDateTime(
+        var todayWeekDay = (WeekDay)(((int)DateTime.Now.DayOfWeek + 1) % 7);
+
+        var todayShift = user.Shift?.ShiftTimes.FirstOrDefault(x => x.DayOfWeek == todayWeekDay);
+
+        // =====================================================
+        // مرخصی امروز
+        // =====================================================
+
+        var todayLeave = await _db.LeaveRequests.AnyAsync(x =>
+            x.UserId == userId
+            && x.Status == LeaveStatus.Approved
+            && x.StartDate <= today
+            && x.EndDate >= today
+        );
+
+        // =====================================================
+        // وضعیت امروز
+        // =====================================================
+
+        AttendanceStatus todayStatus;
+
+        if (todayLeave)
+        {
+            todayStatus = AttendanceStatus.Leave;
+        }
+        else if (todayShift is null)
+        {
+            todayStatus = AttendanceStatus.OutOfShift;
+        }
+        else if (todayAttendance is not null)
+        {
+            todayStatus = todayAttendance.Status;
+        }
+        else
+        {
+            todayStatus = AttendanceStatus.unknown;
+        }
+
+        var todayDto = new TodayAttendanceDto
+        {
+            Date = today,
+
+            Status = todayStatus,
+
+            ShiftName = user.Shift?.Name,
+
+            ShiftStart = todayShift?.StartTime,
+
+            ShiftEnd = todayShift?.EndTime,
+
+            CheckIn = todayAttendance?.CheckIn,
+
+            CheckOut = todayAttendance?.CheckOut,
+
+            WorkedMinutes = todayAttendance?.WorkedMinutes ?? 0,
+
+            LateMinutes = todayAttendance?.LateMinutes ?? 0,
+
+            EarlyLeaveMinutes = todayAttendance?.EarlyLeaveMinutes ?? 0,
+
+            OvertimeMinutes = todayAttendance?.OvertimeMinutes ?? 0,
+
+            IsOnLeave = todayLeave,
+        };
+
+        // =====================================================
+        // خلاصه کل حضور و غیاب
+        // =====================================================
+
+        var attendances = await _db.Attendances.Where(x => x.UserId == userId).ToListAsync();
+
+        var leaveDays = await _db
+            .LeaveRequests.Where(x => x.UserId == userId && x.Status == LeaveStatus.Approved)
+            .Select(x => new { x.StartDate, x.EndDate })
+            .ToListAsync();
+
+        var totalLeaveDays = leaveDays.Sum(x => x.EndDate.DayNumber - x.StartDate.DayNumber + 1);
+
+        var summary = new AttendanceSummaryDto
+        {
+            TotalDays = attendances.Count,
+
+            PresentDays = attendances.Count(x => x.Status == AttendanceStatus.Present),
+
+            AbsentDays = attendances.Count(x => x.Status == AttendanceStatus.Absent),
+
+            LeaveDays = totalLeaveDays,
+
+            TotalWorkedMinutes = attendances.Sum(x => x.WorkedMinutes),
+
+            TotalLateMinutes = attendances.Sum(x => x.LateMinutes),
+
+            TotalEarlyLeaveMinutes = attendances.Sum(x => x.EarlyLeaveMinutes),
+
+            TotalOvertimeMinutes = attendances.Sum(x => x.OvertimeMinutes),
+        };
+
+        // =====================================================
+        // نتیجه
+        // =====================================================
+
+        return Ok(new UserAttendanceReportDto { Today = todayDto, Summary = summary });
+    }
+
+    [HttpGet("{userId}/monthly")]
+    public async Task<IActionResult> GetUserMonthlyAttendance(string userId, int year, int month)
+    {
+        var manager = await _userManager.GetUserAsync(User);
+
+        if (manager is null)
+            return Unauthorized();
+
+        if (month < 1 || month > 12)
+            return BadRequest("Invalid Persian month.");
+
+        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user is null)
+            return NotFound("User not found.");
+
+        var persianCalendar = new PersianCalendar();
+
+        DateTime startGregorian = persianCalendar.ToDateTime(year, month, 1, 0, 0, 0, 0);
+
+        int daysInMonth = persianCalendar.GetDaysInMonth(year, month);
+
+        DateTime endGregorian = persianCalendar.ToDateTime(
             year,
             month,
             daysInMonth,
@@ -293,100 +239,77 @@ public async Task<IActionResult> GetUserMonthlyAttendance(
             999
         );
 
-    var startDate = DateOnly.FromDateTime(startGregorian);
-    var endDate = DateOnly.FromDateTime(endGregorian);
+        var startDate = DateOnly.FromDateTime(startGregorian);
+        var endDate = DateOnly.FromDateTime(endGregorian);
 
+        var attendances = await _db
+            .Attendances.Where(x => x.UserId == userId && x.Date >= startDate && x.Date <= endDate)
+            .OrderBy(x => x.Date)
+            .ToListAsync();
 
-    var attendances = await _db.Attendances
-        .Where(x =>
-            x.UserId == userId &&
-            x.Date >= startDate &&
-            x.Date <= endDate)
-        .OrderBy(x => x.Date)
-        .ToListAsync();
-
-
-
-    var summary = new
-    {
-        totalDays = attendances.Count,
-
-        presentDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.Present),
-
-        absentDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.Absent),
-
-        leaveDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.Leave),
-
-        unknownDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.unknown),
-
-        outOfShiftDays = attendances.Count(x =>
-            x.Status == AttendanceStatus.OutOfShift),
-
-        totalWorkedMinutes = attendances.Sum(x =>
-            x.WorkedMinutes),
-
-        totalLateMinutes = attendances.Sum(x =>
-            x.LateMinutes),
-
-        totalEarlyLeaveMinutes = attendances.Sum(x =>
-            x.EarlyLeaveMinutes),
-
-        totalOvertimeMinutes = attendances.Sum(x =>
-            x.OvertimeMinutes)
-    };
-
-    var requests = attendances
-        .Select(x => new
+        var summary = new
         {
-            id = x.Id,
+            totalDays = attendances.Count,
 
-            date = x.Date,
+            presentDays = attendances.Count(x => x.Status == AttendanceStatus.Present),
 
-            status = x.Status,
+            absentDays = attendances.Count(x => x.Status == AttendanceStatus.Absent),
 
-            checkIn = x.CheckIn,
+            leaveDays = attendances.Count(x => x.Status == AttendanceStatus.Leave),
 
-            checkOut = x.CheckOut,
+            unknownDays = attendances.Count(x => x.Status == AttendanceStatus.unknown),
 
-            workedMinutes = x.WorkedMinutes,
+            outOfShiftDays = attendances.Count(x => x.Status == AttendanceStatus.OutOfShift),
 
-            lateMinutes = x.LateMinutes,
+            totalWorkedMinutes = attendances.Sum(x => x.WorkedMinutes),
 
-            earlyLeaveMinutes = x.EarlyLeaveMinutes,
+            totalLateMinutes = attendances.Sum(x => x.LateMinutes),
 
-            overtimeMinutes = x.OvertimeMinutes,
+            totalEarlyLeaveMinutes = attendances.Sum(x => x.EarlyLeaveMinutes),
 
-            description = x.Description,
+            totalOvertimeMinutes = attendances.Sum(x => x.OvertimeMinutes),
+        };
 
-            createdAt = x.CreatedAt,
+        var requests = attendances
+            .Select(x => new
+            {
+                id = x.Id,
 
-            updatedAt = x.UpdatedAt
-        })
-        .ToList();
+                date = x.Date,
 
+                status = x.Status,
 
-    return Ok(new
-    {
-        user = new
-        {
-            id = user.Id,
-            name = $"{user.FirstName} {user.LastName}"
-        },
+                checkIn = x.CheckIn,
 
-        month = new
-        {
-            year,
-            month
-        },
+                checkOut = x.CheckOut,
 
-        summary,
+                workedMinutes = x.WorkedMinutes,
 
+                lateMinutes = x.LateMinutes,
 
-        requests
-    });
-}
+                earlyLeaveMinutes = x.EarlyLeaveMinutes,
+
+                overtimeMinutes = x.OvertimeMinutes,
+
+                description = x.Description,
+
+                createdAt = x.CreatedAt,
+
+                updatedAt = x.UpdatedAt,
+            })
+            .ToList();
+
+        return Ok(
+            new
+            {
+                user = new { id = user.Id, name = $"{user.FirstName} {user.LastName}" },
+
+                month = new { year, month },
+
+                summary,
+
+                requests,
+            }
+        );
+    }
 }

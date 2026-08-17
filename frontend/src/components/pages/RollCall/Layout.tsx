@@ -18,38 +18,7 @@ const LayoutRollCall = () => {
       <>
          <Breadcrumb>{title}</Breadcrumb>
          <div className="">
-            <div className="">
-               <div>
-                  <Smartwizard
-                     data={[
-                        [
-                           <>
-                              <FaUserFriends className="w-7 h-7" />
-                           </>,
-                           "attendance-list",
-                           "حضور و غیاب",
-                           "نمایش حضور و غیاب",
-                        ],
-                        [
-                           <>
-                              <FaUserLock className="w-7 h-7" />
-                           </>,
-                           "manual-attendance",
-                           "ثبت تردد دستی پرسنل",
-                           "افزودن/ویرایش حضور و غیاب",
-                        ],
-                        [
-                           <>
-                              <FaRegClock className="w-7 h-7" />
-                           </>,
-                           "monthly-attendance",
-                           "گزارش کارکرد ماهانه",
-                           "نمایش گزارش کارکرد ماهانه",
-                        ],
-                     ]}
-                  />
-               </div>
-            </div>
+
             <div>
                <Outlet />
             </div>

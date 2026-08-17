@@ -116,6 +116,7 @@ const Navbar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       {
         title: "حضور و غیاب",
         url: "/rollcall/attendance-list",
+        authorize: ["manager", "both"],
         icon: LuClock3,
         items: [
           {

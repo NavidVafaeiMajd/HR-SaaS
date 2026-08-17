@@ -29,6 +29,13 @@ public enum Permission
     Announcement_post,
     Announcement_edit,
     Announcement_delete,
-   Announcement_view,
-
+    Announcement_view,
+    UserAttendance_view,
+    UserAttendance_edit,
+    UserAttendance_post,
+    UserAttendance_delete,
+    Attendance_view,
+    Attendance_edit,
+    Attendance_post,
+    Attendance_delete,
 }

@@ -40,4 +40,12 @@ export const getPermissionLabel = (permission: string) => {
      name: "مدیریت نقش های کاربری",
      itemPermission: ["Role_view", "Role_post", "Role_edit", "Role_delete"],
    },
+      {
+     name: "حضور غیاب",
+     itemPermission: ["Attendance_view", "Attendance_post", "Attendance_edit", "Attendance_delete"],
+   },
+      {
+     name: "نمایش حضور غیاب کاربران",
+     itemPermission: ["UserAttendance_view", "UserAttendance_post", "UserAttendance_edit", "UserAttendance_delete"],
+   },
  ];

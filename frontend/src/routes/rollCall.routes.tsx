@@ -25,15 +25,15 @@ export const RollCallRoutes = (
       <Route
         path="attendance-list"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute permission="Attendance_view">
             <AttendanceList />
           </ProtectedRoute>
         }
       />
       <Route
-        path="monthly-attendance"
+        path="monthly-attendance "
         element={
-          <ProtectedRoute>
+          <ProtectedRoute permission="UserAttendance_view">
             <MonthlyAttendance />
           </ProtectedRoute>
         }

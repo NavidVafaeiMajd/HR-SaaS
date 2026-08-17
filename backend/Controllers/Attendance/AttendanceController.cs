@@ -18,6 +18,7 @@ public class AttendanceController : ControllerBase
         _userManager = userManager;
     }
 
+    [Permission(Permission.Attendance_view)]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -114,6 +115,8 @@ public class AttendanceController : ControllerBase
 
         return Ok(result);
     }
+
+    [Permission(Permission.Attendance_edit)]
 
     [HttpPatch("{UserId}/present")]
     public async Task<IActionResult> SetPresent(string UserId, AttendancePresentDto dto)
@@ -311,6 +314,7 @@ public class AttendanceController : ControllerBase
         );
     }
 
+    [Permission(Permission.Attendance_edit)]
     [HttpPatch("{UserId}/absent")]
     public async Task<IActionResult> SetAbsent(string UserId, AttendanceAbsentDto dto)
     {
@@ -386,6 +390,7 @@ public class AttendanceController : ControllerBase
         );
     }
 
+    [Permission(Permission.Attendance_edit)]
     [HttpPatch("{UserId}/status")]
     public async Task<IActionResult> ChangeStatus(string UserId, AttendanceStatusDto dto)
     {
