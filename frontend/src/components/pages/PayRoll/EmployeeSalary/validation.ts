@@ -53,6 +53,26 @@ export const validation = z.object({
     .number()
     .min(0, "بیمه نمی‌تواند منفی باشد"),
 
+  bankName: z
+    .string()
+    .max(100, "نام بانک نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد"),
+
+  accountHolderName: z
+    .string()
+    .max(150, "نام صاحب حساب نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد"),
+
+  accountNumber: z
+    .string()
+    .max(30, "شماره حساب نامعتبر است"),
+
+  cardNumber: z
+    .string()
+    .max(20, "شماره کارت نامعتبر است"),
+
+  shebaNumber: z
+    .string()
+    .max(30, "شماره شبا نامعتبر است"),
+
   effectiveFrom: z
     .date({
       message: "تاریخ شروع حقوق الزامی است",

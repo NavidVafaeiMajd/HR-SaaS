@@ -21,4 +21,10 @@ public class UpdateEmployeeSalaryDto
 
 
     public string? ChangeReason { get; set; }
+
+        public string BankName { get; set; } = string.Empty;
+public string AccountHolderName { get; set; } = string.Empty;
+public string AccountNumber { get; set; } = string.Empty;
+public string CardNumber { get; set; } = string.Empty;
+    public string ShebaNumber { get; set; } = string.Empty;
 }

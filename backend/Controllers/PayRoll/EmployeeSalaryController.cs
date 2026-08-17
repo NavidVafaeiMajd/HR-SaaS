@@ -17,8 +17,8 @@ public class EmployeeSalaryController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var salaries = await _context.EmployeeSalaries
-            .AsNoTracking()
+        var salaries = await _context
+            .EmployeeSalaries.AsNoTracking()
             .Include(x => x.User)
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new
@@ -30,7 +30,7 @@ public class EmployeeSalaryController : ControllerBase
                 {
                     x.User.Id,
                     x.User.FirstName,
-                    x.User.LastName
+                    x.User.LastName,
                 },
 
                 x.BaseSalary,
@@ -53,20 +53,19 @@ public class EmployeeSalaryController : ControllerBase
                 x.EffectiveMonth,
 
                 x.CreatedAt,
-                x.UpdatedAt
+                x.UpdatedAt,
             })
             .ToListAsync();
 
         return Ok(salaries);
     }
 
-
     // GET: api/employee-salary/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var salary = await _context.EmployeeSalaries
-            .AsNoTracking()
+        var salary = await _context
+            .EmployeeSalaries.AsNoTracking()
             .Include(x => x.User)
             .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -76,65 +75,53 @@ public class EmployeeSalaryController : ControllerBase
         return Ok(salary);
     }
 
-// DELETE: api/employee-salary/{id}
-[HttpDelete("{id:guid}")]
-public async Task<IActionResult> Delete(Guid id)
-{
-    var salary = await _context.EmployeeSalaries
-        .Include(x => x.History)
-        .FirstOrDefaultAsync(x => x.Id == id);
-
-    if (salary == null)
-        return NotFound("حقوق کارمند پیدا نشد.");
-
-    // اگر سابقه حقوق دارد، اجازه حذف نده
-    if (salary.History.Any())
+    // DELETE: api/employee-salary/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
-        return BadRequest(
-            "این حقوق دارای سابقه تغییرات است و امکان حذف آن وجود ندارد."
-        );
+        var salary = await _context
+            .EmployeeSalaries.Include(x => x.History)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (salary == null)
+            return NotFound("حقوق کارمند پیدا نشد.");
+
+        // اگر سابقه حقوق دارد، اجازه حذف نده
+        if (salary.History.Any())
+        {
+            return BadRequest("این حقوق دارای سابقه تغییرات است و امکان حذف آن وجود ندارد.");
+        }
+
+        _context.EmployeeSalaries.Remove(salary);
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "حقوق کارمند با موفقیت حذف شد." });
     }
-
-    _context.EmployeeSalaries.Remove(salary);
-
-    await _context.SaveChangesAsync();
-
-    return Ok(new
-    {
-        message = "حقوق کارمند با موفقیت حذف شد."
-    });
-}
 
     // POST: api/employee-salary
     [HttpPost]
     public async Task<IActionResult> Create(CreateEmployeeSalaryDto dto)
     {
         // بررسی کارمند
-        var userExists = await _context.Users
-            .AnyAsync(x => x.Id == dto.UserId);
+        var userExists = await _context.Users.AnyAsync(x => x.Id == dto.UserId);
 
         if (!userExists)
             return BadRequest("کارمند پیدا نشد.");
 
-
         // بررسی اینکه کارمند قبلاً حقوق دارد یا نه
-        var salaryExists = await _context.EmployeeSalaries
-            .AnyAsync(x => x.UserId == dto.UserId);
+        var salaryExists = await _context.EmployeeSalaries.AnyAsync(x => x.UserId == dto.UserId);
 
         if (salaryExists)
         {
-            return BadRequest(
-                "برای این کارمند قبلاً حقوق ثبت شده است."
-            );
+            return BadRequest("برای این کارمند قبلاً حقوق ثبت شده است.");
         }
-
 
         // اعتبارسنجی ماه
         if (dto.EffectiveMonth < 1 || dto.EffectiveMonth > 12)
         {
             return BadRequest("ماه وارد شده نامعتبر است.");
         }
-
 
         var salary = new EmployeeSalary
         {
@@ -158,43 +145,37 @@ public async Task<IActionResult> Delete(Guid id)
             Tax = dto.Tax,
             Insurance = dto.Insurance,
 
+            BankName = dto.BankName,
+            AccountHolderName = dto.AccountHolderName,
+            AccountNumber = dto.AccountNumber,
+            CardNumber = dto.CardNumber,
+            ShebaNumber = dto.ShebaNumber,
+
             EffectiveYear = dto.EffectiveYear,
             EffectiveMonth = dto.EffectiveMonth,
 
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
-
-
         _context.EmployeeSalaries.Add(salary);
 
         await _context.SaveChangesAsync();
 
-        return Ok(new
-        {
-            message = "حقوق کارمند با موفقیت ثبت شد.",
-            salary.Id
-        });
+        return Ok(new { message = "حقوق کارمند با موفقیت ثبت شد.", salary.Id });
     }
-
 
     // PUT: api/employee-salary/{userId}/increase
     [HttpPatch("{userId}/increase")]
-    public async Task<IActionResult> IncreaseSalary(
-        string userId,
-        UpdateEmployeeSalaryDto dto)
+    public async Task<IActionResult> IncreaseSalary(string userId, UpdateEmployeeSalaryDto dto)
     {
         // حقوق فعلی کارمند
-        var currentSalary = await _context.EmployeeSalaries
-            .Include(x => x.History)
+        var currentSalary = await _context
+            .EmployeeSalaries.Include(x => x.History)
             .FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (currentSalary == null)
         {
-            return NotFound(
-                "برای این کارمند هنوز حقوقی ثبت نشده است."
-            );
+            return NotFound("برای این کارمند هنوز حقوقی ثبت نشده است.");
         }
-
 
         // اعتبارسنجی ماه
         if (dto.EffectiveMonth < 1 || dto.EffectiveMonth > 12)
@@ -202,24 +183,20 @@ public async Task<IActionResult> Delete(Guid id)
             return BadRequest("ماه وارد شده نامعتبر است.");
         }
 
-
         /*
          * تاریخ حقوق جدید باید بعد از
          * تاریخ شروع حقوق فعلی باشد.
          */
         if (
-            dto.EffectiveYear < currentSalary.EffectiveYear ||
-            (
-                dto.EffectiveYear == currentSalary.EffectiveYear &&
-                dto.EffectiveMonth <= currentSalary.EffectiveMonth
+            dto.EffectiveYear < currentSalary.EffectiveYear
+            || (
+                dto.EffectiveYear == currentSalary.EffectiveYear
+                && dto.EffectiveMonth <= currentSalary.EffectiveMonth
             )
         )
         {
-            return BadRequest(
-                "تاریخ شروع حقوق جدید باید بعد از تاریخ حقوق فعلی باشد."
-            );
+            return BadRequest("تاریخ شروع حقوق جدید باید بعد از تاریخ حقوق فعلی باشد.");
         }
-
 
         /*
          * ذخیره Snapshot حقوق فعلی
@@ -233,105 +210,78 @@ public async Task<IActionResult> Delete(Guid id)
 
             BaseSalary = currentSalary.BaseSalary,
 
-            HousingAllowance =
-                currentSalary.HousingAllowance,
+            HousingAllowance = currentSalary.HousingAllowance,
 
-            FoodAllowance =
-                currentSalary.FoodAllowance,
+            FoodAllowance = currentSalary.FoodAllowance,
 
-            TransportationAllowance =
-                currentSalary.TransportationAllowance,
+            TransportationAllowance = currentSalary.TransportationAllowance,
 
-            ChildAllowance =
-                currentSalary.ChildAllowance,
+            ChildAllowance = currentSalary.ChildAllowance,
 
-            SeniorityAllowance =
-                currentSalary.SeniorityAllowance,
+            SeniorityAllowance = currentSalary.SeniorityAllowance,
 
-            LatePerHour =
-                currentSalary.LatePerHour,
+            LatePerHour = currentSalary.LatePerHour,
 
-            LeavePerDay =
-                currentSalary.LeavePerDay,
+            LeavePerDay = currentSalary.LeavePerDay,
 
-            AbsentPerDay =
-                currentSalary.AbsentPerDay,
+            AbsentPerDay = currentSalary.AbsentPerDay,
 
-            OvertimePerHour =
-                currentSalary.OvertimePerHour,
+            OvertimePerHour = currentSalary.OvertimePerHour,
 
-            Tax =
-                currentSalary.Tax,
+            Tax = currentSalary.Tax,
 
-            Insurance =
-                currentSalary.Insurance,
+            Insurance = currentSalary.Insurance,
 
-            EffectiveYear =
-                currentSalary.EffectiveYear,
+            EffectiveYear = currentSalary.EffectiveYear,
 
-            EffectiveMonth =
-                currentSalary.EffectiveMonth,
+            EffectiveMonth = currentSalary.EffectiveMonth,
 
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
-
-_context.EmployeeSalaryHistories.Add(history);
+        _context.EmployeeSalaryHistories.Add(history);
 
         /*
          * آپدیت حقوق فعلی
          */
         currentSalary.BaseSalary = dto.BaseSalary;
 
-        currentSalary.HousingAllowance =
-            dto.HousingAllowance;
+        currentSalary.HousingAllowance = dto.HousingAllowance;
 
-        currentSalary.FoodAllowance =
-            dto.FoodAllowance;
+        currentSalary.FoodAllowance = dto.FoodAllowance;
 
-        currentSalary.TransportationAllowance =
-            dto.TransportationAllowance;
+        currentSalary.TransportationAllowance = dto.TransportationAllowance;
 
-        currentSalary.ChildAllowance =
-            dto.ChildAllowance;
+        currentSalary.ChildAllowance = dto.ChildAllowance;
 
-        currentSalary.SeniorityAllowance =
-            dto.SeniorityAllowance;
+        currentSalary.SeniorityAllowance = dto.SeniorityAllowance;
 
-        currentSalary.LatePerHour =
-            dto.LatePerHour;
+        currentSalary.LatePerHour = dto.LatePerHour;
 
-        currentSalary.LeavePerDay =
-            dto.LeavePerDay;
+        currentSalary.LeavePerDay = dto.LeavePerDay;
 
-        currentSalary.AbsentPerDay =
-            dto.AbsentPerDay;
+        currentSalary.AbsentPerDay = dto.AbsentPerDay;
 
-        currentSalary.OvertimePerHour =
-            dto.OvertimePerHour;
+        currentSalary.OvertimePerHour = dto.OvertimePerHour;
 
-        currentSalary.Tax =
-            dto.Tax;
+        currentSalary.Tax = dto.Tax;
 
-        currentSalary.Insurance =
-            dto.Insurance;
+        currentSalary.Insurance = dto.Insurance;
 
-        currentSalary.EffectiveYear =
-            dto.EffectiveYear;
+        currentSalary.EffectiveYear = dto.EffectiveYear;
 
-        currentSalary.EffectiveMonth =
-            dto.EffectiveMonth;
+        currentSalary.EffectiveMonth = dto.EffectiveMonth;
 
-        currentSalary.UpdatedAt =
-            DateTime.UtcNow;
+        currentSalary.UpdatedAt = DateTime.UtcNow;
 
+        currentSalary.BankName = dto.BankName;
+        currentSalary.AccountHolderName = dto.AccountHolderName;
+        currentSalary.AccountNumber = dto.AccountNumber;
+        currentSalary.CardNumber = dto.CardNumber;
+        currentSalary.ShebaNumber = dto.ShebaNumber;
 
         await _context.SaveChangesAsync();
 
-
-        return Ok(new
-        {
-            message = "حقوق کارمند با موفقیت تغییر کرد."
-        });
+        return Ok(new { message = "حقوق کارمند با موفقیت تغییر کرد." });
     }
 }

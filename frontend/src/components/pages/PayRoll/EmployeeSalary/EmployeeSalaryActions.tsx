@@ -70,7 +70,6 @@ export function EmployeeSalaryFields() {
   return (
     <>
       {/* کارمند و تاریخ شروع */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Form.Select
           name="userId"
@@ -81,31 +80,30 @@ export function EmployeeSalaryFields() {
           disabled={usersLoading}
         />
 
-        <Form.Date onlyMonthPicker name="effectiveFrom" label="تاریخ شروع حقوق"  />
+        <Form.Date
+          onlyMonthPicker
+          name="effectiveFrom"
+          label="تاریخ شروع حقوق"
+        />
       </div>
-
       {/* حقوق پایه */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">حقوق پایه</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="baseSalary"
             label="حقوق پایه"
             required
             placeholder="حقوق پایه"
           />
-
         </div>
       </div>
-
       {/* مزایا */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">مزایا</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="housingAllowance"
             label="حق مسکن"
@@ -137,13 +135,11 @@ export function EmployeeSalaryFields() {
           />
         </div>
       </div>
-
       {/* محاسبات حضور و غیاب */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">محاسبات حضور و غیاب</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="latePerHour"
             label="کسری هر ساعت تأخیر"
@@ -169,9 +165,7 @@ export function EmployeeSalaryFields() {
           />
         </div>
       </div>
-
       {/* بیمه و مالیات */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">بیمه و مالیات</h3>
 
@@ -186,6 +180,39 @@ export function EmployeeSalaryFields() {
             name="insurance"
             label="بیمه"
             placeholder="مبلغ بیمه"
+          />
+        </div>
+      </div>
+      // داخل EmployeeSalaryFields بعد از بخش بیمه و مالیات
+      {/* اطلاعات بانکی */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">اطلاعات بانکی</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+          <Form.Input name="bankName" label="نام بانک" placeholder="نام بانک" />
+
+          <Form.Input
+            name="accountHolderName"
+            label="نام صاحب حساب"
+            placeholder="نام صاحب حساب"
+          />
+
+          <Form.Input
+            name="accountNumber"
+            label="شماره حساب"
+            placeholder="شماره حساب"
+          />
+
+          <Form.Input
+            name="cardNumber"
+            label="شماره کارت"
+            placeholder="شماره کارت"
+          />
+
+          <Form.Input
+            name="shebaNumber"
+            label="شماره شبا"
+            placeholder="شماره شبا"
           />
         </div>
       </div>
@@ -247,13 +274,18 @@ export function EmployeeSalaryAction({
           tax: salary?.tax,
 
           insurance: salary?.insurance,
+          bankName: salary?.bankName,
 
+          accountHolderName: salary?.accountHolderName,
+
+          accountNumber: salary?.accountNumber,
+
+          cardNumber: salary?.cardNumber,
+
+          shebaNumber: salary?.shebaNumber,
         }}
-        
         onSave={(data) => {
-                  const date = new DateObject(data.effectiveFrom).convert(
-                    persian,
-                  );
+          const date = new DateObject(data.effectiveFrom).convert(persian);
 
           const payload = {
             baseSalary: data.baseSalary,
@@ -284,6 +316,15 @@ export function EmployeeSalaryAction({
             EffectiveMonth: date.month.number,
 
             changeReason: "Salary Change",
+            bankName: data.bankName,
+
+            accountHolderName: data.accountHolderName,
+
+            accountNumber: data.accountNumber,
+
+            cardNumber: data.cardNumber,
+
+            shebaNumber: data.shebaNumber,
           };
 
           console.log("salary change:", payload);

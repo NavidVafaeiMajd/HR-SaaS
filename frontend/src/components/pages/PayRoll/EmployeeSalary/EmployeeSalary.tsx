@@ -36,6 +36,12 @@ const EmployeeSalary: React.FC = () => {
     tax: 0,
     insurance: 0,
 
+    bankName: "",
+    accountHolderName: "",
+    accountNumber: "",
+    cardNumber: "",
+    shebaNumber: "",
+
     effectiveFrom: null,
   };
 
@@ -63,14 +69,11 @@ const EmployeeSalary: React.FC = () => {
   const overtimeMultiplier = 1.4;
 
   const dailySalary = baseSalary / workingDays;
-
   const hourlySalary = dailySalary / workingHoursPerDay;
-
   const overtimePerHour = hourlySalary * overtimeMultiplier;
+
   useEffect(() => {
     if (!baseSalary) {
-      form.setValue("dailySalary", 0);
-      form.setValue("hourlySalary", 0);
       form.setValue("latePerHour", 0);
       form.setValue("leavePerDay", 0);
       form.setValue("absentPerDay", 0);
@@ -78,9 +81,6 @@ const EmployeeSalary: React.FC = () => {
 
       return;
     }
-
-    form.setValue("dailySalary", Math.round(dailySalary));
-    form.setValue("hourlySalary", Math.round(hourlySalary));
 
     form.setValue("latePerHour", Math.round(hourlySalary));
     form.setValue("leavePerDay", Math.round(dailySalary));
@@ -97,7 +97,6 @@ const EmployeeSalary: React.FC = () => {
         </div>
       ) : null}
 
-      {/* کارمند و تاریخ شروع */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Form.Select
           name="userId"
@@ -107,11 +106,14 @@ const EmployeeSalary: React.FC = () => {
           placeholder="انتخاب کارمند"
         />
 
-        <Form.Date onlyMonthPicker name="effectiveFrom" label="تاریخ شروع حقوق" />
+        <Form.Date
+          onlyMonthPicker
+          name="effectiveFrom"
+          label="تاریخ شروع حقوق"
+        />
       </div>
 
-      {/* حقوق پایه */}
-      <div className="mt-6 w-full  ">
+      <div className="mt-6 w-full">
         <h3 className="text-lg font-semibold mb-4">حقوق پایه</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-5 w-full!">
@@ -121,20 +123,20 @@ const EmployeeSalary: React.FC = () => {
             required
             placeholder="حقوق پایه"
           />
-          <div className="flex  flex-col justify-between">
+
+          <div className="flex flex-col justify-between">
             <span>حقوق روزانه: {formatPrice(dailySalary)} تومان</span>
             <span>حقوق ساعتی: {formatPrice(hourlySalary)} تومان</span>
+
             <p className="text-amber-400">
-              نکته : این حقوق ساعتی و روزانه بر اساس 30 روز در ماه و 7:30 ساعت
-              کار در روز لحاظ شده، در غیر این صورت میتنوانید با هر عددی که مورد
-              نظر شماست پر کنید. این نکته برای کسری مرخصی، غیبت و ... به همین
-              شکل است.
+              نکته: حقوق ساعتی و روزانه به صورت پیش‌فرض بر اساس ۳۰ روز در ماه و
+              ۷:۳۰ ساعت کار در روز محاسبه می‌شود. در صورت نیاز می‌توانید مقادیر
+              محاسبات حضور و غیاب را تغییر دهید.
             </p>
           </div>
         </div>
       </div>
 
-      {/* مزایا */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">مزایا</h3>
 
@@ -171,7 +173,6 @@ const EmployeeSalary: React.FC = () => {
         </div>
       </div>
 
-      {/* نرخ محاسبات حضور و غیاب */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">محاسبات حضور و غیاب</h3>
 
@@ -202,7 +203,6 @@ const EmployeeSalary: React.FC = () => {
         </div>
       </div>
 
-      {/* بیمه و مالیات */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">بیمه و مالیات</h3>
 
@@ -218,14 +218,51 @@ const EmployeeSalary: React.FC = () => {
             label="بیمه"
             placeholder="مبلغ بیمه"
           />
+        </div>
+      </div>
 
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">اطلاعات بانکی</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Form.Input
+            name="bankName"
+            label="نام بانک"
+            placeholder="مثلاً بانک ملی"
+          />
+
+          <Form.Input
+            name="accountHolderName"
+            label="نام صاحب حساب"
+            placeholder="نام و نام خانوادگی"
+          />
+
+          <Form.Input
+            name="accountNumber"
+            label="شماره حساب"
+            placeholder="شماره حساب"
+          />
+
+          <Form.Input
+            name="cardNumber"
+            label="شماره کارت"
+            placeholder="شماره کارت"
+          />
+
+          <Form.Input
+            name="shebaNumber"
+            label="شماره شبا"
+            placeholder="IR..."
+          />
         </div>
       </div>
     </div>
   );
 
   const onSubmit = (data: z.infer<typeof validation>) => {
-        const date = new DateObject(data.effectiveFrom).convert(persian);
+    if (!data.effectiveFrom) return;
+
+    const date = new DateObject(data.effectiveFrom).convert(persian);
 
     const formData = {
       userId: data.userId,
@@ -246,28 +283,30 @@ const EmployeeSalary: React.FC = () => {
       tax: data.tax,
       insurance: data.insurance,
 
-      EffectiveYear: date.year,
-      EffectiveMonth: date.month.number,
-    };
+      bankName: data.bankName,
+      accountHolderName: data.accountHolderName,
+      accountNumber: data.accountNumber,
+      cardNumber: data.cardNumber,
+      shebaNumber: data.shebaNumber,
 
-    console.log(formData);
+      effectiveYear: date.year,
+      effectiveMonth: date.month.number,
+    };
 
     mutation.mutate(formData);
   };
 
   return (
-    <>
-      <SectionAcc
-        form={form}
-        defaultValues={defaultValues}
-        schema={validation}
-        formFields={formFields}
-        onSubmit={onSubmit}
-        table={<Table />}
-        FirstTitle="ثبت حقوق کارمند"
-        SecoundTitle="لیست حقوق کارکنان"
-      />
-    </>
+    <SectionAcc
+      form={form}
+      defaultValues={defaultValues}
+      schema={validation}
+      formFields={formFields}
+      onSubmit={onSubmit}
+      table={<Table />}
+      FirstTitle="ثبت حقوق کارمند"
+      SecoundTitle="لیست حقوق کارکنان"
+    />
   );
 };
 
