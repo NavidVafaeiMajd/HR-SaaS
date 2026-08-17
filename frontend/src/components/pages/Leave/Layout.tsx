@@ -17,31 +17,6 @@ const LayoutLeave = () => {
       <>
          <Breadcrumb>{title}</Breadcrumb>
          <div className="">
-            <div className="">
-               <div>
-                  <Smartwizard
-                     data={[
-                        [
-                           <>
-                              <FaUserFriends className="w-7 h-7" />
-                           </>,
-                           "list",
-                           "تنظیم مرخصی ها",
-                           "تنظیمات مرخصی",
-                        ],
-
-                        [
-                           <>
-                              <IoMdExit className="w-7 h-7" />
-                           </>,
-                           "type",
-                           "نوع مرخصی",
-                           "افزودن انواع مرخصی",
-                        ],
-                     ]}
-                  />
-               </div>
-            </div>
             <div>
                <Outlet />
             </div>

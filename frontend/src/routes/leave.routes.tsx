@@ -14,7 +14,7 @@ export const LeaveRoutes = (
     <Route
       path="leave"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute permission="Leave_view">
           <LayoutLeave />
         </ProtectedRoute>
       }

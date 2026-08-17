@@ -13,6 +13,7 @@ public class LeaveTypesController : ControllerBase
         _db = db;
     }
 
+    [Permission(Permission.Leave_view)]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -32,6 +33,7 @@ public class LeaveTypesController : ControllerBase
         return Ok(leaveTypes);
     }
 
+    [Permission(Permission.Leave_post)]
     [HttpPost]
     public async Task<IActionResult> Post(LeaveTypeCreateDto dto)
     {
@@ -70,6 +72,7 @@ public class LeaveTypesController : ControllerBase
         return Ok(leaveTypes);
     }
 
+    [Permission(Permission.Leave_edit)]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Put(Guid id, LeaveTypeUpdateDto dto)
     {
@@ -92,6 +95,7 @@ public class LeaveTypesController : ControllerBase
         return NoContent();
     }
 
+    [Permission(Permission.Leave_delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

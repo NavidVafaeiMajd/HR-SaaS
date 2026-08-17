@@ -33,7 +33,7 @@ export const RollCallRoutes = (
       <Route
         path="monthly-attendance "
         element={
-          <ProtectedRoute permission="UserAttendance_view">
+          <ProtectedRoute permission="Attendance_view">
             <MonthlyAttendance />
           </ProtectedRoute>
         }

@@ -52,4 +52,8 @@ export const getPermissionLabel = (permission: string) => {
      name: "دستمزد و حقوق",
      itemPermission: ["Payment_view", "Payment_post", "Payment_edit", "Payment_delete"],
    },
+            {
+     name: "مرخصی",
+     itemPermission: ["Leave_view", "Leave_post", "Leave_edit", "Leave_delete"],
+   },
  ];

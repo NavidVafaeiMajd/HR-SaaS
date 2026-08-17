@@ -172,6 +172,7 @@ const Navbar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         title: "مرخصی",
         url: "/leave/list",
         icon: LuCalendarDays,
+        authorize: ["manager", "both"],
         items: [
           {
             title: "لیست مرخصی",
