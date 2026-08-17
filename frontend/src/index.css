@@ -442,6 +442,7 @@ input.rmdp-input {
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+
 @media print {
   body * {
     visibility: hidden;
@@ -465,4 +466,24 @@ input.rmdp-input {
     size: A4;
     margin: 10mm;
   }
+}
+
+#login-page {
+  position: relative;
+  isolation: isolate;
+  background: white;
+}
+
+#login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: url("/public/login-bg.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  opacity: 0.5;
+  z-index: -1;
 }

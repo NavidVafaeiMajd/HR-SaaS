@@ -9,7 +9,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Form } from "@/components/shared/Form";
 import NProgress from "@/lib/nprogress";
 import api from "@/api/axios";
-import { toast, ToastContainer } from "react-toastify";
 
 // -----------------
 // Zod Validation
@@ -75,15 +74,17 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 justify-center items-center h-screen w-full!">
-      <div className="fixed z-0 ">
-        <h2 className="font-black text-primary! text-[100px]  md:text-[150px]  lg:text-[250px] tracking-widest! align-middle! text-center">
-          HR SaaS
-        </h2>
-      </div>
-      {errorMessage && <div className="bg-red-400/50 backdrop-blur-md p-3 rounded-md text-red-700 border border-red-700">{errorMessage}</div>}
+    <div
+      className="flex flex-col gap-5 justify-center items-center h-screen w-full!"
+      id="login-page"
+    >
+      {errorMessage && (
+        <div className="bg-red-400/50 backdrop-blur-md p-3 rounded-md text-red-700 border border-red-700">
+          {errorMessage}
+        </div>
+      )}
 
-      <div className="w-full max-w-md p-6 border border-primary/50 rounded-2xl shadow z-1 backdrop-blur-sm bg-white/20">
+      <div className="w-full max-w-md p-6 border border-primary/50 rounded-2xl shadow z-1 backdrop-blur-sm bg-white/20 ">
         <h2 className="text-2xl font-bold mb-4 text-center">ورود به حساب</h2>
         <Form formProp={form} onSubmit={onSubmit}>
           <Form.Input label="نام کاربری" name="username" />
