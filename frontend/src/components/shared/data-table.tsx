@@ -107,8 +107,8 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
     );
 
   return (
-    <div dir="rtl" className="m-4">
-      <div className="flex items-center justify-between gap-2 px-4 pb-2">
+    <div dir="rtl" className="">
+      <div className="flex items-center justify-between gap-2  p-2">
         <PageSizeSelector
           value={table.getState().pagination.pageSize}
           onChange={(size) => {
@@ -123,20 +123,20 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
         />
       </div>
 
-      <Table className="min-w-full rounded-md! my-5 border-5 border-blue-100">
-        <TableHeader className="bg-[#F9FBE4]">
+      <Table className="min-w-full border-t-1! border-b-1!  my-5">
+        <TableHeader className="bg-gray-100 ">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className="text-right whitespace-nowrap px-4 py-2"
+                  className="text-center border-0! whitespace-nowrap px-4 py-2"
                 >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </TableHead>
               ))}
@@ -158,7 +158,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -172,8 +172,12 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                   const hasSearchQuery = searchQuery.trim().length > 0;
                   const hasNoFilteredResults = filteredData.length === 0;
                   const hasOriginalData = rows.length > 0;
-                  
-                  if (hasSearchQuery && hasNoFilteredResults && hasOriginalData) {
+
+                  if (
+                    hasSearchQuery &&
+                    hasNoFilteredResults &&
+                    hasOriginalData
+                  ) {
                     return "وجود ندارد";
                   }
                   return "بدون نتیجه";
@@ -205,7 +209,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
             const half = Math.floor(windowSize / 2);
             const start = Math.max(
               0,
-              Math.min(currentPage - half, pageCount - windowSize)
+              Math.min(currentPage - half, pageCount - windowSize),
             );
             const end = Math.min(pageCount - 1, start + windowSize - 1);
 
@@ -225,7 +229,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                   onClick={() => table.setPageIndex(0)}
                 >
                   1
-                </Button>
+                </Button>,
               );
               if (start > 1) {
                 buttons.push(
@@ -236,7 +240,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                     disabled
                   >
                     ...
-                  </Button>
+                  </Button>,
                 );
               }
             }
@@ -254,7 +258,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                   onClick={() => table.setPageIndex(i)}
                 >
                   {i + 1}
-                </Button>
+                </Button>,
               );
             }
 
@@ -264,7 +268,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                 buttons.push(
                   <Button key="end-ellipsis" variant="ghost" size="sm" disabled>
                     ...
-                  </Button>
+                  </Button>,
                 );
               }
               buttons.push(
@@ -279,7 +283,7 @@ export function DataTable<TData extends Record<string, unknown>, TValue>({
                   onClick={() => table.setPageIndex(pageCount - 1)}
                 >
                   {pageCount}
-                </Button>
+                </Button>,
               );
             }
 
