@@ -8,11 +8,16 @@ namespace HR.UnitTests;
 public class ImageServiceTest
 {
     [Fact]
-    public async void TestSaveImageAsync()
+    public async Task TestSaveImageAsync()
     {
         //assert
+        var testDirectory = Path.Combine(Path.GetTempPath(), "HRTests");
+
+        Directory.CreateDirectory(testDirectory);
         var env = new Mock<IWebHostEnvironment>();
-        env.Setup(x => x.ContentRootPath).Returns(Path.GetTempPath());
+
+        env.Setup(x => x.ContentRootPath).Returns(testDirectory);
+
         var service = new ImageService(env.Object);
 
         //action
