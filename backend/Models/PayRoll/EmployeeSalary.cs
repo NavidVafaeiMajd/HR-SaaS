@@ -29,5 +29,11 @@ public class EmployeeSalary : IAuditable
     public DateTime? UpdatedAt { get; set; }
     public ICollection<EmployeeSalaryHistory> History { get; set; } = null!;
 
+public string BankName { get; set; } = string.Empty;
+public string AccountHolderName { get; set; } = string.Empty;
+public string CardNumber { get; set; } = string.Empty;
+    public string ShebaNumber { get; set; } = string.Empty;
+    public string AccountNumber { get; set; } = string.Empty;
+
     public Users User { get; set; } = null!;
 }

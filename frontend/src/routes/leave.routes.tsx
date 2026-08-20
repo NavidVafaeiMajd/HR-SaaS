@@ -1,9 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import UserLeaveDetailsPage from "@/components/pages/Leave/UserLeaveDetailsPage/UaerLeaveDetailsPage";
-
-
+const UserLeaveDetailsPage = lazy(() => import("@/components/pages/Leave/UserLeaveDetailsPage/UaerLeaveDetailsPage"));
 const LayoutLeave = lazy(() => import("@/components/pages/Leave/Layout"));
 const LeaveList = lazy(() => import("@/components/pages/Leave/List/LeaveList"));
 const LeaveType = lazy(() => import("@/components/pages/Leave/LeaveType"));
@@ -16,7 +14,7 @@ export const LeaveRoutes = (
     <Route
       path="leave"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute permission="Leave_view">
           <LayoutLeave />
         </ProtectedRoute>
       }

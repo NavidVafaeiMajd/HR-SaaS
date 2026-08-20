@@ -43,8 +43,8 @@ const SectionAccImg = <T extends z.ZodTypeAny<any, any, any>>({
           className={`grid grid-cols-1 md:grid-cols-6 gap-5  mt-5! md:items-start ${isOpen ? "show" : "hidden"}`}
           data-accordion="form"
         >
-          <div className=" bg-bgBack rounded-sm shadow md:col-span-4">
-            <div className="border-b-red-500 border-b-2  px-5 py-3 flex justify-between items-center">
+          <div className=" bg-white rounded-sm shadow md:col-span-4">
+            <div className="border-primary! border-b-2  px-5 py-3 flex justify-between items-center">
               <span>{FirstTitle}</span>
               <span>
                 <Button onClick={() => setIsOpen((prev) => !prev)}>
@@ -60,16 +60,16 @@ const SectionAccImg = <T extends z.ZodTypeAny<any, any, any>>({
               </div>
             </div>
           </div>
-          <div className=" bg-bgBack rounded-sm shadow md:col-span-2 md:row-span-1">
-            <div className="border-b-red-500 border-b-2  px-5 py-4 flex justify-between items-center">
+          <div className=" bg-white rounded-sm shadow md:col-span-2 md:row-span-1">
+            <div className="border-primary border-b-2  px-5 py-4 flex justify-between items-center">
               <span>{FileTitle}</span>
             </div>
             <div className=" p-5">{file}</div>
           </div>
         </Form>
       </div>
-      <div className="  bg-bgBack rounded-sm shadow overflow-x-auto!">
-        <div className="border-b-red-500 border-b-2 px-5 py-3 flex justify-between items-center">
+      <div className="  bg-white rounded-sm shadow overflow-x-auto!">
+        <div className="border-primary border-b-2 px-5 py-3 flex justify-between items-center">
           <span>{SecoundTitle}</span>
 
           <span className="flex items-center gap-2">

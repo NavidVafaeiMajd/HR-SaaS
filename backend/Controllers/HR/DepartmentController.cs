@@ -1,4 +1,5 @@
 using HrSaaS.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ public class DepartmentCreateDTO
 
 [ApiController]
 [Route("api/departments")]
+[Authorize]
 public class DepartmentsController : ControllerBase
 {
     private readonly HRSaaSDbContext _db;

@@ -1,7 +1,6 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import EmployeeProtectRoute from "./ProtectedRoute/EmployeeProtectRoute";
 const LayoutRoleMangment = lazy(
   () => import("@/components/pages/RoleManagment/LayoutRoleMangment"),
 );
@@ -13,11 +12,9 @@ export const RolesRoutes = (
   <Route
     path="roles"
     element={
-      <EmployeeProtectRoute>
-        <ProtectedRoute>
-          <LayoutRoleMangment />
-        </ProtectedRoute>
-      </EmployeeProtectRoute>
+      <ProtectedRoute permission="Role_view">
+        <LayoutRoleMangment />
+      </ProtectedRoute>
     }
   >
     <Route index element={<RolesList />} />

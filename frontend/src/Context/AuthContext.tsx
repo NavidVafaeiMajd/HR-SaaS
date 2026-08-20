@@ -50,7 +50,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     verifyAuth();
-  }, [isLoggedIn]);
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);

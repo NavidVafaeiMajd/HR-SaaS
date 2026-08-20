@@ -1,7 +1,6 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import EmployeeProtectRoute from "./ProtectedRoute/EmployeeProtectRoute";
 
 const LayoutHumanResource = lazy(
   () =>
@@ -32,15 +31,27 @@ export const HrRoutes = (
     <Route
       path="hr"
       element={
-        <EmployeeProtectRoute>
-          <ProtectedRoute>
-            <LayoutHumanResource />
-          </ProtectedRoute>
-        </EmployeeProtectRoute>
+        <ProtectedRoute permission="">
+          <LayoutHumanResource />
+        </ProtectedRoute>
       }
     >
-      <Route path="departments-list" element={<OrganizationalUnit />} />
-      <Route path="designation-list" element={<OrganizationalPosition />} />
+      <Route
+        path="departments-list"
+        element={
+          <ProtectedRoute permission="Department_view">
+            <OrganizationalUnit />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="designation-list"
+        element={
+          <ProtectedRoute permission="Position_view">
+            <OrganizationalPosition />
+          </ProtectedRoute>
+        }
+      />
       <Route path="office-shifts" element={<OfficeShifts />} />
       <Route path="policies-list" element={<Policies />} />
     </Route>

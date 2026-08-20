@@ -8,6 +8,7 @@ import { usePostRows } from "@/hook/usePostRows";
 import { useDepartments } from "@/hook/useDepartments";
 import { usePositionQuery } from "./hooks/usePositionQuery";
 import { useUsersQuery } from "./hooks/useUsersQuery";
+import { useAuthContext } from "@/Context/AuthContext";
 
 const NewsList: React.FC = () => {
   const title = " ابلاغیه ";
@@ -137,12 +138,18 @@ const onSubmit = (data: z.infer<typeof validation>) => {
   mutation.mutate(formData);
 };
 
+    const { user } = useAuthContext();
+    const canManageRequests =
+      user?.roles?.includes("Admin") ||
+      user?.permissions?.includes("Announcement_post") ||
+      false;
   return (
     <>
       <SectionAcc
         form={form}
         defaultValues={defaultValues}
         schema={validation}
+        canCreate={canManageRequests}
         formFields={formFields}
         onSubmit={onSubmit}
         table={<Table />}

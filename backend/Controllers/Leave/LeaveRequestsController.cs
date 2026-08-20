@@ -90,7 +90,7 @@ public class LeaveRequestsController : ControllerBase
         return Ok(request.Id);
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Permission(Permission.Leave_view)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -402,7 +402,7 @@ public class LeaveRequestsController : ControllerBase
         );
     }
 
-    [Authorize]
+    [Permission(Permission.Leave_edit)]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateLeaveRequestDto dto)
     {
@@ -478,7 +478,7 @@ public class LeaveRequestsController : ControllerBase
         return Ok(request);
     }
 
-    [Authorize]
+    [Permission(Permission.Leave_delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -497,7 +497,7 @@ public class LeaveRequestsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Permission(Permission.Leave_edit)]
     [HttpPatch("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id)
     {
@@ -538,7 +538,7 @@ public class LeaveRequestsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Permission(Permission.Leave_edit)]
     [HttpPatch("{id}/reject")]
     public async Task<IActionResult> Reject(Guid id, RejectLeaveRequestDto dto)
     {
@@ -581,7 +581,7 @@ public class LeaveRequestsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    [Permission(Permission.Leave_edit)]
     [HttpPatch("{id}/cancel")]
     public async Task<IActionResult> Cancel(Guid id)
     {
@@ -619,7 +619,7 @@ public class LeaveRequestsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = "Admin,Manager")]
+    [Permission(Permission.Leave_view)]
     [HttpGet("report")]
     public async Task<IActionResult> GetReport()
     {

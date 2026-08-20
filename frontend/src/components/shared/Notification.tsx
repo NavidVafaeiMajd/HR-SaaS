@@ -70,7 +70,7 @@ export const Notification = () => {
           {results?.count >= 3 && (
             <DropdownMenuGroup className="h-10 flex justify-center items-center border-t-1">
               <NavLink
-                to={"/notification"}
+                to={"/notifications"}
                 className="flex"
                 onClick={() => readAllMutation.mutate()}
               >

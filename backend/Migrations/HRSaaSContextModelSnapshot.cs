@@ -255,8 +255,24 @@ namespace HrSaaS.Migrations
                     b.Property<decimal>("AbsentPerDay")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("AccountHolderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ChildAllowance")
                         .HasColumnType("decimal(18,2)");
@@ -290,6 +306,10 @@ namespace HrSaaS.Migrations
 
                     b.Property<decimal>("SeniorityAllowance")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ShebaNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(18,2)");

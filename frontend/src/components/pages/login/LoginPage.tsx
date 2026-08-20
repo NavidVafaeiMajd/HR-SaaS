@@ -1,12 +1,11 @@
 // LoginPage.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/Context/AuthContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 import { Form } from "@/components/shared/Form";
 import NProgress from "@/lib/nprogress";
 import api from "@/api/axios";
@@ -35,7 +34,7 @@ const defaultValues: LoginFormData = {
 const LoginPage: React.FC = () => {
   const { login } = useAuthContext();
   const navigate = useNavigate();
-
+  const [errorMessage, setErrorMessage] = useState("");
   const form = useForm<LoginFormData>({
     resolver: zodResolver(validation),
     defaultValues,
@@ -57,7 +56,11 @@ const LoginPage: React.FC = () => {
       NProgress.done();
     },
     onError: (error: any) => {
-      toast.error(error?.message || "خطا در ورود");
+      console.log("ERROR:", error);
+      console.log("RESPONSE:", error.response);
+      console.log("DATA:", error.response?.data);
+      setErrorMessage( error.response?.data?.title ||error.response?.data);
+
       NProgress.done();
     },
   });
@@ -71,8 +74,17 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen w-full!">
-      <div className="w-full max-w-md p-6 border rounded shadow">
+    <div
+      className="flex flex-col gap-5 justify-center items-center h-screen w-full!"
+      id="login-page"
+    >
+      {errorMessage && (
+        <div className="bg-red-400/50 backdrop-blur-md p-3 rounded-md text-red-700 border border-red-700">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="w-full max-w-md p-6 border border-primary/50 rounded-2xl shadow z-1 backdrop-blur-sm bg-white/20 ">
         <h2 className="text-2xl font-bold mb-4 text-center">ورود به حساب</h2>
         <Form formProp={form} onSubmit={onSubmit}>
           <Form.Input label="نام کاربری" name="username" />

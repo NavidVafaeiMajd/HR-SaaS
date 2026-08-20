@@ -39,6 +39,7 @@ public class CreateAnnouncementDto
 
 [ApiController]
 [Route("api/hr-news")]
+[Authorize]
 public class AnnouncementController : ControllerBase
 {
     private readonly HRSaaSDbContext _db;
@@ -56,7 +57,7 @@ public class AnnouncementController : ControllerBase
         _publisher = publisher;
     }
 
-    [Authorize]
+    [Permission(Permission.Announcement_view)]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -72,7 +73,7 @@ public class AnnouncementController : ControllerBase
             .Select(rp => rp.Permission)
             .ToListAsync();
 
-        if (roles.Contains("Admin") || permissions.Contains(Permission.Department_edit))
+        if (roles.Contains("Admin") || user.dashboardType == DashboardType.manager)
         {
             var announcements = await _db
                 .Announcement.Include(x => x.Users)
@@ -147,10 +148,11 @@ public class AnnouncementController : ControllerBase
         return Ok(announcementsForUser);
     }
 
+    [Permission(Permission.Announcement_edit)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> Update(Guid id, UpdateAnnouncementDto dto)
     {
-                var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.GetUserAsync(User);
         var announcement = await _db
             .Announcement.Include(x => x.Departments)
             .Include(x => x.Positions)
@@ -209,6 +211,7 @@ public class AnnouncementController : ControllerBase
         return Ok(new { message = "ابلاغیه با موفقیت ویرایش شد" });
     }
 
+    [Permission(Permission.Announcement_delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -234,7 +237,7 @@ public class AnnouncementController : ControllerBase
         return Ok(new { message = "ابلاغیه با موفقیت حذف شد" });
     }
 
-    [Authorize]
+    [Permission(Permission.Announcement_post)]
     [HttpPost]
     public async Task<IActionResult> Create(CreateAnnouncementDto dto)
     {
@@ -294,68 +297,63 @@ public class AnnouncementController : ControllerBase
 
         return Ok(announcement.Id);
     }
-    [HttpGet("{id}")]
-public async Task<IActionResult> GetById(Guid id)
-{
-    var announcement = await _db.Announcement
-        .Where(x => x.Id == id)
-        .Select(x => new
-        {
-            x.Id,
-            x.Title,
-            x.Content,
-            x.CreatedAt,
-            x.StartDate,
-            x.EndDate,
 
-            Departments = x.Departments
-                .Select(d => new
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var announcement = await _db
+            .Announcement.Where(x => x.Id == id)
+            .Select(x => new
+            {
+                x.Id,
+                x.Title,
+                x.Content,
+                x.CreatedAt,
+                x.StartDate,
+                x.EndDate,
+
+                Departments = x.Departments.Select(d => new
                 {
                     value = d.DepartmentId,
-                    label = _db.Departments
-                        .Where(dep => dep.Id == d.DepartmentId)
+                    label = _db
+                        .Departments.Where(dep => dep.Id == d.DepartmentId)
                         .Select(dep => dep.Name)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
                 }),
 
-            Positions = x.Positions
-                .Select(p => new
+                Positions = x.Positions.Select(p => new
                 {
                     value = p.PositionId,
-                    label = _db.Positions
-                        .Where(pos => pos.Id == p.PositionId)
+                    label = _db
+                        .Positions.Where(pos => pos.Id == p.PositionId)
                         .Select(pos => pos.Name)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
                 }),
 
-            Users = x.Users
-                .Select(u => new
+                Users = x.Users.Select(u => new
                 {
                     value = u.UserId,
-                    label = _db.Users
-                        .Where(user => user.Id == u.UserId)
+                    label = _db
+                        .Users.Where(user => user.Id == u.UserId)
                         .Select(user => user.FirstName + " " + user.LastName)
-                        .FirstOrDefault()
+                        .FirstOrDefault(),
                 }),
 
-            CreatedBy = _db.Users
-                .Where(u => u.Id == x.CreatedBy)
-                .Select(u => new
-                {
-                    u.Id,
-                    u.FirstName,
-                    u.LastName
-                })
-                .FirstOrDefault()
-        })
-        .FirstOrDefaultAsync();
+                CreatedBy = _db
+                    .Users.Where(u => u.Id == x.CreatedBy)
+                    .Select(u => new
+                    {
+                        u.Id,
+                        u.FirstName,
+                        u.LastName,
+                    })
+                    .FirstOrDefault(),
+            })
+            .FirstOrDefaultAsync();
 
-    if (announcement == null)
-        return NotFound(new
-        {
-            message = "ابلاغیه یافت نشد"
-        });
+        if (announcement == null)
+            return NotFound(new { message = "ابلاغیه یافت نشد" });
 
-    return Ok(announcement);
-}
+        return Ok(announcement);
+    }
 }

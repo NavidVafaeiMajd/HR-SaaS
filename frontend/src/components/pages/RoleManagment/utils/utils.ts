@@ -16,6 +16,10 @@ export const getPermissionLabel = (permission: string) => {
      name: "پرسنل",
      itemPermission: ["Users_view", "Users_post", "Users_edit", "Users_delete"],
    },
+      {
+     name: "پیشخوان مدیریتی",
+     itemPermission: ["Manager_Dashboard"],
+   },
    {
      name: "دپارتمان",
      itemPermission: ["Department_view", "Department_post", "Department_edit", "Department_delete"],
@@ -28,8 +32,28 @@ export const getPermissionLabel = (permission: string) => {
      name: "شیفت کاری",
      itemPermission: ["Shift_view", "Shift_post", "Shift_edit", "Shift_delete"],
    },
+      {
+     name: "ابلاغیه ها ",
+     itemPermission: ["Announcement_view","Announcement_post", "Announcement_edit", "Announcement_delete"],
+   },
    {
      name: "مدیریت نقش های کاربری",
      itemPermission: ["Role_view", "Role_post", "Role_edit", "Role_delete"],
+   },
+      {
+     name: "حضور غیاب",
+     itemPermission: ["Attendance_view", "Attendance_post", "Attendance_edit", "Attendance_delete"],
+   },
+      {
+     name: "نمایش حضور غیاب کاربران",
+     itemPermission: ["UserAttendance_view", "UserAttendance_post", "UserAttendance_edit", "UserAttendance_delete"],
+   },
+         {
+     name: "دستمزد و حقوق",
+     itemPermission: ["Payment_view", "Payment_post", "Payment_edit", "Payment_delete"],
+   },
+            {
+     name: "مرخصی",
+     itemPermission: ["Leave_view", "Leave_post", "Leave_edit", "Leave_delete"],
    },
  ];

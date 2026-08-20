@@ -1,4 +1,5 @@
 using HrSaaS.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,13 @@ public class UpdatePayrollPaymentStatusDto
 public class PayrollPaymentController : ControllerBase
 {
     private readonly HRSaaSDbContext _context;
-
-    public PayrollPaymentController(HRSaaSDbContext context)
+private readonly UserManager<Users> _userManager;
+    public PayrollPaymentController(HRSaaSDbContext context , UserManager<Users> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
+
 
     // ==========================================
     // GET
@@ -25,6 +28,7 @@ public class PayrollPaymentController : ControllerBase
 
     // GET:
     // api/payroll-payment?year=1405&month=5
+        [Permission(Permission.Payment_view)]
     [HttpGet]
     public async Task<IActionResult> GetPayments([FromQuery] int year, [FromQuery] int month)
     {
@@ -102,6 +106,7 @@ public class PayrollPaymentController : ControllerBase
         );
     }
 
+    [Permission(Permission.Payment_edit)]
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(
         Guid id,
@@ -152,6 +157,13 @@ public class PayrollPaymentController : ControllerBase
 
         if (payment == null)
             return NotFound("پرداخت حقوق پیدا نشد.");
+        var manager = await _userManager.GetUserAsync(User);
+
+        if (manager is null)
+            return Unauthorized();
+
+        if (manager.dashboardType == DashboardType.employee && manager.Id != payment.UserId)
+            return BadRequest();
 
         return Ok(
             new
@@ -211,6 +223,7 @@ public class PayrollPaymentController : ControllerBase
 
     // POST:
     // api/payroll-payment
+        [Permission(Permission.Payment_post)]
     [HttpPost]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePayrollPaymentDto dto)
     {

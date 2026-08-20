@@ -22,7 +22,7 @@ export const PageSizeSelector = ({
             value={String(value)}
             onValueChange={(val) => onChange(Number(val))}
          >
-            <SelectTrigger className="w-20">
+            <SelectTrigger className="w-20 rounded-md!">
                <SelectValue />
             </SelectTrigger>
             <SelectContent>

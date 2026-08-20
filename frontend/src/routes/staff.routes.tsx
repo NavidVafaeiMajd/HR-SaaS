@@ -2,7 +2,6 @@ import LayoutStaffList from "@/components/pages/Staff/LayoutStaffList";
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import EmployeeProtectRoute from "./ProtectedRoute/EmployeeProtectRoute";
 
 const StaffList = lazy(
   () => import("../components/pages/Staff/StaffList/StaffList"),
@@ -25,15 +24,27 @@ export const staffRoutes = (
     <Route
       path="staff"
       element={
-        <EmployeeProtectRoute>
-          <ProtectedRoute>
-            <LayoutStaffList />
-          </ProtectedRoute>
-        </EmployeeProtectRoute>
+        <ProtectedRoute>
+          <LayoutStaffList />
+        </ProtectedRoute>
       }
     >
-      <Route index element={<StaffList />} />
-      <Route path="office-shifts" element={<OfficeShifts />} />
+      <Route
+        index
+        element={
+          <ProtectedRoute permission="users_view">
+            <StaffList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="office-shifts"
+        element={
+          <ProtectedRoute permission="Shift_view">
+            <OfficeShifts />
+          </ProtectedRoute>
+        }
+      />
       <Route path="employ-exit" element={<EmployExit />} />
     </Route>
     <Route

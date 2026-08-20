@@ -16,6 +16,29 @@ const salaryRows: Array<{ label: string; key: keyof CurrentSalary }> = [
   { label: "مالیات", key: "tax" },
   { label: "بیمه", key: "insurance" },
   { label: "حقوق ناخالص ماهانه", key: "grossSalary" },
+
+  { label: "نام بانک", key: "bankName" },
+  { label: "نام صاحب حساب", key: "accountHolderName" },
+  { label: "شماره حساب", key: "accountNumber" },
+  { label: "شماره کارت", key: "cardNumber" },
+  { label: "شماره شبا", key: "shebaNumber" },
+];
+
+const moneyKeys: Array<keyof CurrentSalary> = [
+  "baseSalary",
+  "housingAllowance",
+  "foodAllowance",
+  "transportationAllowance",
+  "childAllowance",
+  "seniorityAllowance",
+  "totalAllowances",
+  "overtimePerHour",
+  "latePerHour",
+  "leavePerDay",
+  "absentPerDay",
+  "tax",
+  "insurance",
+  "grossSalary",
 ];
 
 const CurrentSalarySection = ({
@@ -27,22 +50,31 @@ const CurrentSalarySection = ({
 }) => (
   <section>
     <h3 className="text-xl font-bold">وضعیت فعلی حقوق</h3>
+
     <p className="mt-1 text-sm text-muted-foreground">
       مبلغ‌ها بر اساس آخرین حکم مؤثر تا {monthLabels[asOf.month]} {asOf.year}{" "}
       نمایش داده می‌شوند.
     </p>
+
     <div className="mt-4 overflow-x-auto rounded-xl border bg-white">
       <table className="w-full min-w-[520px] text-right text-sm">
         <tbody>
-          {salaryRows.map(({ label, key }) => (
-            <tr
-              key={key}
-              className={key === "grossSalary" ? "font-bold" : "border-b"}
-            >
-              <td className="w-1/2 bg-muted/50 p-3">{label}</td>
-              <td className="p-3">{money(salary[key] as number)}</td>
-            </tr>
-          ))}
+          {salaryRows.map(({ label, key }) => {
+            const value = salary[key];
+
+            return (
+              <tr
+                key={key}
+                className={key === "grossSalary" ? "font-bold" : "border-b"}
+              >
+                <td className="w-1/2 bg-muted/50 p-3">{label}</td>
+
+                <td className="p-3">
+                  {moneyKeys.includes(key) ? money(value as number) : value}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute";
-import UserAttendanceDetailsPage from "@/components/pages/RollCall/UserAttendanceDetailsPage/UaerAttendanceDetailsPage";
+const UserAttendanceDetailsPage = lazy(() => import("@/components/pages/RollCall/UserAttendanceDetailsPage/UaerAttendanceDetailsPage"));
 
 const LayoutRollCall = lazy(() => import("@/components/pages/RollCall/Layout"));
 const AttendanceList = lazy(
@@ -25,15 +25,15 @@ export const RollCallRoutes = (
       <Route
         path="attendance-list"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute permission="Attendance_view">
             <AttendanceList />
           </ProtectedRoute>
         }
       />
       <Route
-        path="monthly-attendance"
+        path="monthly-attendance "
         element={
-          <ProtectedRoute>
+          <ProtectedRoute permission="Attendance_view">
             <MonthlyAttendance />
           </ProtectedRoute>
         }

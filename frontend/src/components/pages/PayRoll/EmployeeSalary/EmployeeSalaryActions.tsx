@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
+import { useAuthContext } from "@/Context/AuthContext";
 
 export function EmployeeSalaryFields() {
   const { watch, setValue } = useFormContext();
@@ -70,7 +71,6 @@ export function EmployeeSalaryFields() {
   return (
     <>
       {/* کارمند و تاریخ شروع */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Form.Select
           name="userId"
@@ -81,31 +81,30 @@ export function EmployeeSalaryFields() {
           disabled={usersLoading}
         />
 
-        <Form.Date onlyMonthPicker name="effectiveFrom" label="تاریخ شروع حقوق"  />
+        <Form.Date
+          onlyMonthPicker
+          name="effectiveFrom"
+          label="تاریخ شروع حقوق"
+        />
       </div>
-
       {/* حقوق پایه */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">حقوق پایه</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="baseSalary"
             label="حقوق پایه"
             required
             placeholder="حقوق پایه"
           />
-
         </div>
       </div>
-
       {/* مزایا */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">مزایا</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="housingAllowance"
             label="حق مسکن"
@@ -137,13 +136,11 @@ export function EmployeeSalaryFields() {
           />
         </div>
       </div>
-
       {/* محاسبات حضور و غیاب */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">محاسبات حضور و غیاب</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           <Form.PriceInput
             name="latePerHour"
             label="کسری هر ساعت تأخیر"
@@ -169,9 +166,7 @@ export function EmployeeSalaryFields() {
           />
         </div>
       </div>
-
       {/* بیمه و مالیات */}
-
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">بیمه و مالیات</h3>
 
@@ -186,6 +181,39 @@ export function EmployeeSalaryFields() {
             name="insurance"
             label="بیمه"
             placeholder="مبلغ بیمه"
+          />
+        </div>
+      </div>
+      // داخل EmployeeSalaryFields بعد از بخش بیمه و مالیات
+      {/* اطلاعات بانکی */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">اطلاعات بانکی</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+          <Form.Input name="bankName" label="نام بانک" placeholder="نام بانک" />
+
+          <Form.Input
+            name="accountHolderName"
+            label="نام صاحب حساب"
+            placeholder="نام صاحب حساب"
+          />
+
+          <Form.Input
+            name="accountNumber"
+            label="شماره حساب"
+            placeholder="شماره حساب"
+          />
+
+          <Form.Input
+            name="cardNumber"
+            label="شماره کارت"
+            placeholder="شماره کارت"
+          />
+
+          <Form.Input
+            name="shebaNumber"
+            label="شماره شبا"
+            placeholder="شماره شبا"
           />
         </div>
       </div>
@@ -210,94 +238,121 @@ export function EmployeeSalaryAction({
     "حقوق کارمند",
   );
 
-  
+  const { user } = useAuthContext();
+  const canEdit =
+    user?.roles?.includes("Admin") ||
+    user?.permissions?.includes("Payment_edit") ||
+    false;
+  const canDelete =
+    user?.roles?.includes("Admin") ||
+    user?.permissions?.includes("Payment_delete") ||
+    false;
+
   return (
     <div className="flex items-center gap-2">
-      <EditDialog
-        title="تغییر حقوق"
-        triggerLabel="افزایش/کاهش حقوق"
-        fields={<EmployeeSalaryFields />}
-        defaultValues={{
-          userId: salary?.userId,
+      {canEdit && (
+        <EditDialog
+          title="تغییر حقوق"
+          triggerLabel="افزایش/کاهش حقوق"
+          fields={<EmployeeSalaryFields />}
+          defaultValues={{
+            userId: salary?.userId,
 
-          baseSalary: salary?.baseSalary,
+            baseSalary: salary?.baseSalary,
 
-          dailySalary: salary?.baseSalary / 30,
+            dailySalary: salary?.baseSalary / 30,
 
-          hourlySalary: salary?.baseSalary / 30 / 7.33,
+            hourlySalary: salary?.baseSalary / 30 / 7.33,
 
-          housingAllowance: salary?.housingAllowance,
+            housingAllowance: salary?.housingAllowance,
 
-          foodAllowance: salary?.foodAllowance,
+            foodAllowance: salary?.foodAllowance,
 
-          transportationAllowance: salary?.transportationAllowance,
+            transportationAllowance: salary?.transportationAllowance,
 
-          childAllowance: salary?.childAllowance,
+            childAllowance: salary?.childAllowance,
 
-          seniorityAllowance: salary?.seniorityAllowance,
+            seniorityAllowance: salary?.seniorityAllowance,
 
-          latePerHour: salary?.latePerHour,
+            latePerHour: salary?.latePerHour,
 
-          leavePerDay: salary?.leavePerDay,
+            leavePerDay: salary?.leavePerDay,
 
-          absentPerDay: salary?.absentPerDay,
+            absentPerDay: salary?.absentPerDay,
 
-          overtimePerHour: salary?.overtimePerHour,
+            overtimePerHour: salary?.overtimePerHour,
 
-          tax: salary?.tax,
+            tax: salary?.tax,
 
-          insurance: salary?.insurance,
+            insurance: salary?.insurance,
+            bankName: salary?.bankName,
 
-        }}
-        
-        onSave={(data) => {
-                  const date = new DateObject(data.effectiveFrom).convert(
-                    persian,
-                  );
+            accountHolderName: salary?.accountHolderName,
 
-          const payload = {
-            baseSalary: data.baseSalary,
+            accountNumber: salary?.accountNumber,
 
-            housingAllowance: data.housingAllowance,
+            cardNumber: salary?.cardNumber,
 
-            foodAllowance: data.foodAllowance,
+            shebaNumber: salary?.shebaNumber,
+          }}
+          onSave={(data) => {
+            const date = new DateObject(data.effectiveFrom).convert(persian);
 
-            transportationAllowance: data.transportationAllowance,
+            const payload = {
+              baseSalary: data.baseSalary,
 
-            childAllowance: data.childAllowance,
+              housingAllowance: data.housingAllowance,
 
-            seniorityAllowance: data.seniorityAllowance,
+              foodAllowance: data.foodAllowance,
 
-            latePerHour: data.latePerHour,
+              transportationAllowance: data.transportationAllowance,
 
-            leavePerDay: data.leavePerDay,
+              childAllowance: data.childAllowance,
 
-            absentPerDay: data.absentPerDay,
+              seniorityAllowance: data.seniorityAllowance,
 
-            overtimePerHour: data.overtimePerHour,
+              latePerHour: data.latePerHour,
 
-            tax: data.tax,
+              leavePerDay: data.leavePerDay,
 
-            insurance: data.insurance,
+              absentPerDay: data.absentPerDay,
 
-            EffectiveYear: date.year,
-            EffectiveMonth: date.month.number,
+              overtimePerHour: data.overtimePerHour,
 
-            changeReason: "Salary Change",
-          };
+              tax: data.tax,
 
-          console.log("salary change:", payload);
+              insurance: data.insurance,
 
-          mutation.mutate(payload);
-        }}
-        schema={validation}
-      />
+              EffectiveYear: date.year,
+              EffectiveMonth: date.month.number,
 
-      <DeleteDialog
-        onConfirm={() => {
-          deleteRow.mutate(salary.id as any);
-        }}
-      />
+              changeReason: "Salary Change",
+              bankName: data.bankName,
+
+              accountHolderName: data.accountHolderName,
+
+              accountNumber: data.accountNumber,
+
+              cardNumber: data.cardNumber,
+
+              shebaNumber: data.shebaNumber,
+            };
+
+            console.log("salary change:", payload);
+
+            mutation.mutate(payload);
+          }}
+          schema={validation}
+        />
+      )}
+
+      {canDelete && (
+        <DeleteDialog
+          onConfirm={() => {
+            deleteRow.mutate(salary.id as any);
+          }}
+        />
+      )}
 
       <ActionsCell
         actions={[

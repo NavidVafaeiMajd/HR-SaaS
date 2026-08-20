@@ -1,6 +1,5 @@
-import Header from "./components/shared/Header";
-import { Navbar } from "./components/Navbar/Navbar";
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
+const Header = lazy(() => import("./components/shared/Header"));
 import { useBootstrapData } from "./hook/useBootstrapData";
 import { LoadingProvider, useLoading } from "./Context/LoadingContext";
 const Desk = lazy(() => import("./components/pages/Desk/Desk"));
@@ -23,17 +22,19 @@ import { HrRoutes } from "./routes/hr.routes";
 import { ToastContainer } from "react-toastify";
 import { RollCallRoutes } from "./routes/rollCall.routes";
 import { LeaveRoutes } from "./routes/leave.routes";
-import { DisciplinaryRoutes } from "./routes/disciplinary.routes";
-import { PerformanceRoutes } from "./routes/performance.routes";
-import { TeachingRoutes } from "./routes/teaching.routes";
-import { DocumentsRoutes } from "./routes/documents.routes";
+// import { DisciplinaryRoutes } from "./routes/disciplinary.routes";
+// import { PerformanceRoutes } from "./routes/performance.routes";
+// import { TeachingRoutes } from "./routes/teaching.routes";
+// import { DocumentsRoutes } from "./routes/documents.routes";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 import { RolesRoutes } from "./routes/role.routes";
 import { NewsListRoutes } from "./routes/News.routes";
 import { PayRollRoutes } from "./routes/payRoll.routes";
-import CompanyPage from "./components/pages/Company/CompanyPage";
-import ManagerDesk from "./components/pages/ManagerDesk/ManagerDesk";
-// Documents components - now lazy loaded
+import Notifications from "./components/pages/notifications/Notifications";
+const CompanyPage = lazy(() => import("./components/pages/Company/CompanyPage"));
+const ManagerDesk = lazy(() => import("./components/pages/ManagerDesk/ManagerDesk"));
+
+const Navbar = lazy(() => import("./components/Navbar/Navbar"));
 
 const LoginPage = lazy(() => import("./components/pages/login/LoginPage"));
 
@@ -49,11 +50,11 @@ const NewsListDetailes = lazy(
 );
 
 const AppLayout = () => {
-  useBootstrapData();
   const { toggleNavbar, isNavbarOpen } = useNavbar();
   const location = useLocation();
   const { isLoggedIn, authLoading } = useAuthContext();
   const { isLoadingNavbar } = useLoading();
+  useBootstrapData();
 
   if (authLoading) {
     return (
@@ -82,16 +83,20 @@ const AppLayout = () => {
 
   return (
     <>
-      <ToastContainer toastClassName="custom-toast-font" position="top-right" />
+      <ToastContainer toastClassName="custom-toast-font" className="z-1000" position="top-right" />
       <Navbar />
       <SidebarInset className="h-[calc(100dvh-15px)] max-w-full! overflow-auto">
         {" "}
         <main className="h-full p-6 bg-background rounded-2xl flex flex-col overflow-hidden mb-3 ">
           {" "}
-          <Header />
+          <Suspense fallback={<div className="h-12" />}>
+            <Header />
+          </Suspense>{" "}
           <div className="flex-1 min-h-0 overflow-scroll " dir="ltr">
             <div dir="rtl">
-              <Outlet />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </div>
           </div>
         </main>
@@ -99,6 +104,11 @@ const AppLayout = () => {
     </>
   );
 };
+const PageLoader = () => (
+  <div className="flex min-h-[200px] items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+);
 
 const Layout = () => {
   return (
@@ -111,7 +121,9 @@ const Layout = () => {
                 path="login"
                 element={
                   <PublicRoute>
-                    <LoginPage />
+                    <Suspense fallback={<PageLoader />}>
+                      <LoginPage />
+                    </Suspense>
                   </PublicRoute>
                 }
               />
@@ -131,7 +143,7 @@ const Layout = () => {
                 <Route
                   path="manager-desk"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute permission="Manager_Dashboard">
                       <ManagerDesk />
                     </ProtectedRoute>
                   }
@@ -169,15 +181,23 @@ const Layout = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="notifications"
+                  element={
+                    <ProtectedRoute>
+                      <Notifications />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {staffRoutes}
                 {HrRoutes}
                 {RollCallRoutes}
                 {LeaveRoutes}
-                {DisciplinaryRoutes}
+                {/* {DisciplinaryRoutes}
                 {PerformanceRoutes}
                 {TeachingRoutes}
-                {DocumentsRoutes}
+                {DocumentsRoutes} */}
                 {RolesRoutes}
                 {NewsListRoutes}
                 {PayRollRoutes}

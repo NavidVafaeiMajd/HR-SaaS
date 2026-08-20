@@ -97,18 +97,22 @@ public class ShiftController : ControllerBase
 
     [Permission(Permission.Shift_delete)]
     [HttpDelete("{id}")]
-public async Task<IActionResult> Delete(int id)
-{
-    var shift = await _db.Shifts
-        .FirstOrDefaultAsync(x => x.Id == id);
+    public async Task<IActionResult> Delete(int id)
+    {
+        var shift = await _db.Shifts.FirstOrDefaultAsync(x => x.Id == id);
+        var userHaveShift = await _db.Users.FirstOrDefaultAsync(x => x.ShiftId == shift.Id);
 
-    if (shift is null)
-        return NotFound();
+        if (userHaveShift != null)
+            return BadRequest(
+                "قبلا با این شیفت حداقل یک کاربر ثبت شده، برای حذف شیفت نباید هیچ کارمندی برای آن وجود داشته باشد."
+            );
+        if (shift is null)
+            return NotFound();
 
-    _db.Shifts.Remove(shift);
+        _db.Shifts.Remove(shift);
 
-    await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
-    return NoContent();
-}
+        return NoContent();
+    }
 }

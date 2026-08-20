@@ -1,6 +1,7 @@
 
 import { NavbarProvider } from "./Context/NavbarContext";
 import Layout from "./Layout";
+
 function App() {
    return (
       <NavbarProvider>
