@@ -24,6 +24,7 @@
   <Content Update="wwwroot/uploads/**">
     <CopyToOutputDirectory>Never</CopyToOutputDirectory>
   </Content>
+  <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
     </ItemGroup>
 
 </Project>

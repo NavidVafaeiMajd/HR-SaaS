@@ -121,6 +121,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/api/auth/forbidden";
 });
 
+builder.Services.AddOpenApiDocument(options =>
+{
+    options.Title = "HR SaaS API";
+    options.Version = "v1";
+});
+
+
 ///
 /// add hub for signalR
 ///
@@ -133,6 +140,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseOpenApi();
+
+app.UseSwaggerUi();
 
 ///
 /// add hub for signalR
